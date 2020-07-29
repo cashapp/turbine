@@ -19,6 +19,8 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import org.junit.Test
+import kotlin.time.milliseconds
+import kotlin.time.seconds
 
 class FlowAssertTest {
   @Test fun timeoutEnforcedByDefault() = suspendTest {
@@ -28,10 +30,10 @@ class FlowAssertTest {
       }
     }
 
-    advanceTimeBy(999)
+    advanceTimeBy(999.milliseconds)
     assertThat(subject.isActive).isTrue()
 
-    advanceTimeBy(1)
+    advanceTimeBy(1.milliseconds)
     assertThat(subject.isActive).isFalse()
 
     assertThrows<TimeoutCancellationException> {
@@ -41,15 +43,15 @@ class FlowAssertTest {
 
   @Test fun timeoutEnforcedCustomValue() = suspendTest {
     val subject = async {
-      neverFlow().test(timeoutMs = 10_000) {
+      neverFlow().test(timeout = 10.seconds) {
         expectComplete()
       }
     }
 
-    advanceTimeBy(9999)
+    advanceTimeBy(9999.milliseconds)
     assertThat(subject.isActive).isTrue()
 
-    advanceTimeBy(1)
+    advanceTimeBy(1.milliseconds)
     assertThat(subject.isActive).isFalse()
 
     assertThrows<TimeoutCancellationException> {

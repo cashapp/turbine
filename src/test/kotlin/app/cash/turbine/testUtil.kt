@@ -21,7 +21,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.test.DelayController
 import kotlinx.coroutines.test.TestCoroutineScope
+import kotlin.time.Duration
+import kotlin.time.milliseconds
 
 /** A flow that never emits anything. */
 fun neverFlow(): Flow<Nothing> = flow {
@@ -38,6 +41,10 @@ fun suspendTest(body: suspend TestCoroutineScope.() -> Unit) {
     scope.body()
   }
   scope.cleanupTestCoroutines()
+}
+
+fun DelayController.advanceTimeBy(duration: Duration): Duration {
+  return advanceTimeBy(duration.toLongMilliseconds()).milliseconds
 }
 
 inline fun <reified T : Throwable> assertThrows(body: () -> Unit): ThrowableSubject {

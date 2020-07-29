@@ -24,8 +24,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
+import kotlin.time.seconds
 
-suspend fun <T> Flow<T>.test(timeoutMs: Long = 1000L, validate: suspend FlowAssert<T>.() -> Unit) {
+@ExperimentalTime
+suspend fun <T> Flow<T>.test(
+  timeout: Duration = 1.seconds,
+  validate: suspend FlowAssert<T>.() -> Unit
+) {
   coroutineScope {
     val events = Channel<Event<T>>(UNLIMITED)
     val collectJob = launch {
@@ -44,7 +51,7 @@ suspend fun <T> Flow<T>.test(timeoutMs: Long = 1000L, validate: suspend FlowAsse
       }
       events.close()
     }
-    val flowAssert = FlowAssert(events, collectJob, timeoutMs)
+    val flowAssert = FlowAssert(events, collectJob, timeout)
     val ensureConsumed = try {
       flowAssert.validate()
       true
@@ -68,16 +75,17 @@ internal sealed class Event<out T> {
   data class Item<T>(val item: T) : Event<T>()
 }
 
+@ExperimentalTime
 class FlowAssert<T> internal constructor(
   private val events: Channel<Event<T>>,
   private val collectJob: Job,
-  private val timeoutMs: Long
+  private val timeout: Duration
 ) {
   private suspend fun <T> withTimeout(body: suspend () -> T): T {
-    return if (timeoutMs == 0L) {
+    return if (timeout == Duration.ZERO) {
       body()
     } else {
-      withTimeout(timeoutMs) {
+      withTimeout(timeout) {
         body()
       }
     }
