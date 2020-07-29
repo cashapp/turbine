@@ -19,6 +19,8 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import org.junit.Test
+import kotlin.time.Duration
+import kotlin.time.days
 import kotlin.time.milliseconds
 import kotlin.time.seconds
 
@@ -57,5 +59,18 @@ class FlowAssertTest {
     assertThrows<TimeoutCancellationException> {
       subject.await()
     }.hasMessageThat().isEqualTo("Timed out waiting for 10000 ms")
+  }
+
+  @Test fun timeoutCanBeZero() = suspendTest {
+    val subject = async {
+      neverFlow().test(timeout = Duration.ZERO) {
+        expectComplete()
+      }
+    }
+
+    advanceTimeBy(10.days)
+    assertThat(subject.isActive).isTrue()
+
+    subject.cancel()
   }
 }
