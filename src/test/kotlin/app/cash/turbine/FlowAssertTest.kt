@@ -16,18 +16,50 @@
 package app.cash.turbine
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import org.junit.Test
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration
 import kotlin.time.days
 import kotlin.time.milliseconds
 import kotlin.time.seconds
 
 class FlowAssertTest {
+  @Test fun cancelStopsFlow() = suspendTest {
+    val collecting = AtomicBoolean()
+    callbackFlow<Nothing> {
+      collecting.set(true)
+      awaitClose {
+        collecting.set(false)
+      }
+    }.test {
+      assertThat(collecting.get()).isTrue()
+      cancel()
+      assertThat(collecting.get()).isFalse()
+    }
+  }
+
+  @Test fun expectNoEvents() = suspendTest {
+    neverFlow().test {
+      expectNoEvents()
+      cancel()
+    }
+  }
+
   @Test fun unconsumedItemThrows() = suspendTest {
     assertThrows<AssertionError> {
       flowOf("item!").test { }
@@ -67,6 +99,50 @@ class FlowAssertTest {
     flow<Nothing> { throw RuntimeException() }.test {
       cancelAndIgnoreRemainingEvents()
     }
+  }
+
+  @Test fun expectItem() = suspendTest {
+    val item = Any()
+    flowOf(item).test {
+      assertThat(expectItem()).isSameInstanceAs(item)
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun expectComplete() = suspendTest {
+    emptyFlow<Nothing>().test {
+      expectComplete()
+    }
+  }
+
+  @Test fun expectError() = suspendTest {
+    val error = RuntimeException()
+    flow<Nothing> { throw error }.test {
+      assertThat(expectError()).isSameInstanceAs(error)
+    }
+  }
+
+  @Test fun expectWaitsForEvents() = suspendTest {
+    val channel = Channel<String>(UNLIMITED)
+    val position = AtomicInteger(0)
+
+    // Start undispatched so we suspend inside the test{} block.
+    launch(start = UNDISPATCHED) {
+      channel.consumeAsFlow().test {
+        position.set(1)
+        assertThat(expectItem()).isEqualTo("one")
+        position.set(2)
+        assertThat(expectItem()).isEqualTo("two")
+        position.set(3)
+        cancel()
+      }
+    }
+
+    assertThat(position.get()).isEqualTo(1)
+    channel.send("one")
+    assertThat(position.get()).isEqualTo(2)
+    channel.send("two")
+    assertThat(position.get()).isEqualTo(3)
   }
 
   @Test fun timeoutEnforcedByDefault() = suspendTest {
