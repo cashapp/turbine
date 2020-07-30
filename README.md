@@ -42,10 +42,14 @@ flowOf("one", "two").test {
 }
 ```
 ```
-Exception in thread "main" AssertionError: Expected no more events but found Item(two)
+Exception in thread "main" AssertionError:
+  Unconsumed events found:
+   - Item(two)
+   - Complete
 ```
 
-Consuming the `"two"` item is not enough, you also need to consume the complete event.
+As the exception indicates, consuming the `"two"` item is not enough. The complete event must
+also be consumed.
 
 ```kotlin
 flowOf("one", "two").test {

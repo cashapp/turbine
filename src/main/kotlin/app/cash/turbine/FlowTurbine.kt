@@ -78,7 +78,7 @@ suspend fun <T> Flow<T>.test(
     }
     if (ensureConsumed) {
       collectJob.cancel()
-      flowTurbine.expectNoEvents()
+      flowTurbine.ensureAllEventsConsumed()
     }
   }
 }
@@ -182,7 +182,6 @@ private class ChannelBasedFlowTurbine<T>(
   }
 
   override fun expectNoEvents() {
-    // TODO get all available
     val event = events.poll()
     if (event != null) {
       throw unexpectedEvent(event, "no events")
@@ -224,5 +223,29 @@ private class ChannelBasedFlowTurbine<T>(
       error.initCause(event.throwable)
     }
     return error
+  }
+
+  fun ensureAllEventsConsumed() {
+    val unconsumed = mutableListOf<Event<T>>()
+    var cause: Throwable? = null
+    while (true) {
+      val event = events.poll() ?: break
+      unconsumed += event
+      if (event is Event.Error) {
+        check(cause == null)
+        cause = event.throwable
+      }
+    }
+    if (unconsumed.isNotEmpty()) {
+      throw AssertionError(
+        buildString {
+          append("Unconsumed events found:")
+          for (event in unconsumed) {
+            append("\n - $event")
+          }
+        },
+        cause
+      )
+    }
   }
 }

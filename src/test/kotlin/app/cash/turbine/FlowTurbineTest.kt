@@ -50,7 +50,7 @@ class FlowTurbineTest {
     }
   }
 
-  @Test fun cancelStopsFlow() = suspendTest {
+  @Test fun cancelStopsFlowCollection() = suspendTest {
     val collecting = AtomicBoolean()
     callbackFlow<Nothing> {
       collecting.set(true)
@@ -74,13 +74,24 @@ class FlowTurbineTest {
   @Test fun unconsumedItemThrows() = suspendTest {
     assertThrows<AssertionError> {
       flowOf("item!").test { }
-    }.hasMessageThat().isEqualTo("Expected no events but found Item(item!)")
+    }.hasMessageThat().isEqualTo(
+      """
+      |Unconsumed events found:
+      | - Item(item!)
+      | - Complete
+      """.trimMargin()
+    )
   }
 
   @Test fun unconsumedCompleteThrows() = suspendTest {
     assertThrows<AssertionError> {
       emptyFlow<Nothing>().test { }
-    }.hasMessageThat().isEqualTo("Expected no events but found Complete")
+    }.hasMessageThat().isEqualTo(
+      """
+      |Unconsumed events found:
+      | - Complete
+      """.trimMargin()
+    )
   }
 
   @Test fun unconsumedErrorThrows() = suspendTest {
@@ -88,7 +99,12 @@ class FlowTurbineTest {
     assertThrows<AssertionError> {
       flow<Nothing> { throw expected }.test { }
     }.apply {
-      hasMessageThat().isEqualTo("Expected no events but found Error(RuntimeException)")
+      hasMessageThat().isEqualTo(
+        """
+        |Unconsumed events found:
+        | - Error(RuntimeException)
+        """.trimMargin()
+      )
       // Coroutine nonsense means our actual exception gets bumped down to the second cause.
       hasCauseThat().hasCauseThat().isSameInstanceAs(expected)
     }
@@ -101,7 +117,13 @@ class FlowTurbineTest {
         assertThat(expectItem()).isEqualTo("one")
         cancel()
       }
-    }.hasMessageThat().isEqualTo("Expected no events but found Item(two)")
+    }.hasMessageThat().isEqualTo(
+      """
+      |Unconsumed events found:
+      | - Item(two)
+      | - Complete
+      """.trimMargin()
+    )
   }
 
   @Test fun unconsumedItemCanBeIgnored() = suspendTest {
