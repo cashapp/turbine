@@ -109,7 +109,7 @@ class FlowAssert<T> internal constructor(
   fun expectNoEvents() {
     val event = events.poll()
     if (event != null) {
-      throw AssertionError("Expected no events but found $event")
+      throw unexpectedEvent(event, "no events")
     }
   }
 
@@ -119,11 +119,7 @@ class FlowAssert<T> internal constructor(
       events.receiveOrNull()
     }
     if (event != null) {
-      val error = AssertionError("Expected no more events but found $event")
-      if (event is Event.Error) {
-        error.initCause(event.throwable)
-      }
-      throw error
+      throw unexpectedEvent(event, "no more events")
     }
   }
 
@@ -132,7 +128,7 @@ class FlowAssert<T> internal constructor(
       events.receive()
     }
     if (event !is Event.Item<T>) {
-      throw AssertionError("Expected item but was $event")
+      throw unexpectedEvent(event, "item")
     }
     return event.value
   }
@@ -142,7 +138,7 @@ class FlowAssert<T> internal constructor(
       events.receive()
     }
     if (event != Event.Complete) {
-      throw AssertionError("Expected complete but was $event")
+      throw unexpectedEvent(event, "complete")
     }
   }
 
@@ -151,8 +147,16 @@ class FlowAssert<T> internal constructor(
       events.receive()
     }
     if (event !is Event.Error) {
-      throw AssertionError("Expected error but was $event")
+      throw unexpectedEvent(event, "error")
     }
     return event.throwable
+  }
+
+  private fun unexpectedEvent(event: Event<*>, expected: String): AssertionError {
+    val error = AssertionError("Expected $expected but found $event")
+    if (event is Event.Error) {
+      error.initCause(event.throwable)
+    }
+    return error
   }
 }

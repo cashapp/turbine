@@ -109,7 +109,42 @@ class FlowAssertTest {
     }
   }
 
+  @Test fun expectItemButWasCloseThrows() = suspendTest {
+    assertThrows<AssertionError> {
+      emptyFlow<Unit>().test {
+        expectItem()
+      }
+    }.hasMessageThat().isEqualTo("Expected item but found Complete")
+  }
+
+  @Test fun expectItemButWasErrorThrows() = suspendTest {
+    val error = RuntimeException()
+    assertThrows<AssertionError> {
+      flow<Unit> { throw error }.test {
+        expectItem()
+      }
+    }.apply {
+      hasMessageThat().isEqualTo("Expected item but found Error(RuntimeException)")
+      // Coroutine nonsense means our actual exception gets bumped down to the second cause.
+      hasCauseThat().hasCauseThat().isSameInstanceAs(error)
+    }
+  }
+
   @Test fun expectComplete() = suspendTest {
+    emptyFlow<Nothing>().test {
+      expectComplete()
+    }
+  }
+
+  @Test fun expectCompleteButWasItemThrows() = suspendTest {
+    assertThrows<AssertionError> {
+      flowOf("item!").test {
+        expectComplete()
+      }
+    }.hasMessageThat().isEqualTo("Expected complete but found Item(item!)")
+  }
+
+  @Test fun expectCompleteButWasErrorThrows() = suspendTest {
     emptyFlow<Nothing>().test {
       expectComplete()
     }
@@ -120,6 +155,22 @@ class FlowAssertTest {
     flow<Nothing> { throw error }.test {
       assertThat(expectError()).isSameInstanceAs(error)
     }
+  }
+
+  @Test fun expectErrorButWasItemThrows() = suspendTest {
+    assertThrows<AssertionError> {
+      flowOf("item!").test {
+        expectError()
+      }
+    }.hasMessageThat().isEqualTo("Expected error but found Item(item!)")
+  }
+
+  @Test fun expectErrorButWasCompleteThrows() = suspendTest {
+    assertThrows<AssertionError> {
+      emptyFlow<Nothing>().test {
+        expectError()
+      }
+    }.hasMessageThat().isEqualTo("Expected error but found Complete")
   }
 
   @Test fun expectWaitsForEvents() = suspendTest {
