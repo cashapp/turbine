@@ -94,12 +94,31 @@ flowOf("one", "two").test {
 }
 ```
 
-Flows which result in exceptions can be tested.
+#### Consuming Errors
+
+Unlike `collect`, a flow which causes an exception will still be exposed as an event that you
+must consume.
 
 ```kotlin
 flow { throw RuntimeException("broken!") }.test {
   assertEquals("broken!", expectError().message)
 }
+```
+
+Failure to consume an error will result in the same unconsumed event exception as above, but
+with the exception added as the cause so that the full stacktrace is available.
+
+```kotlin
+flow { throw RuntimeException("broken!") }.test { }
+```
+```
+java.lang.AssertionError: Unconsumed events found:
+ - Error(RuntimeException)
+    at app.cash.turbine.ChannelBasedFlowTurbine.ensureAllEventsConsumed(FlowTurbine.kt:240)
+    ... 53 more
+Caused by: java.lang.RuntimeException: don't forget about me
+    at example.MainKt$main$1.invokeSuspend(Main.kt:7)
+    ... 32 more
 ```
 
 #### Asynchronous Flows
