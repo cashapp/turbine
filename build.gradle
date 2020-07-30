@@ -2,11 +2,13 @@ buildscript {
   dependencies {
     classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.72'
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.1.0'
+    classpath 'com.vanniktech:gradle-maven-publish-plugin:0.12.0'
   }
 }
 
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'com.diffplug.spotless'
+apply plugin: 'com.vanniktech.maven.publish'
 
 dependencies {
   api 'org.jetbrains.kotlin:kotlin-stdlib'
@@ -39,8 +41,10 @@ spotless {
 buildscript {
   repositories {
     mavenCentral()
+    jcenter()
   }
 }
 repositories {
   mavenCentral()
+  jcenter()
 }
