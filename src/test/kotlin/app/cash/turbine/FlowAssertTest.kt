@@ -37,6 +37,19 @@ import kotlin.time.milliseconds
 import kotlin.time.seconds
 
 class FlowAssertTest {
+  @Test fun exceptionsPropagate() = suspendTest {
+    val error = RuntimeException("hello")
+    assertThrows<RuntimeException> {
+      neverFlow().test {
+        throw error
+      }
+    }.apply {
+      hasMessageThat().isEqualTo("hello")
+      // Coroutine nonsense means our actual exception gets bumped down to the second cause.
+      hasCauseThat().isSameInstanceAs(error)
+    }
+  }
+
   @Test fun cancelStopsFlow() = suspendTest {
     val collecting = AtomicBoolean()
     callbackFlow<Nothing> {
