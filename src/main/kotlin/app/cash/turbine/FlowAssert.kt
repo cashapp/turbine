@@ -70,9 +70,15 @@ suspend fun <T> Flow<T>.test(
 private val ignoreRemainingEventsException = CancellationException("Ignore remaining events")
 
 internal sealed class Event<out T> {
-  object Complete : Event<Nothing>()
-  data class Error(val throwable: Throwable) : Event<Nothing>()
-  data class Item<T>(val item: T) : Event<T>()
+  object Complete : Event<Nothing>() {
+    override fun toString() = "Complete"
+  }
+  data class Error(val throwable: Throwable) : Event<Nothing>() {
+    override fun toString() = "Error(${throwable.javaClass.simpleName})"
+  }
+  data class Item<T>(val value: T) : Event<T>() {
+    override fun toString() = "Item($value)"
+  }
 }
 
 @ExperimentalTime
@@ -108,11 +114,16 @@ class FlowAssert<T> internal constructor(
   }
 
   suspend fun expectNoMoreEvents() {
+    // TODO get all available
     val event = withTimeout {
       events.receiveOrNull()
     }
     if (event != null) {
-      throw AssertionError("Expected no more events but found $event")
+      val error = AssertionError("Expected no more events but found $event")
+      if (event is Event.Error) {
+        error.initCause(event.throwable)
+      }
+      throw error
     }
   }
 
@@ -123,7 +134,7 @@ class FlowAssert<T> internal constructor(
     if (event !is Event.Item<T>) {
       throw AssertionError("Expected item but was $event")
     }
-    return event.item
+    return event.value
   }
 
   suspend fun expectComplete() {

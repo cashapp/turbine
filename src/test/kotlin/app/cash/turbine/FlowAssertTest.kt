@@ -18,6 +18,9 @@ package app.cash.turbine
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Test
 import kotlin.time.Duration
 import kotlin.time.days
@@ -25,6 +28,29 @@ import kotlin.time.milliseconds
 import kotlin.time.seconds
 
 class FlowAssertTest {
+  @Test fun unconsumedItemThrows() = suspendTest {
+    assertThrows<AssertionError> {
+      flowOf("item!").test { }
+    }.hasMessageThat().isEqualTo("Expected no more events but found Item(item!)")
+  }
+
+  @Test fun unconsumedCompleteThrows() = suspendTest {
+    assertThrows<AssertionError> {
+      emptyFlow<Nothing>().test { }
+    }.hasMessageThat().isEqualTo("Expected no more events but found Complete")
+  }
+
+  @Test fun unconsumedErrorThrows() = suspendTest {
+    val expected = RuntimeException()
+    assertThrows<AssertionError> {
+      flow<Nothing> { throw expected }.test { }
+    }.apply {
+      hasMessageThat().isEqualTo("Expected no more events but found Error(RuntimeException)")
+      // Coroutine nonsense means our actual exception gets bumped down to the second cause.
+      hasCauseThat().hasCauseThat().isSameInstanceAs(expected)
+    }
+  }
+
   @Test fun timeoutEnforcedByDefault() = suspendTest {
     val subject = async {
       neverFlow().test {
