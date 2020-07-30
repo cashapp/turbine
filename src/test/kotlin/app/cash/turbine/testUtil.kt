@@ -17,14 +17,14 @@ package app.cash.turbine
 
 import com.google.common.truth.ThrowableSubject
 import com.google.common.truth.Truth
+import kotlin.time.Duration
+import kotlin.time.milliseconds
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.test.DelayController
 import kotlinx.coroutines.test.TestCoroutineScope
-import kotlin.time.Duration
-import kotlin.time.milliseconds
 
 /** A flow that never emits anything. */
 fun neverFlow(): Flow<Nothing> = flow {
@@ -57,5 +57,6 @@ inline fun <reified T : Throwable> assertThrows(body: () -> Unit): ThrowableSubj
     throw t
   }
   throw AssertionError(
-      "Expected body to throw ${T::class.java.simpleName} but it completed successfully")
+    "Expected body to throw ${T::class.java.simpleName} but it completed successfully"
+  )
 }

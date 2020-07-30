@@ -16,6 +16,12 @@
 package app.cash.turbine
 
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.time.Duration
+import kotlin.time.days
+import kotlin.time.milliseconds
+import kotlin.time.seconds
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
@@ -29,12 +35,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.junit.Test
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.time.Duration
-import kotlin.time.days
-import kotlin.time.milliseconds
-import kotlin.time.seconds
 
 class FlowAssertTest {
   @Test fun exceptionsPropagate() = suspendTest {
