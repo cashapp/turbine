@@ -51,6 +51,24 @@ class FlowAssertTest {
     }
   }
 
+  @Test fun unconsumedItemCanBeIgnored() = suspendTest {
+    flowOf("item!").test {
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun unconsumedCompleteCanBeIgnored() = suspendTest {
+    emptyFlow<Nothing>().test {
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun unconsumedErrorCanBeIgnored() = suspendTest {
+    flow<Nothing> { throw RuntimeException() }.test {
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
   @Test fun timeoutEnforcedByDefault() = suspendTest {
     val subject = async {
       neverFlow().test {
