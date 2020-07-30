@@ -139,3 +139,22 @@ channelFlow {
   cancel()
 }
 ```
+
+## Experimental API Usage
+
+Turbine uses Kotlin's experimental time API. Since the library targets test code, the
+impact and risk of any breaking changes to the time API are minimal and would likely only
+require a version bump.
+
+Instead of sprinkling `@ExperimentalTime` or `@OptIn(ExperimentalTime::class)` all over your tests,
+opt-in at the compiler level.
+
+```groovy
+compileTestKotlin {
+  kotlinOptions {
+    freeCompilerArgs += [
+        '-Xopt-in=kotlin.time.ExperimentalTime',
+    ]
+  }
+}
+```
