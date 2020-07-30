@@ -28,10 +28,25 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 
+/**
+ * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
+ * consume and assert properties on them in order. If any exception occurs during validation the
+ * exception is rethrown from this method.
+ *
+ * ```kotlin
+ * flowOf("one", "two").test {
+ *   assertEquals("one", expectItem())
+ *   assertEquals("two", expectItem())
+ *   expectComplete()
+ * }
+ * ```
+ *
+ * @param timeout Duration each suspending function on [FlowTurbine] will wait before timing out.
+ */
 @ExperimentalTime
 suspend fun <T> Flow<T>.test(
   timeout: Duration = 1.seconds,
-  validate: suspend FlowAssert<T>.() -> Unit
+  validate: suspend FlowTurbine<T>.() -> Unit
 ) {
   coroutineScope {
     val events = Channel<Event<T>>(UNLIMITED)
@@ -51,9 +66,9 @@ suspend fun <T> Flow<T>.test(
       }
       events.close()
     }
-    val flowAssert = ChannelBasedFlowAssert(events, collectJob, timeout)
+    val flowTurbine = ChannelBasedFlowTurbine(events, collectJob, timeout)
     val ensureConsumed = try {
-      flowAssert.validate()
+      flowTurbine.validate()
       true
     } catch (e: CancellationException) {
       if (e !== ignoreRemainingEventsException) {
@@ -62,18 +77,68 @@ suspend fun <T> Flow<T>.test(
       false
     }
     if (ensureConsumed) {
-      flowAssert.expectNoMoreEvents()
+      collectJob.cancel()
+      flowTurbine.expectNoEvents()
     }
   }
 }
 
-interface FlowAssert<T> {
+/**
+ * Represents active collection on a source [Flow] which buffers item emissions, completion,
+ * and/or errors as events for consuming.
+ */
+interface FlowTurbine<T> {
+  /**
+   * Duration that [expectItem], [expectComplete], and [expectError] will wait for an event before
+   * throwing a timeout exception.
+   */
+  @ExperimentalTime
+  val timeout: Duration
+
+  /**
+   * Cancel collecting events from the source [Flow]. Any events which have already been received
+   * will still need consumed using the "expect" functions.
+   */
   fun cancel()
+
+  /**
+   * Cancel collecting events from the source [Flow] and ignore any events which have already
+   * been received. Calling this function will exit the [test] block.
+   */
   fun cancelAndIgnoreRemainingEvents(): Nothing
+
+  /**
+   * Assert that there are no unconsumed events which have been received.
+   *
+   * @throws AssertionError if unconsumed events are found.
+   */
   fun expectNoEvents()
-  suspend fun expectNoMoreEvents()
+
+  /**
+   * Assert that the next event received was an item and return it.
+   * If no events have been received, this function will suspend for up to [timeout].
+   *
+   * @throws AssertionError if the next event was completion or an error.
+   * @throws TimeoutCancellationException if no event was received in time.
+   */
   suspend fun expectItem(): T
+
+  /**
+   * Assert that the next event received was the flow completing.
+   * If no events have been received, this function will suspend for up to [timeout].
+   *
+   * @throws AssertionError if the next event was an item or an error.
+   * @throws TimeoutCancellationException if no event was received in time.
+   */
   suspend fun expectComplete()
+
+  /**
+   * Assert that the next event received was an error terminating the flow.
+   * If no events have been received, this function will suspend for up to [timeout].
+   *
+   * @throws AssertionError if the next event was an item or completion.
+   * @throws TimeoutCancellationException if no event was received in time.
+   */
   suspend fun expectError(): Throwable
 }
 
@@ -92,11 +157,11 @@ private sealed class Event<out T> {
 }
 
 @ExperimentalTime
-private class ChannelBasedFlowAssert<T>(
+private class ChannelBasedFlowTurbine<T>(
   private val events: Channel<Event<T>>,
   private val collectJob: Job,
-  private val timeout: Duration
-) : FlowAssert<T> {
+  override val timeout: Duration
+) : FlowTurbine<T> {
   private suspend fun <T> withTimeout(body: suspend () -> T): T {
     return if (timeout == Duration.ZERO) {
       body()
@@ -117,19 +182,10 @@ private class ChannelBasedFlowAssert<T>(
   }
 
   override fun expectNoEvents() {
+    // TODO get all available
     val event = events.poll()
     if (event != null) {
       throw unexpectedEvent(event, "no events")
-    }
-  }
-
-  override suspend fun expectNoMoreEvents() {
-    // TODO get all available
-    val event = withTimeout {
-      events.receiveOrNull()
-    }
-    if (event != null) {
-      throw unexpectedEvent(event, "no more events")
     }
   }
 

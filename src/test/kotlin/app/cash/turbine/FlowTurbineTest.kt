@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.junit.Test
 
-class FlowAssertTest {
+class FlowTurbineTest {
   @Test fun exceptionsPropagate() = suspendTest {
     val error = RuntimeException("hello")
     assertThrows<RuntimeException> {
@@ -74,13 +74,13 @@ class FlowAssertTest {
   @Test fun unconsumedItemThrows() = suspendTest {
     assertThrows<AssertionError> {
       flowOf("item!").test { }
-    }.hasMessageThat().isEqualTo("Expected no more events but found Item(item!)")
+    }.hasMessageThat().isEqualTo("Expected no events but found Item(item!)")
   }
 
   @Test fun unconsumedCompleteThrows() = suspendTest {
     assertThrows<AssertionError> {
       emptyFlow<Nothing>().test { }
-    }.hasMessageThat().isEqualTo("Expected no more events but found Complete")
+    }.hasMessageThat().isEqualTo("Expected no events but found Complete")
   }
 
   @Test fun unconsumedErrorThrows() = suspendTest {
@@ -88,7 +88,7 @@ class FlowAssertTest {
     assertThrows<AssertionError> {
       flow<Nothing> { throw expected }.test { }
     }.apply {
-      hasMessageThat().isEqualTo("Expected no more events but found Error(RuntimeException)")
+      hasMessageThat().isEqualTo("Expected no events but found Error(RuntimeException)")
       // Coroutine nonsense means our actual exception gets bumped down to the second cause.
       hasCauseThat().hasCauseThat().isSameInstanceAs(expected)
     }
@@ -101,7 +101,7 @@ class FlowAssertTest {
         assertThat(expectItem()).isEqualTo("one")
         cancel()
       }
-    }.hasMessageThat().isEqualTo("Expected no more events but found Item(two)")
+    }.hasMessageThat().isEqualTo("Expected no events but found Item(two)")
   }
 
   @Test fun unconsumedItemCanBeIgnored() = suspendTest {
