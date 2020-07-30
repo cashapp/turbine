@@ -23,12 +23,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicBoolean
@@ -81,6 +79,16 @@ class FlowAssertTest {
       // Coroutine nonsense means our actual exception gets bumped down to the second cause.
       hasCauseThat().hasCauseThat().isSameInstanceAs(expected)
     }
+  }
+
+  @Test fun unconsumedItemThrowsWithCancel() = suspendTest {
+    assertThrows<AssertionError> {
+      flowOf("one", "two").test {
+        // Expect one item to ensure we start collecting and receive both items.
+        assertThat(expectItem()).isEqualTo("one")
+        cancel()
+      }
+    }.hasMessageThat().isEqualTo("Expected no more events but found Item(two)")
   }
 
   @Test fun unconsumedItemCanBeIgnored() = suspendTest {
