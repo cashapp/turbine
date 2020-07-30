@@ -51,7 +51,7 @@ suspend fun <T> Flow<T>.test(
       }
       events.close()
     }
-    val flowAssert = FlowAssert(events, collectJob, timeout)
+    val flowAssert = ChannelBasedFlowAssert(events, collectJob, timeout)
     val ensureConsumed = try {
       flowAssert.validate()
       true
@@ -67,9 +67,19 @@ suspend fun <T> Flow<T>.test(
   }
 }
 
+interface FlowAssert<T> {
+  fun cancel()
+  fun cancelAndIgnoreRemainingEvents(): Nothing
+  fun expectNoEvents()
+  suspend fun expectNoMoreEvents()
+  suspend fun expectItem(): T
+  suspend fun expectComplete()
+  suspend fun expectError(): Throwable
+}
+
 private val ignoreRemainingEventsException = CancellationException("Ignore remaining events")
 
-internal sealed class Event<out T> {
+private sealed class Event<out T> {
   object Complete : Event<Nothing>() {
     override fun toString() = "Complete"
   }
@@ -82,11 +92,11 @@ internal sealed class Event<out T> {
 }
 
 @ExperimentalTime
-class FlowAssert<T> internal constructor(
+private class ChannelBasedFlowAssert<T>(
   private val events: Channel<Event<T>>,
   private val collectJob: Job,
   private val timeout: Duration
-) {
+) : FlowAssert<T> {
   private suspend fun <T> withTimeout(body: suspend () -> T): T {
     return if (timeout == Duration.ZERO) {
       body()
@@ -97,23 +107,23 @@ class FlowAssert<T> internal constructor(
     }
   }
 
-  fun cancel() {
+  override fun cancel() {
     collectJob.cancel()
   }
 
-  fun cancelAndIgnoreRemainingEvents(): Nothing {
+  override fun cancelAndIgnoreRemainingEvents(): Nothing {
     cancel()
     throw ignoreRemainingEventsException
   }
 
-  fun expectNoEvents() {
+  override fun expectNoEvents() {
     val event = events.poll()
     if (event != null) {
       throw unexpectedEvent(event, "no events")
     }
   }
 
-  suspend fun expectNoMoreEvents() {
+  override suspend fun expectNoMoreEvents() {
     // TODO get all available
     val event = withTimeout {
       events.receiveOrNull()
@@ -123,7 +133,7 @@ class FlowAssert<T> internal constructor(
     }
   }
 
-  suspend fun expectItem(): T {
+  override suspend fun expectItem(): T {
     val event = withTimeout {
       events.receive()
     }
@@ -133,7 +143,7 @@ class FlowAssert<T> internal constructor(
     return event.value
   }
 
-  suspend fun expectComplete() {
+  override suspend fun expectComplete() {
     val event = withTimeout {
       events.receive()
     }
@@ -142,7 +152,7 @@ class FlowAssert<T> internal constructor(
     }
   }
 
-  suspend fun expectError(): Throwable {
+  override suspend fun expectError(): Throwable {
     val event = withTimeout {
       events.receive()
     }
