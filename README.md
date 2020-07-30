@@ -17,7 +17,33 @@ flowOf("one", "two").test {
 
 ## Download
 
-Coming soon.
+```groovy
+repositories {
+  mavenCentral()
+}
+dependencies {
+  // Coming soon!
+  // testImplementation 'app.cash.turbine:turbine:0.1.0'
+}
+```
+
+<details>
+<summary>Snapshots of the development version are available in Sonatype's snapshots repository.</summary>
+<p>
+
+```groovy
+repositories {
+  maven {
+    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+  }
+}
+dependencies {
+  testImplementation 'app.cash.turbine:turbine:0.1.0-SNAPSHOT'
+}
+```
+
+</p>
+</details>
 
 ## Usage
 
