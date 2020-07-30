@@ -64,6 +64,45 @@ class FlowTurbineTest {
     }
   }
 
+  @Test fun endOfBlockStopsFlowCollection() = suspendTest {
+    val collecting = AtomicBoolean()
+    callbackFlow<Nothing> {
+      collecting.set(true)
+      awaitClose {
+        collecting.set(false)
+      }
+    }.test { }
+    assertThat(collecting.get()).isFalse()
+  }
+
+  @Test fun exceptionStopsFlowCollection() = suspendTest {
+    val collecting = AtomicBoolean()
+    assertThrows<RuntimeException> {
+      callbackFlow<Nothing> {
+        collecting.set(true)
+        awaitClose {
+          collecting.set(false)
+        }
+      }.test {
+        throw RuntimeException()
+      }
+    }
+    assertThat(collecting.get()).isFalse()
+  }
+
+  @Test fun ignoreRemainingEventsStopsFlowCollection() = suspendTest {
+    val collecting = AtomicBoolean()
+    callbackFlow<Nothing> {
+      collecting.set(true)
+      awaitClose {
+        collecting.set(false)
+      }
+    }.test {
+      cancelAndIgnoreRemainingEvents()
+    }
+    assertThat(collecting.get()).isFalse()
+  }
+
   @Test fun expectNoEvents() = suspendTest {
     neverFlow().test {
       expectNoEvents()
