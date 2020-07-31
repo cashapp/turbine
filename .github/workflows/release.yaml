@@ -1,0 +1,43 @@
+name: release
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: gradle/wrapper-validation-action@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 14
+
+      - name: Build and publish artifacts
+        env:
+          SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
+        run: ./gradlew build publish
+
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
+
+      - name: Extract release notes
+        id: release_notes
+        uses: ffurrer2/extract-release-notes@v1
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ${{ steps.release_notes.outputs.release_notes }}
+          files: build/libs/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
