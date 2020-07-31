@@ -191,19 +191,38 @@ channelFlow {
 
 ## Experimental API Usage
 
-Turbine uses Kotlin's experimental time API. Since the library targets test code, the
-impact and risk of any breaking changes to the time API are minimal and would likely only
-require a version bump.
+Turbine uses Kotlin experimental APIs:
 
-Instead of sprinkling `@ExperimentalTime` or `@OptIn(ExperimentalTime::class)` all over your tests,
-opt-in at the compiler level.
+ * `Duration` is used to declare the event timeout.
+ * `launch(start=UNDISPATCHED)` is used to ensure we start collecting events from the `Flow` before
+   invoking the test lambda.
+
+Since the library targets test code, the impact and risk of any breaking changes to these APIs are
+minimal and would likely only require a version bump.
+
+Instead of sprinkling the experimental annotations or `@OptIn` all over your tests, opt-in at the
+compiler level.
 
 ```groovy
 compileTestKotlin {
   kotlinOptions {
     freeCompilerArgs += [
         '-Xopt-in=kotlin.time.ExperimentalTime',
+        '-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi',
     ]
+  }
+}
+```
+
+For multiplatform projects:
+
+```groovy
+kotlin {
+  sourceSets.matching { it.name.endsWith("Test") }.all {
+    it.languageSettings {
+      useExperimentalAnnotation('kotlin.time.ExperimentalTime')
+      useExperimentalAnnotation('kotlinx.coroutines.ExperimentalCoroutinesApi')
+    }
   }
 }
 ```

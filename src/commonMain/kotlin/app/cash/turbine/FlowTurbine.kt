@@ -15,10 +15,9 @@
  */
 package app.cash.turbine
 
-import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
-import kotlin.time.seconds
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
@@ -27,6 +26,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
+import kotlin.time.seconds
+
+private const val debug = false
 
 /**
  * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
@@ -43,41 +47,60 @@ import kotlinx.coroutines.withTimeout
  *
  * @param timeout Duration each suspending function on [FlowTurbine] will wait before timing out.
  */
-@ExperimentalTime
+@ExperimentalTime // For timeout.
+@ExperimentalCoroutinesApi // For start=UNDISPATCHED
 suspend fun <T> Flow<T>.test(
   timeout: Duration = 1.seconds,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
   coroutineScope {
     val events = Channel<Event<T>>(UNLIMITED)
-    val collectJob = launch {
+
+    val collectJob = launch(start = UNDISPATCHED) {
       val terminalEvent = try {
+        if (debug) println("Collect starting!")
         collect { item ->
+          if (debug) println("Collect got: $item")
           events.send(Event.Item(item))
         }
+
+        if (debug) println("Collect complete!")
         Event.Complete
       } catch (_: CancellationException) {
+        if (debug) println("Collect canceled!")
         null
       } catch (t: Throwable) {
+        if (debug) println("Collect error! $t")
         Event.Error(t)
       }
+
       if (terminalEvent != null) {
         events.send(terminalEvent)
       }
+
+      if (debug) println("Collect closing event channel")
       events.close()
     }
+
     val flowTurbine = ChannelBasedFlowTurbine(events, collectJob, timeout)
     val ensureConsumed = try {
       flowTurbine.validate()
+      if (debug) println("Validate lambda returning normally")
+
       true
     } catch (e: CancellationException) {
       if (e !== ignoreRemainingEventsException) {
+        if (debug) println("Validate ignoring remaining events")
         throw e
       }
+
+      if (debug) println("Validate canceling $e")
       false
     }
+
+    flowTurbine.cancel()
+
     if (ensureConsumed) {
-      collectJob.cancel()
       flowTurbine.ensureAllEventsConsumed()
     }
   }
@@ -99,13 +122,13 @@ interface FlowTurbine<T> {
    * Cancel collecting events from the source [Flow]. Any events which have already been received
    * will still need consumed using the "expect" functions.
    */
-  fun cancel()
+  suspend fun cancel()
 
   /**
    * Cancel collecting events from the source [Flow] and ignore any events which have already
    * been received. Calling this function will exit the [test] block.
    */
-  fun cancelAndIgnoreRemainingEvents(): Nothing
+  suspend fun cancelAndIgnoreRemainingEvents(): Nothing
 
   /**
    * Assert that there are no unconsumed events which have been received.
@@ -149,7 +172,7 @@ private sealed class Event<out T> {
     override fun toString() = "Complete"
   }
   data class Error(val throwable: Throwable) : Event<Nothing>() {
-    override fun toString() = "Error(${throwable.javaClass.simpleName})"
+    override fun toString() = "Error(${throwable::class.simpleName})"
   }
   data class Item<T>(val value: T) : Event<T>() {
     override fun toString() = "Item($value)"
@@ -172,11 +195,13 @@ private class ChannelBasedFlowTurbine<T>(
     }
   }
 
-  override fun cancel() {
+  override suspend fun cancel() {
     collectJob.cancel()
+    // Non-JVM platforms may not perform cancellation synchronously so force its handling.
+    collectJob.join()
   }
 
-  override fun cancelAndIgnoreRemainingEvents(): Nothing {
+  override suspend fun cancelAndIgnoreRemainingEvents(): Nothing {
     cancel()
     throw ignoreRemainingEventsException
   }
@@ -184,7 +209,7 @@ private class ChannelBasedFlowTurbine<T>(
   override fun expectNoEvents() {
     val event = events.poll()
     if (event != null) {
-      throw unexpectedEvent(event, "no events")
+      unexpectedEvent(event, "no events")
     }
   }
 
@@ -193,7 +218,7 @@ private class ChannelBasedFlowTurbine<T>(
       events.receive()
     }
     if (event !is Event.Item<T>) {
-      throw unexpectedEvent(event, "item")
+      unexpectedEvent(event, "item")
     }
     return event.value
   }
@@ -203,7 +228,7 @@ private class ChannelBasedFlowTurbine<T>(
       events.receive()
     }
     if (event != Event.Complete) {
-      throw unexpectedEvent(event, "complete")
+      unexpectedEvent(event, "complete")
     }
   }
 
@@ -212,17 +237,14 @@ private class ChannelBasedFlowTurbine<T>(
       events.receive()
     }
     if (event !is Event.Error) {
-      throw unexpectedEvent(event, "error")
+      unexpectedEvent(event, "error")
     }
     return event.throwable
   }
 
-  private fun unexpectedEvent(event: Event<*>, expected: String): AssertionError {
-    val error = AssertionError("Expected $expected but found $event")
-    if (event is Event.Error) {
-      error.initCause(event.throwable)
-    }
-    return error
+  private fun unexpectedEvent(event: Event<*>, expected: String): Nothing {
+    val cause = (event as? Event.Error)?.throwable
+    throw AssertionError("Expected $expected but found $event", cause)
   }
 
   fun ensureAllEventsConsumed() {
@@ -236,6 +258,7 @@ private class ChannelBasedFlowTurbine<T>(
         cause = event.throwable
       }
     }
+    if (debug) println("Unconsumed events: $unconsumed")
     if (unconsumed.isNotEmpty()) {
       throw AssertionError(
         buildString {
@@ -249,3 +272,15 @@ private class ChannelBasedFlowTurbine<T>(
     }
   }
 }
+
+/**
+ * A plain [AssertionError] working around three bugs:
+ *
+ *  1. No two-arg constructor in common (https://youtrack.jetbrains.com/issue/KT-40728).
+ *  2. No two-arg constructor in Java 6.
+ *  3. Public exceptions with public constructors have referential equality broken by coroutines.
+ */
+private class AssertionError(
+  message: String,
+  override val cause: Throwable?
+) : kotlin.AssertionError(message)

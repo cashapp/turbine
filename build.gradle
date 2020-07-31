@@ -3,31 +3,109 @@ buildscript {
     classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.72'
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.1.0'
     classpath 'com.vanniktech:gradle-maven-publish-plugin:0.12.0'
+    classpath 'org.jetbrains.dokka:dokka-gradle-plugin:0.10.1'
+  }
+
+  ext.versions = [
+    'coroutines': '1.3.8',
+  ]
+}
+
+apply plugin: 'org.jetbrains.kotlin.multiplatform'
+kotlin {
+  js {
+    nodejs()
+  }
+
+  jvm()
+
+  iosArm32()
+  iosArm64()
+  iosX64()
+  linuxX64()
+  macosX64()
+  mingwX64()
+  tvosArm64()
+  tvosX64()
+  watchosArm32()
+  watchosArm64()
+  watchosX86()
+
+  sourceSets {
+    commonMain {
+      dependencies {
+        api 'org.jetbrains.kotlin:kotlin-stdlib-common'
+        api "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:${versions.coroutines}"
+      }
+    }
+    commonTest {
+      dependencies {
+        implementation 'org.jetbrains.kotlin:kotlin-test-common'
+        implementation 'org.jetbrains.kotlin:kotlin-test-annotations-common'
+      }
+    }
+
+    jsMain {
+      dependencies {
+        api 'org.jetbrains.kotlin:kotlin-stdlib-js'
+        api "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:${versions.coroutines}"
+      }
+    }
+    jsTest {
+      dependencies {
+        implementation 'org.jetbrains.kotlin:kotlin-test-js'
+      }
+    }
+
+    jvmMain {
+      dependencies {
+        api 'org.jetbrains.kotlin:kotlin-stdlib'
+        api "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}"
+      }
+    }
+    jvmTest {
+      dependencies {
+        implementation 'org.jetbrains.kotlin:kotlin-test-junit'
+        implementation 'junit:junit:4.13'
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.coroutines}"
+      }
+    }
+
+    nativeMain {
+      dependencies {
+        api "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:${versions.coroutines}"
+      }
+    }
+    nativeTest {
+    }
+
+    configure([
+      targets.iosArm32,
+      targets.iosArm64,
+      targets.iosX64,
+      targets.linuxX64,
+      targets.macosX64,
+      targets.mingwX64,
+      targets.tvosArm64,
+      targets.tvosX64,
+      targets.watchosArm32,
+      targets.watchosArm64,
+      targets.watchosX86,
+    ]) {
+      compilations.main.source(sourceSets.nativeMain)
+      compilations.test.source(sourceSets.nativeTest)
+    }
+  }
+
+  sourceSets.matching { it.name.endsWith("Test") }.all {
+    it.languageSettings {
+      useExperimentalAnnotation('kotlin.time.ExperimentalTime')
+      useExperimentalAnnotation('kotlinx.coroutines.ExperimentalCoroutinesApi')
+    }
   }
 }
 
-apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'com.diffplug.spotless'
-apply plugin: 'com.vanniktech.maven.publish'
-
-dependencies {
-  api 'org.jetbrains.kotlin:kotlin-stdlib'
-  api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8'
-
-  testImplementation 'junit:junit:4.13'
-  testImplementation 'com.google.truth:truth:1.0.1'
-  testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.8'
-}
-
-compileTestKotlin {
-  kotlinOptions {
-    freeCompilerArgs += [
-        '-Xopt-in=kotlin.time.ExperimentalTime',
-        '-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi',
-    ]
-  }
-}
-
 spotless {
   kotlin {
     ktlint('0.37.2').userData([
@@ -35,6 +113,25 @@ spotless {
       'indent_size': '2',
       'kotlin_imports_layout': 'ascii',
     ])
+  }
+}
+
+apply plugin: 'com.vanniktech.maven.publish'
+signing {
+  def signingKey = findProperty('signingKey')
+  def signingPassword = ''
+  useInMemoryPgpKeys(signingKey, signingPassword)
+}
+
+apply plugin: 'org.jetbrains.dokka'
+dokka {
+  outputDirectory = "$buildDir/dokka"
+  outputFormat = 'html'
+
+  configuration {
+    externalDocumentationLink {
+      url = new URL('https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/')
+    }
   }
 }
 
@@ -47,10 +144,4 @@ buildscript {
 repositories {
   mavenCentral()
   jcenter()
-}
-
-signing {
-  def signingKey = findProperty('signingKey')
-  def signingPassword = ''
-  useInMemoryPgpKeys(signingKey, signingPassword)
 }

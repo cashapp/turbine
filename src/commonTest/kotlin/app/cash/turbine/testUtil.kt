@@ -15,16 +15,10 @@
  */
 package app.cash.turbine
 
-import com.google.common.truth.ThrowableSubject
-import com.google.common.truth.Truth
-import kotlin.time.Duration
-import kotlin.time.milliseconds
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.test.DelayController
-import kotlinx.coroutines.test.TestCoroutineScope
 
 /** A flow that never emits anything. */
 fun neverFlow(): Flow<Nothing> = flow {
@@ -33,30 +27,18 @@ fun neverFlow(): Flow<Nothing> = flow {
   }
 }
 
-fun suspendTest(body: suspend TestCoroutineScope.() -> Unit) {
-  // We don't use runBlockingTest because it always advances time unconditionally.
+expect fun suspendTest(body: suspend CoroutineScope.() -> Unit)
 
-  val scope = TestCoroutineScope()
-  scope.launch {
-    scope.body()
-  }
-  scope.cleanupTestCoroutines()
-}
-
-fun DelayController.advanceTimeBy(duration: Duration): Duration {
-  return advanceTimeBy(duration.toLongMilliseconds()).milliseconds
-}
-
-inline fun <reified T : Throwable> assertThrows(body: () -> Unit): ThrowableSubject {
+inline fun <reified T : Throwable> assertThrows(body: () -> Unit): T {
   try {
     body()
   } catch (t: Throwable) {
     if (t is T) {
-      return Truth.assertThat(t)
+      return t
     }
     throw t
   }
   throw AssertionError(
-    "Expected body to throw ${T::class.java.simpleName} but it completed successfully"
+    "Expected body to throw ${T::class.simpleName} but it completed successfully"
   )
 }

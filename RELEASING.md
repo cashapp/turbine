@@ -1,6 +1,6 @@
 # Releasing
 
-1. Update the `version` in `gradle.properties` to the release version.
+1. Update the `VERSION_NAME` in `gradle.properties` to the release version.
 
 2. Update the `CHANGELOG.md`:
    1. Change the `Unreleased` header to the release version.
@@ -22,7 +22,7 @@
    $ git tag -am "Version X.Y.Z" X.Y.Z
    ```
 
-6. Update the `version` in `gradle.properties` to the next "SNAPSHOT" version.
+6. Update the `VERSION_NAME` in `gradle.properties` to the next "SNAPSHOT" version.
 
 7. Commit
 
