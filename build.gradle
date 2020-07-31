@@ -48,3 +48,9 @@ repositories {
   mavenCentral()
   jcenter()
 }
+
+signing {
+  def signingKey = findProperty('signingKey')
+  def signingPassword = ''
+  useInMemoryPgpKeys(signingKey, signingPassword)
+}
