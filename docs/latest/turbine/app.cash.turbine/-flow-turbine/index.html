@@ -1,0 +1,87 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>FlowTurbine - turbine</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">turbine</a>&nbsp;/&nbsp;<a href="../index.html">app.cash.turbine</a>&nbsp;/&nbsp;<a href="./index.html">FlowTurbine</a><br/>
+<br/>
+<h1>FlowTurbine</h1>
+<code><span class="keyword">interface </span><span class="identifier">FlowTurbine</span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span></code>
+<p>Represents active collection on a source <a href="https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html">Flow</a> which buffers item emissions, completion,
+and/or errors as events for consuming.</p>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="timeout.html">timeout</a></h4>
+</td>
+<td>
+<p>Duration that <a href="expect-item.html">expectItem</a>, <a href="expect-complete.html">expectComplete</a>, and <a href="expect-error.html">expectError</a> will wait for an event before
+throwing a timeout exception.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">timeout</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.time/-duration/index.html"><span class="identifier">Duration</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="cancel.html">cancel</a></h4>
+</td>
+<td>
+<p>Cancel collecting events from the source <a href="https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html">Flow</a>. Any events which have already been received
+will still need consumed using the "expect" functions.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">cancel</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="cancel-and-ignore-remaining-events.html">cancelAndIgnoreRemainingEvents</a></h4>
+</td>
+<td>
+<p>Cancel collecting events from the source <a href="https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html">Flow</a> and ignore any events which have already
+been received. Calling this function will exit the <a href="../kotlinx.coroutines.flow.-flow/test.html">test</a> block.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">cancelAndIgnoreRemainingEvents</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-nothing/index.html"><span class="identifier">Nothing</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="expect-complete.html">expectComplete</a></h4>
+</td>
+<td>
+<p>Assert that the next event received was the flow completing.
+If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">expectComplete</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="expect-error.html">expectError</a></h4>
+</td>
+<td>
+<p>Assert that the next event received was an error terminating the flow.
+If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">expectError</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html"><span class="identifier">Throwable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="expect-item.html">expectItem</a></h4>
+</td>
+<td>
+<p>Assert that the next event received was an item and return it.
+If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">expectItem</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><span class="identifier">T</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="expect-no-events.html">expectNoEvents</a></h4>
+</td>
+<td>
+<p>Assert that there are no unconsumed events which have been received.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">expectNoEvents</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

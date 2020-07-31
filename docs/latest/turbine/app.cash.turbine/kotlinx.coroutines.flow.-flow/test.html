@@ -1,0 +1,26 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>test - turbine</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">turbine</a>&nbsp;/&nbsp;<a href="../index.html">app.cash.turbine</a>&nbsp;/&nbsp;<a href="index.html">kotlinx.coroutines.flow.Flow</a>&nbsp;/&nbsp;<a href="./test.html">test</a><br/>
+<br/>
+<h1>test</h1>
+<a name="app.cash.turbine$test(kotlinx.coroutines.flow.Flow((app.cash.turbine.test.T)), kotlin.time.Duration, kotlin.coroutines.SuspendFunction1((app.cash.turbine.FlowTurbine((app.cash.turbine.test.T)), kotlin.Unit)))"></a>
+<code><span class="identifier">@ExperimentalTime</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <a href="https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html"><span class="identifier">Flow</span></a><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span><span class="symbol">.</span><span class="identifier">test</span><span class="symbol">(</span><span class="identifier" id="app.cash.turbine$test(kotlinx.coroutines.flow.Flow((app.cash.turbine.test.T)), kotlin.time.Duration, kotlin.coroutines.SuspendFunction1((app.cash.turbine.FlowTurbine((app.cash.turbine.test.T)), kotlin.Unit)))/timeout">timeout</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.time/-duration/index.html"><span class="identifier">Duration</span></a>&nbsp;<span class="symbol">=</span>&nbsp;1.seconds<span class="symbol">, </span><span class="identifier" id="app.cash.turbine$test(kotlinx.coroutines.flow.Flow((app.cash.turbine.test.T)), kotlin.time.Duration, kotlin.coroutines.SuspendFunction1((app.cash.turbine.FlowTurbine((app.cash.turbine.test.T)), kotlin.Unit)))/validate">validate</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><a href="../-flow-turbine/index.html"><span class="identifier">FlowTurbine</span></a><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span><span class="symbol">.</span><span class="symbol">(</span><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Terminal flow operator that collects events from given flow and allows the <a href="test.html#app.cash.turbine$test(kotlinx.coroutines.flow.Flow((app.cash.turbine.test.T)), kotlin.time.Duration, kotlin.coroutines.SuspendFunction1((app.cash.turbine.FlowTurbine((app.cash.turbine.test.T)), kotlin.Unit)))/validate">validate</a> lambda to
+consume and assert properties on them in order. If any exception occurs during validation the
+exception is rethrown from this method.</p>
+<pre><code class="lang-kotlin">flowOf("one", "two").test {
+  assertEquals("one", expectItem())
+  assertEquals("two", expectItem())
+  expectComplete()
+}
+</code></pre>
+<h3>Parameters</h3>
+<p><a name="timeout"></a>
+<code>timeout</code> - Duration each suspending function on <a href="../-flow-turbine/index.html">FlowTurbine</a> will wait before timing out.</p>
+</BODY>
+</HTML>

@@ -1,0 +1,21 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>FlowTurbine.expectError - turbine</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">turbine</a>&nbsp;/&nbsp;<a href="../index.html">app.cash.turbine</a>&nbsp;/&nbsp;<a href="index.html">FlowTurbine</a>&nbsp;/&nbsp;<a href="./expect-error.html">expectError</a><br/>
+<br/>
+<h1>expectError</h1>
+<a name="app.cash.turbine.FlowTurbine$expectError()"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">expectError</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html"><span class="identifier">Throwable</span></a></code>
+<p>Assert that the next event received was an error terminating the flow.
+If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p>
+<h3>Exceptions</h3>
+<p><a name="AssertionError"></a>
+<code>AssertionError</code> - if the next event was an item or completion.</p>
+<p><a name="TimeoutCancellationException"></a>
+<code>TimeoutCancellationException</code> - if no event was received in time.</p>
+</BODY>
+</HTML>
