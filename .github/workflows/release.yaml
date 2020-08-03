@@ -66,7 +66,7 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
+          BRANCH: site
           FOLDER: build/dokka
           TARGET_FOLDER: docs/0.x/
           CLEAN: true
