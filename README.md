@@ -115,7 +115,7 @@ java.lang.AssertionError: Unconsumed events found:
  - Error(RuntimeException)
     at app.cash.turbine.ChannelBasedFlowTurbine.ensureAllEventsConsumed(FlowTurbine.kt:240)
     ... 53 more
-Caused by: java.lang.RuntimeException: don't forget about me
+Caused by: java.lang.RuntimeException: broken!
     at example.MainKt$main$1.invokeSuspend(Main.kt:7)
     ... 32 more
 ```
