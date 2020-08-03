@@ -22,7 +22,7 @@ repositories {
   mavenCentral()
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:0.1.0'
+  testImplementation 'app.cash.turbine:turbine:0.1.1'
 }
 ```
 
