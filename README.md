@@ -22,8 +22,7 @@ repositories {
   mavenCentral()
 }
 dependencies {
-  // Coming soon!
-  // testImplementation 'app.cash.turbine:turbine:0.1.0'
+  testImplementation 'app.cash.turbine:turbine:0.1.0'
 }
 ```
 
@@ -38,7 +37,7 @@ repositories {
   }
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:0.1.0-SNAPSHOT'
+  testImplementation 'app.cash.turbine:turbine:0.2.0-SNAPSHOT'
 }
 ```
 
