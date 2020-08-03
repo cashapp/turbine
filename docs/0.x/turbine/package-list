@@ -1,0 +1,4 @@
+$dokka.format:html
+$dokka.linkExtension:html
+$dokka.location:app.cash.turbine$test(kotlinx.coroutines.flow.Flow((app.cash.turbine.test.T)), kotlin.time.Duration, kotlin.coroutines.SuspendFunction1((app.cash.turbine.FlowTurbine((app.cash.turbine.test.T)), kotlin.Unit)))app.cash.turbine/kotlinx.coroutines.flow.-flow/test.html
+app.cash.turbine

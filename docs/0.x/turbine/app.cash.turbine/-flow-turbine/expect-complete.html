@@ -1,0 +1,21 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>FlowTurbine.expectComplete - turbine</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">turbine</a>&nbsp;/&nbsp;<a href="../index.html">app.cash.turbine</a>&nbsp;/&nbsp;<a href="index.html">FlowTurbine</a>&nbsp;/&nbsp;<a href="./expect-complete.html">expectComplete</a><br/>
+<br/>
+<h1>expectComplete</h1>
+<a name="app.cash.turbine.FlowTurbine$expectComplete()"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">expectComplete</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Assert that the next event received was the flow completing.
+If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p>
+<h3>Exceptions</h3>
+<p><a name="AssertionError"></a>
+<code>AssertionError</code> - if the next event was an item or an error.</p>
+<p><a name="TimeoutCancellationException"></a>
+<code>TimeoutCancellationException</code> - if no event was received in time.</p>
+</BODY>
+</HTML>

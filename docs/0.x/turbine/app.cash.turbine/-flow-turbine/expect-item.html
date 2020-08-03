@@ -1,0 +1,21 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>FlowTurbine.expectItem - turbine</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">turbine</a>&nbsp;/&nbsp;<a href="../index.html">app.cash.turbine</a>&nbsp;/&nbsp;<a href="index.html">FlowTurbine</a>&nbsp;/&nbsp;<a href="./expect-item.html">expectItem</a><br/>
+<br/>
+<h1>expectItem</h1>
+<a name="app.cash.turbine.FlowTurbine$expectItem()"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">expectItem</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><span class="identifier">T</span></code>
+<p>Assert that the next event received was an item and return it.
+If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p>
+<h3>Exceptions</h3>
+<p><a name="AssertionError"></a>
+<code>AssertionError</code> - if the next event was completion or an error.</p>
+<p><a name="TimeoutCancellationException"></a>
+<code>TimeoutCancellationException</code> - if no event was received in time.</p>
+</BODY>
+</HTML>
