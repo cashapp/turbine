@@ -16,6 +16,7 @@
 package app.cash.turbine
 
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
+import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -25,7 +26,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -258,7 +258,7 @@ class FlowTurbineTest {
     var position = 0
 
     // Start undispatched so we suspend inside the test{} block.
-    launch(start = UNDISPATCHED) {
+    launch(start = UNDISPATCHED, context = Unconfined) {
       channel.consumeAsFlow().test {
         position = 1
         assertEquals("one", expectItem())
@@ -272,17 +272,9 @@ class FlowTurbineTest {
     assertEquals(1, position)
 
     channel.send("one")
-
-    // Allow the other coroutine to consume the event and re-suspend.
-    yield()
-    yield()
     assertEquals(2, position)
 
     channel.send("two")
-
-    // Allow the other coroutine to consume the event and re-suspend.
-    yield()
-    yield()
     assertEquals(3, position)
   }
 }

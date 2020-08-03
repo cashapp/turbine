@@ -17,6 +17,7 @@ package app.cash.turbine
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
+import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -56,7 +57,7 @@ suspend fun <T> Flow<T>.test(
   coroutineScope {
     val events = Channel<Event<T>>(UNLIMITED)
 
-    val collectJob = launch(start = UNDISPATCHED) {
+    val collectJob = launch(start = UNDISPATCHED, context = Unconfined) {
       val terminalEvent = try {
         if (debug) println("Collect starting!")
         collect { item ->
