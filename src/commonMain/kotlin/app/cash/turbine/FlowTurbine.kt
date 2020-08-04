@@ -198,8 +198,6 @@ private class ChannelBasedFlowTurbine<T>(
 
   override suspend fun cancel() {
     collectJob.cancel()
-    // Non-JVM platforms may not perform cancellation synchronously so force its handling.
-    collectJob.join()
   }
 
   override suspend fun cancelAndIgnoreRemainingEvents(): Nothing {
