@@ -181,9 +181,9 @@ channelFlow {
     }
   }
 }.test {
-  assertEquals("item0", expectItem())
-  assertEquals("item1", expectItem())
-  assertEquals("item2", expectItem())
+  assertEquals("item 0", expectItem())
+  assertEquals("item 1", expectItem())
+  assertEquals("item 2", expectItem())
   cancel()
 }
 ```
