@@ -1,6 +1,8 @@
-# Changelog
+# Change Log
 
 ## [Unreleased]
+### Changed
+- Upgrade to Kotlin 1.4.
 
 
 ## [0.1.1] - 2020-08-03
