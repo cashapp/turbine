@@ -1,7 +1,8 @@
 # Change Log
 
 ## [Unreleased]
-
+### Added
+- Support Javascript IR backend
 
 ## [0.2.0] - 2020-08-17
 ### Changed
