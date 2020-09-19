@@ -202,6 +202,8 @@ minimal and would likely only require a version bump.
 Instead of sprinkling the experimental annotations or `@OptIn` all over your tests, opt-in at the
 compiler level.
 
+### Groovy DSL
+
 ```groovy
 compileTestKotlin {
   kotlinOptions {
@@ -210,6 +212,19 @@ compileTestKotlin {
         '-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi',
     ]
   }
+}
+```
+
+### Kotlin DSL
+
+```kotlin
+tasks.compileTestKotlin {
+    kotlinOptions {
+        freeCompilerArgs += listOf(
+                "-Xopt-in=kotlin.time.ExperimentalTime",
+                "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+        )
+    }
 }
 ```
 
