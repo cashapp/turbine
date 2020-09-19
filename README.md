@@ -219,16 +219,18 @@ compileTestKotlin {
 
 ```kotlin
 tasks.compileTestKotlin {
-    kotlinOptions {
-        freeCompilerArgs += listOf(
-                "-Xopt-in=kotlin.time.ExperimentalTime",
-                "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
-        )
-    }
+  kotlinOptions {
+    freeCompilerArgs += listOf(
+        "-Xopt-in=kotlin.time.ExperimentalTime",
+        "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+    )
+  }
 }
 ```
 
 For multiplatform projects:
+
+### Groovy DSL
 
 ```groovy
 kotlin {
@@ -241,6 +243,16 @@ kotlin {
 }
 ```
 
+### Kotlin DSL
+
+```kotlin
+kotlin.sourceSets.matching {
+  it.name.endsWith("Test")
+}.configureEach {
+  languageSettings.useExperimentalAnnotation("kotlin.time.ExperimentalTime")
+  languageSettings.useExperimentalAnnotation("kotlinx.coroutines.ExperimentalCoroutinesApi")
+}
+```
 
 # License
 
