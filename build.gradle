@@ -7,7 +7,7 @@ buildscript {
   }
 
   ext.versions = [
-    'coroutines': '1.3.9',
+    'coroutines': '1.4.0',
   ]
 }
 
