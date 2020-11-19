@@ -132,11 +132,25 @@ interface FlowTurbine<T> {
   suspend fun cancelAndIgnoreRemainingEvents(): Nothing
 
   /**
+   * Cancel collecting events from the source [Flow]. Any events which have already been received
+   * will be returned.
+   */
+  suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>>
+
+  /**
    * Assert that there are no unconsumed events which have been received.
    *
    * @throws AssertionError if unconsumed events are found.
    */
   fun expectNoEvents()
+
+  /**
+   * Assert that an event was received and return it.
+   * If no events have been received, this function will suspend for up to [timeout].
+   *
+   * @throws TimeoutCancellationException if no event was received in time.
+   */
+  suspend fun expectEvent(): Event<T>
 
   /**
    * Assert that the next event received was an item and return it.
@@ -168,7 +182,7 @@ interface FlowTurbine<T> {
 
 private val ignoreRemainingEventsException = CancellationException("Ignore remaining events")
 
-private sealed class Event<out T> {
+sealed class Event<out T> {
   object Complete : Event<Nothing>() {
     override fun toString() = "Complete"
   }
@@ -205,6 +219,15 @@ private class ChannelBasedFlowTurbine<T>(
     throw ignoreRemainingEventsException
   }
 
+  override suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>> {
+    cancel()
+    return mutableListOf<Event<T>>().apply {
+      while (true) {
+        this += events.poll() ?: break
+      }
+    }
+  }
+
   override fun expectNoEvents() {
     val event = events.poll()
     if (event != null) {
@@ -212,10 +235,14 @@ private class ChannelBasedFlowTurbine<T>(
     }
   }
 
-  override suspend fun expectItem(): T {
-    val event = withTimeout {
+  override suspend fun expectEvent(): Event<T> {
+    return withTimeout {
       events.receive()
     }
+  }
+
+  override suspend fun expectItem(): T {
+    val event = expectEvent()
     if (event !is Event.Item<T>) {
       unexpectedEvent(event, "item")
     }
@@ -223,18 +250,14 @@ private class ChannelBasedFlowTurbine<T>(
   }
 
   override suspend fun expectComplete() {
-    val event = withTimeout {
-      events.receive()
-    }
+    val event = expectEvent()
     if (event != Event.Complete) {
       unexpectedEvent(event, "complete")
     }
   }
 
   override suspend fun expectError(): Throwable {
-    val event = withTimeout {
-      events.receive()
-    }
+    val event = expectEvent()
     if (event !is Event.Error) {
       unexpectedEvent(event, "error")
     }

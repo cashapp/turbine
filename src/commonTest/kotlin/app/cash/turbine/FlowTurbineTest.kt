@@ -15,22 +15,23 @@
  */
 package app.cash.turbine
 
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertSame
-import kotlin.test.assertTrue
 
 class FlowTurbineTest {
   @Test fun exceptionsPropagate() = suspendTest {
@@ -103,13 +104,15 @@ class FlowTurbineTest {
 
   @Test fun unconsumedItemThrows() = suspendTest {
     val actual = assertThrows<AssertionError> {
-      flowOf("item!").test { }
+      flow {
+        emit("item!")
+        emitAll(neverFlow()) // Avoid emitting complete
+      }.test { }
     }
     assertEquals(
       """
       |Unconsumed events found:
       | - Item(item!)
-      | - Complete
       """.trimMargin(),
       actual.message
     )
@@ -145,7 +148,11 @@ class FlowTurbineTest {
 
   @Test fun unconsumedItemThrowsWithCancel() = suspendTest {
     val actual = assertThrows<AssertionError> {
-      flowOf("one", "two").test {
+      flow {
+        emit("one")
+        emit("two")
+        emitAll(neverFlow()) // Avoid emitting complete
+      }.test {
         // Expect one item to ensure we start collecting and receive both items.
         assertEquals("one", expectItem())
         cancel()
@@ -155,10 +162,86 @@ class FlowTurbineTest {
       """
       |Unconsumed events found:
       | - Item(two)
+      """.trimMargin(),
+      actual.message
+    )
+  }
+
+  @Test fun unconsumedCompleteThrowsWithCancel() = suspendTest {
+    val actual = assertThrows<AssertionError> {
+      flowOf("one").test {
+        // Expect one item to ensure we start collecting and receive complete.
+        assertEquals("one", expectItem())
+        cancel()
+      }
+    }
+    assertEquals(
+      """
+      |Unconsumed events found:
       | - Complete
       """.trimMargin(),
       actual.message
     )
+  }
+
+  @Test fun unconsumedErrorThrowsWithCancel() = suspendTest {
+    val expected = RuntimeException()
+    val actual = assertThrows<AssertionError> {
+      flow {
+        emit("one")
+        throw expected
+      }.test {
+        // Expect one item to ensure we start collecting and receive the exception.
+        assertEquals("one", expectItem())
+        cancel()
+      }
+    }
+    assertEquals(
+      """
+      |Unconsumed events found:
+      | - Error(RuntimeException)
+      """.trimMargin(),
+      actual.message
+    )
+    assertSame(expected, actual.cause)
+  }
+
+  @Test fun unconsumedItemReturnedWithConsumingCancel() = suspendTest {
+    flow {
+      emit("one")
+      emit("two")
+      emitAll(neverFlow()) // Avoid emitting complete
+    }.test {
+      // Expect one item to ensure we start collecting and receive both items.
+      assertEquals("one", expectItem())
+
+      val remaining = cancelAndConsumeRemainingEvents()
+      assertEquals(listOf(Event.Item("two")), remaining)
+    }
+  }
+
+  @Test fun unconsumedCompleteReturnedWithConsumingCancel() = suspendTest {
+    flowOf("one").test {
+      // Expect one item to ensure we start collecting and receive complete.
+      assertEquals("one", expectItem())
+
+      val remaining = cancelAndConsumeRemainingEvents()
+      assertEquals(listOf(Event.Complete), remaining)
+    }
+  }
+
+  @Test fun unconsumedErrorReturnedWithConsumingCancel() = suspendTest {
+    val expected = RuntimeException()
+    flow {
+      emit("one")
+      throw expected
+    }.test {
+      // Expect one item to ensure we start collecting and receive the exception.
+      assertEquals("one", expectItem())
+
+      val remaining = cancelAndConsumeRemainingEvents()
+      assertEquals(listOf(Event.Error(expected)), remaining)
+    }
   }
 
   @Test fun unconsumedItemCanBeIgnored() = suspendTest {
@@ -251,6 +334,32 @@ class FlowTurbineTest {
       }
     }
     assertEquals("Expected error but found Complete", actual.message)
+  }
+
+  @Test fun expectItemEvent() = suspendTest {
+    val item = Any()
+    flowOf(item).test {
+      val event = expectEvent()
+      assertEquals(Event.Item(item), event)
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun expectCompleteEvent() = suspendTest {
+    emptyFlow<Nothing>().test {
+      val event = expectEvent()
+      assertEquals(Event.Complete, event)
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun expectErrorEvent() = suspendTest {
+    val exception = RuntimeException()
+    flow<Nothing> { throw exception }.test {
+      val event = expectEvent()
+      assertEquals(Event.Error(exception), event)
+      cancelAndIgnoreRemainingEvents()
+    }
   }
 
   @Test fun expectWaitsForEvents() = suspendTest {
