@@ -1,7 +1,9 @@
 # Change Log
 
 ## [Unreleased]
-
+### Added
+- `cancelAndConsumeRemainingEvents()` cancels the `Flow` and returns any unconsumed events which were already received.
+- `expectEvent()` waits for an event (item, complete, or error) and returns it as a sealed type `Event`.
 
 ## [0.2.1]
 ### Added
