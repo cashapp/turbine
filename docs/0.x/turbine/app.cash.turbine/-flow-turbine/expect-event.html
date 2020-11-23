@@ -1,0 +1,19 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>FlowTurbine.expectEvent - turbine</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">turbine</a>&nbsp;/&nbsp;<a href="../index.html">app.cash.turbine</a>&nbsp;/&nbsp;<a href="index.html">FlowTurbine</a>&nbsp;/&nbsp;<a href="./expect-event.html">expectEvent</a><br/>
+<br/>
+<h1>expectEvent</h1>
+<a name="app.cash.turbine.FlowTurbine$expectEvent()"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">expectEvent</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="../-event/index.html"><span class="identifier">Event</span></a><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span></code>
+<p>Assert that an event was received and return it.
+If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p>
+<h3>Exceptions</h3>
+<p><a name="TimeoutCancellationException"></a>
+<code>TimeoutCancellationException</code> - if no event was received in time.</p>
+</BODY>
+</HTML>

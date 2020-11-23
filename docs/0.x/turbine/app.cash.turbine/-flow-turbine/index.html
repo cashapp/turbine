@@ -39,6 +39,15 @@ will still need consumed using the "expect" functions.</p>
 </tr>
 <tr>
 <td>
+<h4><a href="cancel-and-consume-remaining-events.html">cancelAndConsumeRemainingEvents</a></h4>
+</td>
+<td>
+<p>Cancel collecting events from the source <a href="https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html">Flow</a>. Any events which have already been received
+will be returned.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">cancelAndConsumeRemainingEvents</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="../-event/index.html"><span class="identifier">Event</span></a><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
 <h4><a href="cancel-and-ignore-remaining-events.html">cancelAndIgnoreRemainingEvents</a></h4>
 </td>
 <td>
@@ -63,6 +72,15 @@ If no events have been received, this function will suspend for up to <a href="t
 <p>Assert that the next event received was an error terminating the flow.
 If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p>
 <code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">expectError</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html"><span class="identifier">Throwable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="expect-event.html">expectEvent</a></h4>
+</td>
+<td>
+<p>Assert that an event was received and return it.
+If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">expectEvent</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="../-event/index.html"><span class="identifier">Event</span></a><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span></code></td>
 </tr>
 <tr>
 <td>
