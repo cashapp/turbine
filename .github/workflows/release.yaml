@@ -29,6 +29,7 @@ jobs:
           SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
         run: ./gradlew build publish
+        if: matrix.os == 'macOS-latest'
 
       - name: Build and publish artifacts
         env:

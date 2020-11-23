@@ -29,7 +29,7 @@ jobs:
       - run: ./gradlew build
 
       - run: ./gradlew publish
-        if: ${{ github.ref == 'refs/heads/trunk' && github.repository == 'cashapp/turbine' }}
+        if: ${{ github.ref == 'refs/heads/trunk' && github.repository == 'cashapp/turbine' && matrix.os == 'macOS-latest' }}
         env:
           ORG_GRADLE_PROJECT_SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           ORG_GRADLE_PROJECT_SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
