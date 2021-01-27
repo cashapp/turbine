@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.seconds
@@ -52,12 +53,13 @@ private const val debug = false
 @ExperimentalCoroutinesApi // For start=UNDISPATCHED
 suspend fun <T> Flow<T>.test(
   timeout: Duration = 1.seconds,
+  context: CoroutineContext = Unconfined,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
   coroutineScope {
     val events = Channel<Event<T>>(UNLIMITED)
 
-    val collectJob = launch(start = UNDISPATCHED, context = Unconfined) {
+    val collectJob = launch(start = UNDISPATCHED, context = context) {
       val terminalEvent = try {
         if (debug) println("Collect starting!")
         collect { item ->
@@ -186,9 +188,11 @@ sealed class Event<out T> {
   object Complete : Event<Nothing>() {
     override fun toString() = "Complete"
   }
+
   data class Error(val throwable: Throwable) : Event<Nothing>() {
     override fun toString() = "Error(${throwable::class.simpleName})"
   }
+
   data class Item<T>(val value: T) : Event<T>() {
     override fun toString() = "Item($value)"
   }
