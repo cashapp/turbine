@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [0.4.0]
+### Changed
+- Upgrade to Kotlin 1.4.30.
 
 ## [0.3.0]
 ### Added
@@ -25,7 +28,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/cashapp/turbine/releases/tag/0.4.0
 [0.3.0]: https://github.com/cashapp/turbine/releases/tag/0.3.0
 [0.2.1]: https://github.com/cashapp/turbine/releases/tag/0.2.1
 [0.2.0]: https://github.com/cashapp/turbine/releases/tag/0.2.0
