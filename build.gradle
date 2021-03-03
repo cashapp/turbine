@@ -7,7 +7,7 @@ buildscript {
   }
 
   ext.versions = [
-    'coroutines': '1.4.2',
+    'coroutines': '1.4.3',
   ]
 }
 
@@ -76,7 +76,6 @@ kotlin {
   sourceSets.matching { it.name.endsWith("Test") }.all {
     it.languageSettings {
       useExperimentalAnnotation('kotlin.time.ExperimentalTime')
-      useExperimentalAnnotation('kotlinx.coroutines.ExperimentalCoroutinesApi')
     }
   }
 }

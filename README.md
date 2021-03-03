@@ -193,8 +193,6 @@ channelFlow {
 Turbine uses Kotlin experimental APIs:
 
  * `Duration` is used to declare the event timeout.
- * `launch(start=UNDISPATCHED)` is used to ensure we start collecting events from the `Flow` before
-   invoking the test lambda.
 
 Since the library targets test code, the impact and risk of any breaking changes to these APIs are
 minimal and would likely only require a version bump.
@@ -209,7 +207,6 @@ compileTestKotlin {
   kotlinOptions {
     freeCompilerArgs += [
         '-Xopt-in=kotlin.time.ExperimentalTime',
-        '-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi',
     ]
   }
 }
@@ -222,7 +219,6 @@ tasks.compileTestKotlin {
   kotlinOptions {
     freeCompilerArgs += listOf(
         "-Xopt-in=kotlin.time.ExperimentalTime",
-        "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
     )
   }
 }
@@ -237,7 +233,6 @@ kotlin {
   sourceSets.matching { it.name.endsWith("Test") }.all {
     it.languageSettings {
       useExperimentalAnnotation('kotlin.time.ExperimentalTime')
-      useExperimentalAnnotation('kotlinx.coroutines.ExperimentalCoroutinesApi')
     }
   }
 }
@@ -250,7 +245,6 @@ kotlin.sourceSets.matching {
   it.name.endsWith("Test")
 }.configureEach {
   languageSettings.useExperimentalAnnotation("kotlin.time.ExperimentalTime")
-  languageSettings.useExperimentalAnnotation("kotlinx.coroutines.ExperimentalCoroutinesApi")
 }
 ```
 
