@@ -18,7 +18,6 @@ package app.cash.turbine
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
@@ -49,7 +48,6 @@ private const val debug = false
  * @param timeout Duration each suspending function on [FlowTurbine] will wait before timing out.
  */
 @ExperimentalTime // For timeout.
-@ExperimentalCoroutinesApi // For start=UNDISPATCHED
 suspend fun <T> Flow<T>.test(
   timeout: Duration = 1.seconds,
   validate: suspend FlowTurbine<T>.() -> Unit
