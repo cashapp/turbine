@@ -206,7 +206,7 @@ compiler level.
 compileTestKotlin {
   kotlinOptions {
     freeCompilerArgs += [
-        '-Xopt-in=kotlin.time.ExperimentalTime',
+        '-Xopt-in=kotlin.time.ExperimentalTime'
     ]
   }
 }
@@ -218,7 +218,7 @@ compileTestKotlin {
 tasks.compileTestKotlin {
   kotlinOptions {
     freeCompilerArgs += listOf(
-        "-Xopt-in=kotlin.time.ExperimentalTime",
+        "-Xopt-in=kotlin.time.ExperimentalTime"
     )
   }
 }
