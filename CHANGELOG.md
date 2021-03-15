@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [0.4.1]
+### Changed
+- Upgrade to kotlinx.coroutines 1.4.3.
+- Removed requirement to opt-in to `@ExperimentalCoroutinesApi`.
+
 ## [0.4.0]
 ### Changed
 - Upgrade to Kotlin 1.4.30.
@@ -28,7 +33,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.4.1...HEAD
+[0.4.1]: https://github.com/cashapp/turbine/releases/tag/0.4.1
 [0.4.0]: https://github.com/cashapp/turbine/releases/tag/0.4.0
 [0.3.0]: https://github.com/cashapp/turbine/releases/tag/0.3.0
 [0.2.1]: https://github.com/cashapp/turbine/releases/tag/0.2.1
