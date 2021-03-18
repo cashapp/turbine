@@ -3,7 +3,7 @@ buildscript {
     classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.30'
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.1.0'
     classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
-    classpath 'org.jetbrains.dokka:dokka-gradle-plugin:0.10.1'
+    classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.4.30'
   }
 
   ext.versions = [
@@ -99,13 +99,12 @@ signing {
 }
 
 apply plugin: 'org.jetbrains.dokka'
-dokka {
-  outputDirectory = "$buildDir/dokka"
-  outputFormat = 'html'
-
-  configuration {
-    externalDocumentationLink {
-      url = new URL('https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/')
+tasks.withType(org.jetbrains.dokka.gradle.DokkaTask).configureEach { task ->
+  task.dokkaSourceSets {
+    configureEach {
+      externalDocumentationLink {
+        url.set(new URL('https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/'))
+      }
     }
   }
 }

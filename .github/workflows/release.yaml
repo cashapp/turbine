@@ -61,13 +61,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate docs
-        run: ./gradlew dokka
+        run: ./gradlew dokkaHtml
 
       - name: Deploy docs to website
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: site
-          FOLDER: build/dokka
+          FOLDER: build/dokka/html
           TARGET_FOLDER: docs/0.x/
           CLEAN: true
