@@ -6,3 +6,4 @@ build
 # IntelliJ
 /.idea
 *.iml
+local.properties
