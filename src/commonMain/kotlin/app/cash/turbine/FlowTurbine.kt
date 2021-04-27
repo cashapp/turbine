@@ -15,6 +15,8 @@
  */
 package app.cash.turbine
 
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
@@ -26,9 +28,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
-import kotlin.time.seconds
 
 private const val debug = false
 
@@ -49,7 +48,7 @@ private const val debug = false
  */
 @ExperimentalTime // For timeout.
 suspend fun <T> Flow<T>.test(
-  timeout: Duration = 1.seconds,
+  timeout: Duration = Duration.seconds(1),
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
   coroutineScope {
@@ -221,13 +220,13 @@ private class ChannelBasedFlowTurbine<T>(
     cancel()
     return mutableListOf<Event<T>>().apply {
       while (true) {
-        this += events.poll() ?: break
+        this += events.tryReceive().getOrNull() ?: break
       }
     }
   }
 
   override fun expectNoEvents() {
-    val event = events.poll()
+    val event = events.tryReceive().getOrNull()
     if (event != null) {
       unexpectedEvent(event, "no events")
     }
@@ -271,7 +270,7 @@ private class ChannelBasedFlowTurbine<T>(
     val unconsumed = mutableListOf<Event<T>>()
     var cause: Throwable? = null
     while (true) {
-      val event = events.poll() ?: break
+      val event = events.tryReceive().getOrNull() ?: break
       unconsumed += event
       if (event is Event.Error) {
         check(cause == null)

@@ -1,13 +1,13 @@
 buildscript {
   dependencies {
-    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.30'
+    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.0'
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.1.0'
     classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
     classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.4.30'
   }
 
   ext.versions = [
-    'coroutines': '1.4.3',
+    'coroutines': '1.5.0-RC',
   ]
 }
 
@@ -39,7 +39,7 @@ kotlin {
     }
     commonTest {
       dependencies {
-        implementation 'org.jetbrains.kotlin:kotlin-test-multiplatform'
+        implementation 'org.jetbrains.kotlin:kotlin-test'
       }
     }
 
@@ -76,6 +76,8 @@ kotlin {
   sourceSets.matching { it.name.endsWith("Test") }.all {
     it.languageSettings {
       useExperimentalAnnotation('kotlin.time.ExperimentalTime')
+      useExperimentalAnnotation('kotlinx.coroutines.DelicateCoroutinesApi')
+      useExperimentalAnnotation('kotlinx.coroutines.ExperimentalCoroutinesApi')
     }
   }
 }

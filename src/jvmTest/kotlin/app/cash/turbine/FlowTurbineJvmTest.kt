@@ -15,16 +15,13 @@
  */
 package app.cash.turbine
 
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.async
-import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Duration
-import kotlin.time.days
-import kotlin.time.milliseconds
-import kotlin.time.seconds
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
+import org.junit.Test
 
 class FlowTurbineJvmTest {
   @Test fun timeoutEnforcedByDefault() = jvmSuspendTest {
@@ -34,10 +31,10 @@ class FlowTurbineJvmTest {
       }
     }
 
-    advanceTimeBy(999.milliseconds)
+    advanceTimeBy(Duration.milliseconds(999))
     assertTrue(subject.isActive)
 
-    advanceTimeBy(1.milliseconds)
+    advanceTimeBy(Duration.milliseconds(1))
     assertFalse(subject.isActive)
 
     val actual = assertThrows<TimeoutCancellationException> {
@@ -48,15 +45,15 @@ class FlowTurbineJvmTest {
 
   @Test fun timeoutEnforcedCustomValue() = jvmSuspendTest {
     val subject = async {
-      neverFlow().test(timeout = 10.seconds) {
+      neverFlow().test(timeout = Duration.seconds(10)) {
         expectComplete()
       }
     }
 
-    advanceTimeBy(9999.milliseconds)
+    advanceTimeBy(Duration.milliseconds(9999))
     assertTrue(subject.isActive)
 
-    advanceTimeBy(1.milliseconds)
+    advanceTimeBy(Duration.milliseconds(1))
     assertFalse(subject.isActive)
 
     val actual = assertThrows<TimeoutCancellationException> {
@@ -72,7 +69,7 @@ class FlowTurbineJvmTest {
       }
     }
 
-    advanceTimeBy(10.days)
+    advanceTimeBy(Duration.days(10))
     assertTrue(subject.isActive)
 
     subject.cancel()
