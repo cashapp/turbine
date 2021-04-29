@@ -176,6 +176,16 @@ public interface FlowTurbine<T> {
    * @throws TimeoutCancellationException if no event was received in time.
    */
   public suspend fun expectError(): Throwable
+
+  /**
+   * Returns the most recent item that was received without following any timeout
+   * rules. If a complete event has been received with no item being received
+   * previously, this function will throw an [AssertionError]. If an error event
+   * has been received, this function will throw the underlying exception.
+   *
+   * @throws AssertionError if no item was emitted.
+   */
+  public fun expectMostRecentItem(): T
 }
 
 @SharedImmutable
@@ -261,6 +271,26 @@ private class ChannelBasedFlowTurbine<T>(
       unexpectedEvent(event, "error")
     }
     return event.throwable
+  }
+
+  override fun expectMostRecentItem(): T {
+    var recentItem: Event.Item<T>? = null
+    var event: Event<T>? = events.tryReceive().getOrNull()
+    while (event != null) {
+      when (event) {
+        Event.Complete -> break
+        is Event.Error -> throw event.throwable
+        is Event.Item -> recentItem = event
+
+      }
+      event = events.tryReceive().getOrNull()
+    }
+
+    return if (recentItem != null) {
+      recentItem.value
+    } else {
+      throw AssertionError("No item was found")
+    }
   }
 
   private fun unexpectedEvent(event: Event<*>, expected: String): Nothing {

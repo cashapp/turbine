@@ -93,6 +93,25 @@ flowOf("one", "two").test {
 }
 ```
 
+Additionally, we can receive the most recent emitted item and ignore the previous ones.
+
+```kotlin
+flowOf("one", "two", "three")
+  .map {
+    delay(100)
+    it
+  }
+  .test {
+    // 0 - 100ms -> no emission yet
+    // 100ms - 200ms -> "one" is emitted
+    // 200ms - 300ms -> "two" is emitted
+    // 300ms - 400ms -> "three" is emitted
+    delay(250)
+    assertEquals("two", expectMostRecentItem())
+    cancelAndIgnoreRemainingEvents()
+  }
+```
+
 #### Consuming Errors
 
 Unlike `collect`, a flow which causes an exception will still be exposed as an event that you
