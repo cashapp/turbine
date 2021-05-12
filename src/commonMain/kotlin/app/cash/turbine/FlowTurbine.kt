@@ -47,7 +47,7 @@ private const val debug = false
  * @param timeout Duration each suspending function on [FlowTurbine] will wait before timing out.
  */
 @ExperimentalTime // For timeout.
-suspend fun <T> Flow<T>.test(
+public suspend fun <T> Flow<T>.test(
   timeout: Duration = Duration.seconds(1),
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
@@ -108,38 +108,38 @@ suspend fun <T> Flow<T>.test(
  * Represents active collection on a source [Flow] which buffers item emissions, completion,
  * and/or errors as events for consuming.
  */
-interface FlowTurbine<T> {
+public interface FlowTurbine<T> {
   /**
    * Duration that [expectItem], [expectComplete], and [expectError] will wait for an event before
    * throwing a timeout exception.
    */
   @ExperimentalTime
-  val timeout: Duration
+  public val timeout: Duration
 
   /**
    * Cancel collecting events from the source [Flow]. Any events which have already been received
    * will still need consumed using the "expect" functions.
    */
-  suspend fun cancel()
+  public suspend fun cancel()
 
   /**
    * Cancel collecting events from the source [Flow] and ignore any events which have already
    * been received. Calling this function will exit the [test] block.
    */
-  suspend fun cancelAndIgnoreRemainingEvents(): Nothing
+  public suspend fun cancelAndIgnoreRemainingEvents(): Nothing
 
   /**
    * Cancel collecting events from the source [Flow]. Any events which have already been received
    * will be returned.
    */
-  suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>>
+  public suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>>
 
   /**
    * Assert that there are no unconsumed events which have been received.
    *
    * @throws AssertionError if unconsumed events are found.
    */
-  fun expectNoEvents()
+  public fun expectNoEvents()
 
   /**
    * Assert that an event was received and return it.
@@ -147,7 +147,7 @@ interface FlowTurbine<T> {
    *
    * @throws TimeoutCancellationException if no event was received in time.
    */
-  suspend fun expectEvent(): Event<T>
+  public suspend fun expectEvent(): Event<T>
 
   /**
    * Assert that the next event received was an item and return it.
@@ -156,7 +156,7 @@ interface FlowTurbine<T> {
    * @throws AssertionError if the next event was completion or an error.
    * @throws TimeoutCancellationException if no event was received in time.
    */
-  suspend fun expectItem(): T
+  public suspend fun expectItem(): T
 
   /**
    * Assert that the next event received was the flow completing.
@@ -165,7 +165,7 @@ interface FlowTurbine<T> {
    * @throws AssertionError if the next event was an item or an error.
    * @throws TimeoutCancellationException if no event was received in time.
    */
-  suspend fun expectComplete()
+  public suspend fun expectComplete()
 
   /**
    * Assert that the next event received was an error terminating the flow.
@@ -174,20 +174,20 @@ interface FlowTurbine<T> {
    * @throws AssertionError if the next event was an item or completion.
    * @throws TimeoutCancellationException if no event was received in time.
    */
-  suspend fun expectError(): Throwable
+  public suspend fun expectError(): Throwable
 }
 
 private val ignoreRemainingEventsException = CancellationException("Ignore remaining events")
 
-sealed class Event<out T> {
-  object Complete : Event<Nothing>() {
-    override fun toString() = "Complete"
+public sealed class Event<out T> {
+  public object Complete : Event<Nothing>() {
+    override fun toString(): String = "Complete"
   }
-  data class Error(val throwable: Throwable) : Event<Nothing>() {
-    override fun toString() = "Error(${throwable::class.simpleName})"
+  public data class Error(val throwable: Throwable) : Event<Nothing>() {
+    override fun toString(): String = "Error(${throwable::class.simpleName})"
   }
-  data class Item<T>(val value: T) : Event<T>() {
-    override fun toString() = "Item($value)"
+  public data class Item<T>(val value: T) : Event<T>() {
+    override fun toString(): String = "Item($value)"
   }
 }
 

@@ -13,6 +13,8 @@ buildscript {
 
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
 kotlin {
+  explicitApi()
+
   js {
     nodejs()
   }
