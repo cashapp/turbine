@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 
+## [0.5.0]
+### Changed
+- Upgrade to Kotlin 1.5.0.
+- Upgrade to kotlinx.coroutines 1.5.0.
+
 ## [0.5.0-rc1]
 ### Changed
 - Upgrade to Kotlin 1.5.0.
