@@ -32,6 +32,7 @@ kotlin {
   watchosArm32()
   watchosArm64()
   watchosX86()
+  watchosX64()
 
   sourceSets {
     commonMain {
@@ -69,6 +70,7 @@ kotlin {
       targets.watchosArm32,
       targets.watchosArm64,
       targets.watchosX86,
+      targets.watchosX64,
     ]) {
       compilations.main.source(sourceSets.nativeMain)
       compilations.test.source(sourceSets.nativeTest)
