@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 
+## [0.5.1]
+### Added
+- Support watchOS 64-bit.
+
 ## [0.5.0]
 ### Changed
 - Upgrade to Kotlin 1.5.0.
