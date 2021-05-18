@@ -15,13 +15,12 @@
  */
 package app.cash.turbine
 
+import kotlin.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.DelayController
 import kotlinx.coroutines.test.TestCoroutineScope
-import kotlin.time.Duration
-import kotlin.time.milliseconds
 
 actual fun suspendTest(body: suspend CoroutineScope.() -> Unit) {
   runBlocking { body() }
@@ -38,5 +37,5 @@ fun jvmSuspendTest(body: suspend TestCoroutineScope.() -> Unit) {
 }
 
 fun DelayController.advanceTimeBy(duration: Duration): Duration {
-  return advanceTimeBy(duration.toLongMilliseconds()).milliseconds
+  return Duration.milliseconds(advanceTimeBy(duration.inWholeMilliseconds))
 }

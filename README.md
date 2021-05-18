@@ -22,7 +22,7 @@ repositories {
   mavenCentral()
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:0.4.1'
+  testImplementation 'app.cash.turbine:turbine:0.5.0'
 }
 ```
 
@@ -37,7 +37,7 @@ repositories {
   }
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:0.5.0-SNAPSHOT'
+  testImplementation 'app.cash.turbine:turbine:0.6.0-SNAPSHOT'
 }
 ```
 

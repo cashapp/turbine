@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+
+## [0.5.0]
+### Changed
+- Upgrade to Kotlin 1.5.0.
+- Upgrade to kotlinx.coroutines 1.5.0.
+
+## [0.5.0-rc1]
+### Changed
+- Upgrade to Kotlin 1.5.0.
+- Upgrade to kotlinx.coroutines 1.5.0-RC.
+
 ## [0.4.1]
 ### Changed
 - Upgrade to kotlinx.coroutines 1.4.3.
@@ -34,6 +45,7 @@ Initial release
 
 
 [Unreleased]: https://github.com/cashapp/turbine/compare/0.4.1...HEAD
+[0.4.1]: https://github.com/cashapp/turbine/releases/tag/0.5.0-rc1
 [0.4.1]: https://github.com/cashapp/turbine/releases/tag/0.4.1
 [0.4.0]: https://github.com/cashapp/turbine/releases/tag/0.4.0
 [0.3.0]: https://github.com/cashapp/turbine/releases/tag/0.3.0
