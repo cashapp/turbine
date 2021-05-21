@@ -188,6 +188,48 @@ channelFlow {
 }
 ```
 
+#### Hot Flows
+
+Emissions to hot flows that don't have active consumers are dropped. It's important to call `test` 
+(and therefore have an active collector) on a flow _before_ emissions to a flow are made. For example:
+
+```kotlin
+val mutableStateFlow = MutableStateFlow<Int>(replay = 0)
+mutableStateFlow.emit(1)
+mutableStateFlow.test {
+  assertEquals(expectItem(), 1)
+  cancelAndConsumeRemainingEvents()
+}
+``` 
+
+will fail with a timeout exception. 
+
+```
+kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 1000 ms
+	(Coroutine boundary)
+	at app.cash.turbine.ChannelBasedFlowTurbine$expectEvent$2.invokeSuspend(FlowTurbine.kt:238)
+	at app.cash.turbine.ChannelBasedFlowTurbine$withTimeout$2.invokeSuspend(FlowTurbine.kt:206)
+	at app.cash.turbine.ChannelBasedFlowTurbine.expectItem(FlowTurbine.kt:243)
+```
+
+Proper usage of Turbine with hot flows looks like the following. 
+
+```kotlin
+val mutableStateFlow = MutableStateFlow<Int>(replay = 0)
+mutableStateFlow.test {
+  mutableStateFlow.emit(1)
+  assertEquals(expectItem(), 1)
+  cancelAndConsumeRemainingEvents()
+}
+```
+
+The hot flow types Kotlin currently provide are:
+* `MutableStateFlow`
+* `StateFlow`
+* `MutableSharedFlow`
+* `SharedFlow`
+* Channels converted to flow with `Channel.consumeAsFlow`
+
 ## Experimental API Usage
 
 Turbine uses Kotlin experimental APIs:
