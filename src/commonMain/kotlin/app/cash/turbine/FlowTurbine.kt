@@ -15,6 +15,7 @@
  */
 package app.cash.turbine
 
+import kotlin.native.concurrent.SharedImmutable
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.CancellationException
@@ -177,6 +178,7 @@ public interface FlowTurbine<T> {
   public suspend fun expectError(): Throwable
 }
 
+@SharedImmutable
 private val ignoreRemainingEventsException = CancellationException("Ignore remaining events")
 
 public sealed class Event<out T> {
