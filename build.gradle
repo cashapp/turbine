@@ -84,6 +84,22 @@ kotlin {
       useExperimentalAnnotation('kotlinx.coroutines.ExperimentalCoroutinesApi')
     }
   }
+
+  // Add a test binary and execution for native targets which runs on a background thread.
+  targets.withType(org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithTests).all {
+    binaries {
+      test('background', [org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG]) {
+        freeCompilerArgs += [
+          "-trw"
+        ]
+      }
+    }
+    testRuns {
+      background {
+        setExecutionSourceFrom(binaries.getByName("backgroundDebugTest"))
+      }
+    }
+  }
 }
 
 apply plugin: 'com.diffplug.spotless'
