@@ -194,9 +194,9 @@ Emissions to hot flows that don't have active consumers are dropped. It's import
 (and therefore have an active collector) on a flow _before_ emissions to a flow are made. For example:
 
 ```kotlin
-val mutableSharedFlow = MutableSharedFlow<Int>(replay = 0)
-mutableSharedFlow.emit(1)
-mutableSharedFlow.test {
+val flow = MutableStateFlow<Int>(value = 0)
+flow.value = 1
+flow.test {
   assertEquals(expectItem(), 1)
   cancelAndConsumeRemainingEvents()
 }
@@ -215,9 +215,9 @@ kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 1000 ms
 Proper usage of Turbine with hot flows looks like the following. 
 
 ```kotlin
-val mutableSharedFlow = MutableSharedFlow<Int>(replay = 0)
-mutableSharedFlow.test {
-  mutableSharedFlow.emit(1)
+val flow = MutableStateFlow<Int>(value = 0)
+flow.test {
+  flow.value = 1
   assertEquals(expectItem(), 1)
   cancelAndConsumeRemainingEvents()
 }
