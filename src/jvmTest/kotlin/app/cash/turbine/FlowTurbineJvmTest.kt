@@ -27,7 +27,7 @@ class FlowTurbineJvmTest {
   @Test fun timeoutEnforcedByDefault() = jvmSuspendTest {
     val subject = async {
       neverFlow().test {
-        expectComplete()
+        awaitComplete()
       }
     }
 
@@ -46,7 +46,7 @@ class FlowTurbineJvmTest {
   @Test fun timeoutEnforcedCustomValue() = jvmSuspendTest {
     val subject = async {
       neverFlow().test(timeout = Duration.seconds(10)) {
-        expectComplete()
+        awaitComplete()
       }
     }
 
@@ -65,7 +65,7 @@ class FlowTurbineJvmTest {
   @Test fun timeoutCanBeZero() = jvmSuspendTest {
     val subject = async {
       neverFlow().test(timeout = Duration.ZERO) {
-        expectComplete()
+        awaitComplete()
       }
     }
 

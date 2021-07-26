@@ -156,7 +156,7 @@ class FlowTurbineTest {
         emitAll(neverFlow()) // Avoid emitting complete
       }.test {
         // Expect one item to ensure we start collecting and receive both items.
-        assertEquals("one", expectItem())
+        assertEquals("one", awaitItem())
         cancel()
       }
     }
@@ -173,7 +173,7 @@ class FlowTurbineTest {
     val actual = assertThrows<AssertionError> {
       flowOf("one").test {
         // Expect one item to ensure we start collecting and receive complete.
-        assertEquals("one", expectItem())
+        assertEquals("one", awaitItem())
         cancel()
       }
     }
@@ -194,7 +194,7 @@ class FlowTurbineTest {
         throw expected
       }.test {
         // Expect one item to ensure we start collecting and receive the exception.
-        assertEquals("one", expectItem())
+        assertEquals("one", awaitItem())
         cancel()
       }
     }
@@ -215,7 +215,7 @@ class FlowTurbineTest {
       emitAll(neverFlow()) // Avoid emitting complete
     }.test {
       // Expect one item to ensure we start collecting and receive both items.
-      assertEquals("one", expectItem())
+      assertEquals("one", awaitItem())
 
       val remaining = cancelAndConsumeRemainingEvents()
       assertEquals(listOf(Event.Item("two")), remaining)
@@ -225,7 +225,7 @@ class FlowTurbineTest {
   @Test fun unconsumedCompleteReturnedWithConsumingCancel() = suspendTest {
     flowOf("one").test {
       // Expect one item to ensure we start collecting and receive complete.
-      assertEquals("one", expectItem())
+      assertEquals("one", awaitItem())
 
       val remaining = cancelAndConsumeRemainingEvents()
       assertEquals(listOf(Event.Complete), remaining)
@@ -239,7 +239,7 @@ class FlowTurbineTest {
       throw expected
     }.test {
       // Expect one item to ensure we start collecting and receive the exception.
-      assertEquals("one", expectItem())
+      assertEquals("one", awaitItem())
 
       val remaining = cancelAndConsumeRemainingEvents()
       assertEquals(listOf(Event.Error(expected)), remaining)
@@ -267,7 +267,7 @@ class FlowTurbineTest {
   @Test fun expectItem() = suspendTest {
     val item = Any()
     flowOf(item).test {
-      assertSame(item, expectItem())
+      assertSame(item, awaitItem())
       cancelAndIgnoreRemainingEvents()
     }
   }
@@ -275,7 +275,7 @@ class FlowTurbineTest {
   @Test fun expectItemButWasCloseThrows() = suspendTest {
     val actual = assertThrows<AssertionError> {
       emptyFlow<Unit>().test {
-        expectItem()
+        awaitItem()
       }
     }
     assertEquals("Expected item but found Complete", actual.message)
@@ -285,7 +285,7 @@ class FlowTurbineTest {
     val error = RuntimeException()
     val actual = assertThrows<AssertionError> {
       flow<Unit> { throw error }.test {
-        expectItem()
+        awaitItem()
       }
     }
     assertEquals("Expected item but found Error(RuntimeException)", actual.message)
@@ -294,14 +294,14 @@ class FlowTurbineTest {
 
   @Test fun expectComplete() = suspendTest {
     emptyFlow<Nothing>().test {
-      expectComplete()
+      awaitComplete()
     }
   }
 
   @Test fun expectCompleteButWasItemThrows() = suspendTest {
     val actual = assertThrows<AssertionError> {
       flowOf("item!").test {
-        expectComplete()
+        awaitComplete()
       }
     }
     assertEquals("Expected complete but found Item(item!)", actual.message)
@@ -309,21 +309,21 @@ class FlowTurbineTest {
 
   @Test fun expectCompleteButWasErrorThrows() = suspendTest {
     emptyFlow<Nothing>().test {
-      expectComplete()
+      awaitComplete()
     }
   }
 
   @Test fun expectError() = suspendTest {
     val error = RuntimeException()
     flow<Nothing> { throw error }.test {
-      assertSame(error, expectError())
+      assertSame(error, awaitError())
     }
   }
 
   @Test fun expectErrorButWasItemThrows() = suspendTest {
     val actual = assertThrows<AssertionError> {
       flowOf("item!").test {
-        expectError()
+        awaitError()
       }
     }
     assertEquals("Expected error but found Item(item!)", actual.message)
@@ -332,7 +332,7 @@ class FlowTurbineTest {
   @Test fun expectErrorButWasCompleteThrows() = suspendTest {
     val actual = assertThrows<AssertionError> {
       emptyFlow<Nothing>().test {
-        expectError()
+        awaitError()
       }
     }
     assertEquals("Expected error but found Complete", actual.message)
@@ -341,7 +341,7 @@ class FlowTurbineTest {
   @Test fun expectItemEvent() = suspendTest {
     val item = Any()
     flowOf(item).test {
-      val event = expectEvent()
+      val event = awaitEvent()
       assertEquals(Event.Item(item), event)
       cancelAndIgnoreRemainingEvents()
     }
@@ -349,7 +349,7 @@ class FlowTurbineTest {
 
   @Test fun expectCompleteEvent() = suspendTest {
     emptyFlow<Nothing>().test {
-      val event = expectEvent()
+      val event = awaitEvent()
       assertEquals(Event.Complete, event)
       cancelAndIgnoreRemainingEvents()
     }
@@ -358,7 +358,7 @@ class FlowTurbineTest {
   @Test fun expectErrorEvent() = suspendTest {
     val exception = RuntimeException()
     flow<Nothing> { throw exception }.test {
-      val event = expectEvent()
+      val event = awaitEvent()
       assertEquals(Event.Error(exception), event)
       cancelAndIgnoreRemainingEvents()
     }
@@ -372,9 +372,9 @@ class FlowTurbineTest {
     launch(start = UNDISPATCHED, context = Unconfined) {
       channel.consumeAsFlow().test {
         position = 1
-        assertEquals("one", expectItem())
+        assertEquals("one", awaitItem())
         position = 2
-        assertEquals("two", expectItem())
+        assertEquals("two", awaitItem())
         position = 3
         cancel()
       }
@@ -441,7 +441,7 @@ class FlowTurbineTest {
         onCompleteSent.await()
         assertEquals(5, expectMostRecentItem())
         onCompleteContinue.complete(Unit)
-        expectComplete()
+        awaitComplete()
       }
   }
 
