@@ -111,7 +111,7 @@ public suspend fun <T> Flow<T>.test(
  */
 public interface FlowTurbine<T> {
   /**
-   * Duration that [expectItem], [expectComplete], and [expectError] will wait for an event before
+   * Duration that [awaitItem], [awaitComplete], [awaitError], and [awaitEvent] will wait before
    * throwing a timeout exception.
    */
   @ExperimentalTime
@@ -119,73 +119,85 @@ public interface FlowTurbine<T> {
 
   /**
    * Cancel collecting events from the source [Flow]. Any events which have already been received
-   * will still need consumed using the "expect" functions.
+   * will still need consumed using the "await" functions.
    */
-  public suspend fun cancel()
+  public fun cancel()
 
   /**
    * Cancel collecting events from the source [Flow] and ignore any events which have already
    * been received. Calling this function will exit the [test] block.
    */
-  public suspend fun cancelAndIgnoreRemainingEvents(): Nothing
+  public fun cancelAndIgnoreRemainingEvents(): Nothing
 
   /**
    * Cancel collecting events from the source [Flow]. Any events which have already been received
    * will be returned.
    */
-  public suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>>
+  public fun cancelAndConsumeRemainingEvents(): List<Event<T>>
 
   /**
-   * Assert that there are no unconsumed events which have been received.
+   * Assert that there are no unconsumed events which have already been received.
    *
    * @throws AssertionError if unconsumed events are found.
    */
   public fun expectNoEvents()
 
   /**
-   * Assert that an event was received and return it.
-   * If no events have been received, this function will suspend for up to [timeout].
-   *
-   * @throws TimeoutCancellationException if no event was received in time.
-   */
-  public suspend fun expectEvent(): Event<T>
-
-  /**
-   * Assert that the next event received was an item and return it.
-   * If no events have been received, this function will suspend for up to [timeout].
-   *
-   * @throws AssertionError if the next event was completion or an error.
-   * @throws TimeoutCancellationException if no event was received in time.
-   */
-  public suspend fun expectItem(): T
-
-  /**
-   * Assert that the next event received was the flow completing.
-   * If no events have been received, this function will suspend for up to [timeout].
-   *
-   * @throws AssertionError if the next event was an item or an error.
-   * @throws TimeoutCancellationException if no event was received in time.
-   */
-  public suspend fun expectComplete()
-
-  /**
-   * Assert that the next event received was an error terminating the flow.
-   * If no events have been received, this function will suspend for up to [timeout].
-   *
-   * @throws AssertionError if the next event was an item or completion.
-   * @throws TimeoutCancellationException if no event was received in time.
-   */
-  public suspend fun expectError(): Throwable
-
-  /**
-   * Returns the most recent item that was received without following any timeout
-   * rules. If a complete event has been received with no item being received
+   * Returns the most recent item that has already been received.
+   * If a complete event has been received with no item being received
    * previously, this function will throw an [AssertionError]. If an error event
    * has been received, this function will throw the underlying exception.
    *
    * @throws AssertionError if no item was emitted.
    */
   public fun expectMostRecentItem(): T
+
+  /**
+   * Assert that an event was received and return it.
+   * If no events have been received, this function will suspend for up to [timeout].
+   *
+   * @throws kotlinx.coroutines.TimeoutCancellationException if no event was received in time.
+   */
+  public suspend fun awaitEvent(): Event<T>
+
+  @Deprecated("Renamed", ReplaceWith("this.awaitEvent()"))
+  public suspend fun expectEvent(): Event<T> = awaitEvent()
+
+  /**
+   * Assert that the next event received was an item and return it.
+   * If no events have been received, this function will suspend for up to [timeout].
+   *
+   * @throws AssertionError if the next event was completion or an error.
+   * @throws kotlinx.coroutines.TimeoutCancellationException if no event was received in time.
+   */
+  public suspend fun awaitItem(): T
+
+  @Deprecated("Renamed", ReplaceWith("this.awaitItem()"))
+  public suspend fun expectItem(): T = awaitItem()
+
+  /**
+   * Assert that the next event received was the flow completing.
+   * If no events have been received, this function will suspend for up to [timeout].
+   *
+   * @throws AssertionError if the next event was an item or an error.
+   * @throws kotlinx.coroutines.TimeoutCancellationException if no event was received in time.
+   */
+  public suspend fun awaitComplete()
+
+  @Deprecated("Renamed", ReplaceWith("this.awaitComplete()"))
+  public suspend fun expectComplete(): Unit = awaitComplete()
+
+  /**
+   * Assert that the next event received was an error terminating the flow.
+   * If no events have been received, this function will suspend for up to [timeout].
+   *
+   * @throws AssertionError if the next event was an item or completion.
+   * @throws kotlinx.coroutines.TimeoutCancellationException if no event was received in time.
+   */
+  public suspend fun awaitError(): Throwable
+
+  @Deprecated("Renamed", ReplaceWith("this.awaitError()"))
+  public suspend fun expectError(): Throwable = awaitError()
 }
 
 @SharedImmutable
@@ -219,16 +231,16 @@ private class ChannelBasedFlowTurbine<T>(
     }
   }
 
-  override suspend fun cancel() {
+  override fun cancel() {
     collectJob.cancel()
   }
 
-  override suspend fun cancelAndIgnoreRemainingEvents(): Nothing {
+  override fun cancelAndIgnoreRemainingEvents(): Nothing {
     cancel()
     throw ignoreRemainingEventsException
   }
 
-  override suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>> {
+  override fun cancelAndConsumeRemainingEvents(): List<Event<T>> {
     cancel()
     return mutableListOf<Event<T>>().apply {
       while (true) {
@@ -244,29 +256,29 @@ private class ChannelBasedFlowTurbine<T>(
     }
   }
 
-  override suspend fun expectEvent(): Event<T> {
+  override suspend fun awaitEvent(): Event<T> {
     return withTimeout {
       events.receive()
     }
   }
 
-  override suspend fun expectItem(): T {
-    val event = expectEvent()
+  override suspend fun awaitItem(): T {
+    val event = awaitEvent()
     if (event !is Event.Item<T>) {
       unexpectedEvent(event, "item")
     }
     return event.value
   }
 
-  override suspend fun expectComplete() {
-    val event = expectEvent()
+  override suspend fun awaitComplete() {
+    val event = awaitEvent()
     if (event != Event.Complete) {
       unexpectedEvent(event, "complete")
     }
   }
 
-  override suspend fun expectError(): Throwable {
-    val event = expectEvent()
+  override suspend fun awaitError(): Throwable {
+    val event = awaitEvent()
     if (event !is Event.Error) {
       unexpectedEvent(event, "error")
     }
@@ -275,15 +287,13 @@ private class ChannelBasedFlowTurbine<T>(
 
   override fun expectMostRecentItem(): T {
     var recentItem: Event.Item<T>? = null
-    var event: Event<T>? = events.tryReceive().getOrNull()
-    while (event != null) {
-      when (event) {
+    while (true) {
+      when (val event = events.tryReceive().getOrNull()) {
+        null -> break
         Event.Complete -> break
         is Event.Error -> throw event.throwable
         is Event.Item -> recentItem = event
-
       }
-      event = events.tryReceive().getOrNull()
     }
 
     return if (recentItem != null) {
