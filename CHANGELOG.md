@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 
+## [0.6.0]
+### Added
+- `expectMostRecentItem()` function consumes all received items and returns the most recent item.
+
+### Changed
+- Functions which may suspend to wait for an event are now prefixed with 'await'.
+
 ## [0.5.2]
 ### Fixed
 - Support running on a background thread with Kotlin/Native.
@@ -52,7 +59,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.5.2...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/cashapp/turbine/releases/tag/0.6.0
 [0.5.2]: https://github.com/cashapp/turbine/releases/tag/0.5.2
 [0.5.1]: https://github.com/cashapp/turbine/releases/tag/0.5.1
 [0.5.0]: https://github.com/cashapp/turbine/releases/tag/0.5.0

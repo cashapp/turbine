@@ -5,9 +5,9 @@ Turbine is a small testing library for kotlinx.coroutines
 
 ```kotlin
 flowOf("one", "two").test {
-  assertEquals("one", expectItem())
-  assertEquals("two", expectItem())
-  expectComplete()
+  assertEquals("one", awaitItem())
+  assertEquals("two", awaitItem())
+  awaitComplete()
 }
 ```
 
@@ -22,7 +22,7 @@ repositories {
   mavenCentral()
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:0.5.2'
+  testImplementation 'app.cash.turbine:turbine:0.6.0'
 }
 ```
 
@@ -37,7 +37,7 @@ repositories {
   }
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:0.6.0-SNAPSHOT'
+  testImplementation 'app.cash.turbine:turbine:0.7.0-SNAPSHOT'
 }
 ```
 
@@ -63,7 +63,7 @@ events will fail your test.
 
 ```kotlin
 flowOf("one", "two").test {
-  assertEquals("one", expectItem())
+  assertEquals("one", awaitItem())
 }
 ```
 ```
@@ -78,9 +78,9 @@ also be consumed.
 
 ```kotlin
 flowOf("one", "two").test {
-  assertEquals("one", expectItem())
-  assertEquals("two", expectItem())
-  expectComplete()
+  assertEquals("one", awaitItem())
+  assertEquals("two", awaitItem())
+  awaitComplete()
 }
 ```
 
@@ -88,7 +88,7 @@ Received events can be explicitly ignored, however.
 
 ```kotlin
 flowOf("one", "two").test {
-  assertEquals("one", expectItem())
+  assertEquals("one", awaitItem())
   cancelAndIgnoreRemainingEvents()
 }
 ```
@@ -119,7 +119,7 @@ must consume.
 
 ```kotlin
 flow { throw RuntimeException("broken!") }.test {
-  assertEquals("broken!", expectError().message)
+  assertEquals("broken!", awaitError().message)
 }
 ```
 
@@ -141,7 +141,7 @@ Caused by: java.lang.RuntimeException: broken!
 
 #### Asynchronous Flows
 
-Calls to `expectItem()`, `expectComplete()`, and `expectError()` are suspending and will wait
+Calls to `awaitItem()`, `awaitComplete()`, and `awaitError()` are suspending and will wait
 for events from asynchronous flows.
 
 ```kotlin
@@ -151,12 +151,12 @@ channelFlow {
     send("item")
   }
 }.test {
-  assertEquals("item", expectItem())
-  expectComplete()
+  assertEquals("item", awaitItem())
+  awaitComplete()
 }
 ```
 
-By default, when one of the "expect" methods suspends waiting for an event it will timeout after
+By default, when one of the "await" methods suspends waiting for an event it will timeout after
 one second.
 
 ```kotlin
@@ -166,8 +166,8 @@ channelFlow {
     send("item")
   }
 }.test {
-  assertEquals("item", expectItem())
-  expectComplete()
+  assertEquals("item", awaitItem())
+  awaitComplete()
 }
 ```
 ```
@@ -183,8 +183,8 @@ channelFlow {
     send("item")
   }
 }.test(timeout = 3.seconds) {
-  assertEquals("item", expectItem())
-  expectComplete()
+  assertEquals("item", awaitItem())
+  awaitComplete()
 }
 ```
 
@@ -200,9 +200,9 @@ channelFlow {
     }
   }
 }.test {
-  assertEquals("item 0", expectItem())
-  assertEquals("item 1", expectItem())
-  assertEquals("item 2", expectItem())
+  assertEquals("item 0", awaitItem())
+  assertEquals("item 1", awaitItem())
+  assertEquals("item 2", awaitItem())
   cancel()
 }
 ```
@@ -216,7 +216,7 @@ Emissions to hot flows that don't have active consumers are dropped. It's import
 val mutableSharedFlow = MutableSharedFlow<Int>(replay = 0)
 mutableSharedFlow.emit(1)
 mutableSharedFlow.test {
-  assertEquals(expectItem(), 1)
+  assertEquals(awaitItem(), 1)
   cancelAndConsumeRemainingEvents()
 }
 ``` 
@@ -226,9 +226,9 @@ will fail with a timeout exception.
 ```
 kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 1000 ms
 	(Coroutine boundary)
-	at app.cash.turbine.ChannelBasedFlowTurbine$expectEvent$2.invokeSuspend(FlowTurbine.kt:238)
+	at app.cash.turbine.ChannelBasedFlowTurbine$awaitEvent$2.invokeSuspend(FlowTurbine.kt:238)
 	at app.cash.turbine.ChannelBasedFlowTurbine$withTimeout$2.invokeSuspend(FlowTurbine.kt:206)
-	at app.cash.turbine.ChannelBasedFlowTurbine.expectItem(FlowTurbine.kt:243)
+	at app.cash.turbine.ChannelBasedFlowTurbine.awaitItem(FlowTurbine.kt:243)
 ```
 
 Proper usage of Turbine with hot flows looks like the following. 
@@ -237,7 +237,7 @@ Proper usage of Turbine with hot flows looks like the following.
 val mutableSharedFlow = MutableSharedFlow<Int>(replay = 0)
 mutableSharedFlow.test {
   mutableSharedFlow.emit(1)
-  assertEquals(expectItem(), 1)
+  assertEquals(awaitItem(), 1)
   cancelAndConsumeRemainingEvents()
 }
 ```
