@@ -1,13 +1,13 @@
 buildscript {
   dependencies {
-    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.0'
-    classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.1.0'
+    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21'
+    classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.14.2'
     classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
-    classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.4.30'
+    classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.5.0'
   }
 
   ext.versions = [
-    'coroutines': '1.5.0',
+    'coroutines': '1.5.1',
   ]
 }
 
@@ -48,7 +48,7 @@ kotlin {
 
     jvmTest {
       dependencies {
-        implementation 'junit:junit:4.13'
+        implementation 'junit:junit:4.13.2'
         implementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.coroutines}"
       }
     }
