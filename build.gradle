@@ -134,10 +134,8 @@ tasks.withType(org.jetbrains.dokka.gradle.DokkaTask).configureEach { task ->
 buildscript {
   repositories {
     mavenCentral()
-    jcenter()
   }
 }
 repositories {
   mavenCentral()
-  jcenter()
 }
