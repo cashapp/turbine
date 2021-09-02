@@ -1,13 +1,13 @@
 buildscript {
   dependencies {
-    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21'
+    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.30'
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.14.2'
     classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
     classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.5.0'
   }
 
   ext.versions = [
-    'coroutines': '1.5.1',
+    'coroutines': '1.5.2',
   ]
 }
 
@@ -24,15 +24,19 @@ kotlin {
   iosArm32()
   iosArm64()
   iosX64()
+  iosSimulatorArm64()
   linuxX64()
   macosX64()
+  macosArm64()
   mingwX64()
   tvosArm64()
   tvosX64()
+  tvosSimulatorArm64()
   watchosArm32()
   watchosArm64()
   watchosX86()
   watchosX64()
+  watchosSimulatorArm64()
 
   sourceSets {
     commonMain {
@@ -62,15 +66,19 @@ kotlin {
       targets.iosArm32,
       targets.iosArm64,
       targets.iosX64,
+      targets.iosSimulatorArm64,
       targets.linuxX64,
       targets.macosX64,
+      targets.macosArm64,
       targets.mingwX64,
       targets.tvosArm64,
       targets.tvosX64,
+      targets.tvosSimulatorArm64,
       targets.watchosArm32,
       targets.watchosArm64,
       targets.watchosX86,
       targets.watchosX64,
+      targets.watchosSimulatorArm64,
     ]) {
       compilations.main.source(sourceSets.nativeMain)
       compilations.test.source(sourceSets.nativeTest)
@@ -79,9 +87,9 @@ kotlin {
 
   sourceSets.matching { it.name.endsWith("Test") }.all {
     it.languageSettings {
-      useExperimentalAnnotation('kotlin.time.ExperimentalTime')
-      useExperimentalAnnotation('kotlinx.coroutines.DelicateCoroutinesApi')
-      useExperimentalAnnotation('kotlinx.coroutines.ExperimentalCoroutinesApi')
+      optIn('kotlin.time.ExperimentalTime')
+      optIn('kotlinx.coroutines.DelicateCoroutinesApi')
+      optIn('kotlinx.coroutines.ExperimentalCoroutinesApi')
     }
   }
 

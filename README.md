@@ -293,7 +293,7 @@ For multiplatform projects:
 kotlin {
   sourceSets.matching { it.name.endsWith("Test") }.all {
     it.languageSettings {
-      useExperimentalAnnotation('kotlin.time.ExperimentalTime')
+      optIn('kotlin.time.ExperimentalTime')
     }
   }
 }
@@ -305,7 +305,7 @@ kotlin {
 kotlin.sourceSets.matching {
   it.name.endsWith("Test")
 }.configureEach {
-  languageSettings.useExperimentalAnnotation("kotlin.time.ExperimentalTime")
+  languageSettings.optIn("kotlin.time.ExperimentalTime")
 }
 ```
 
