@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 
+## [0.6.1]
+### Added
+- Support Apple silicon targets for native users.
+
 ## [0.6.0]
 ### Added
 - `expectMostRecentItem()` function consumes all received items and returns the most recent item.
@@ -59,7 +63,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/cashapp/turbine/releases/tag/0.6.1
 [0.6.0]: https://github.com/cashapp/turbine/releases/tag/0.6.0
 [0.5.2]: https://github.com/cashapp/turbine/releases/tag/0.5.2
 [0.5.1]: https://github.com/cashapp/turbine/releases/tag/0.5.1
