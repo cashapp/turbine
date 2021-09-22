@@ -2,7 +2,7 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>FlowTurbine</title>
-<link href="../../../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script><script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script><link href="../../../styles/style.css" rel="Stylesheet"><link href="../../../styles/logo-styles.css" rel="Stylesheet"><link href="../../../styles/jetbrains-mono.css" rel="Stylesheet"><link href="../../../styles/main.css" rel="Stylesheet"><script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script><script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script><script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script><script type="text/javascript" src="../../../scripts/main.js" async="async"></script>  </head>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script><script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script><link href="../../../styles/style.css" rel="Stylesheet"><link href="../../../styles/logo-styles.css" rel="Stylesheet"><link href="../../../styles/jetbrains-mono.css" rel="Stylesheet"><link href="../../../styles/main.css" rel="Stylesheet"><script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script><script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script><script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script><script type="text/javascript" src="../../../scripts/main.js" async="async"></script>  </head>
   <body>
     <div id="container">
       <div id="leftColumn"><a href="../../../index.html">
@@ -21,7 +21,7 @@
             </div>
           </div>
           <div class="cover ">
-            <h1 class="cover"><span>Flow</span><wbr></wbr><span>Turbine</span></h1>
+            <h1 class="cover"><span>Flow</span><wbr></wbr><span><span>Turbine</span></span></h1>
             <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace">interface <a href="index.html">FlowTurbine</a>&lt;<a href="index.html">T</a>&gt;<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Represents active collection on a source <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span> which buffers item emissions, completion, and/or errors as events for consuming.</p></div></div>
           </div>
           <div class="tabbedcontent">
@@ -31,7 +31,7 @@
               <div class="table" data-togglable="Functions"><a data-name="1310205738%2FFunctions%2F788909594" anchor-label="awaitComplete" id="1310205738%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="await-complete.html">awaitComplete</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1310205738%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="await-complete.html"><span>await</span><wbr></wbr><span><span>Complete</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1310205738%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
@@ -40,7 +40,7 @@
   <div>
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace">abstract suspend fun <a href="await-complete.html">awaitComplete</a>()<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
-<a data-name="1310205738%2FFunctions%2F788909594" anchor-label="awaitComplete" id="1310205738%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="brief "><a data-name="1310205738%2FFunctions%2F788909594" anchor-label="awaitComplete" id="1310205738%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>Assert that the next event received was the flow completing.</div></div>
+<div class="brief "><p class="paragraph">Assert that the next event received was the flow completing. If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p></div></div>
 </div>
                     </div>
                   </div>
@@ -48,7 +48,7 @@
 <a data-name="-1919740433%2FFunctions%2F788909594" anchor-label="awaitError" id="-1919740433%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="await-error.html">awaitError</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1919740433%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="await-error.html"><span>await</span><wbr></wbr><span><span>Error</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1919740433%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
@@ -57,7 +57,7 @@
   <div>
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace">abstract suspend fun <a href="await-error.html">awaitError</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
-<a data-name="-1919740433%2FFunctions%2F788909594" anchor-label="awaitError" id="-1919740433%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="brief "><a data-name="-1919740433%2FFunctions%2F788909594" anchor-label="awaitError" id="-1919740433%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>Assert that the next event received was an error terminating the flow.</div></div>
+<div class="brief "><p class="paragraph">Assert that the next event received was an error terminating the flow. If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p></div></div>
 </div>
                     </div>
                   </div>
@@ -65,7 +65,7 @@
 <a data-name="-1030300259%2FFunctions%2F788909594" anchor-label="awaitEvent" id="-1030300259%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="await-event.html">awaitEvent</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1030300259%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="await-event.html"><span>await</span><wbr></wbr><span><span>Event</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1030300259%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
@@ -74,7 +74,7 @@
   <div>
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace">abstract suspend fun <a href="await-event.html">awaitEvent</a>(): <a href="../-event/index.html">Event</a>&lt;<a href="index.html">T</a>&gt;<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
-<a data-name="-1030300259%2FFunctions%2F788909594" anchor-label="awaitEvent" id="-1030300259%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="brief "><a data-name="-1030300259%2FFunctions%2F788909594" anchor-label="awaitEvent" id="-1030300259%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>Assert that an event was received and return it.</div></div>
+<div class="brief "><p class="paragraph">Assert that an event was received and return it. If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p></div></div>
 </div>
                     </div>
                   </div>
@@ -82,7 +82,7 @@
 <a data-name="-851773040%2FFunctions%2F788909594" anchor-label="awaitItem" id="-851773040%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="await-item.html">awaitItem</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-851773040%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="await-item.html"><span>await</span><wbr></wbr><span><span>Item</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-851773040%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
@@ -91,7 +91,7 @@
   <div>
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace">abstract suspend fun <a href="await-item.html">awaitItem</a>(): <a href="index.html">T</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
-<a data-name="-851773040%2FFunctions%2F788909594" anchor-label="awaitItem" id="-851773040%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="brief "><a data-name="-851773040%2FFunctions%2F788909594" anchor-label="awaitItem" id="-851773040%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>Assert that the next event received was an item and return it.</div></div>
+<div class="brief "><p class="paragraph">Assert that the next event received was an item and return it. If no events have been received, this function will suspend for up to <a href="timeout.html">timeout</a>.</p></div></div>
 </div>
                     </div>
                   </div>
@@ -99,7 +99,7 @@
 <a data-name="716469447%2FFunctions%2F788909594" anchor-label="cancel" id="716469447%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="cancel.html">cancel</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="716469447%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="cancel.html"><span><span>cancel</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="716469447%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
@@ -108,7 +108,7 @@
   <div>
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace">abstract fun <a href="cancel.html">cancel</a>()<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
-<a data-name="716469447%2FFunctions%2F788909594" anchor-label="cancel" id="716469447%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="brief "><a data-name="716469447%2FFunctions%2F788909594" anchor-label="cancel" id="716469447%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>Cancel collecting events from the source <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span>.</div></div>
+<div class="brief "><p class="paragraph">Cancel collecting events from the source <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span>. Any events which have already been received will still need consumed using the &quot;await&quot; functions.</p></div></div>
 </div>
                     </div>
                   </div>
@@ -116,7 +116,7 @@
 <a data-name="1148033929%2FFunctions%2F788909594" anchor-label="cancelAndConsumeRemainingEvents" id="1148033929%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="cancel-and-consume-remaining-events.html">cancelAndConsumeRemainingEvents</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1148033929%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="cancel-and-consume-remaining-events.html"><span>cancel</span><wbr></wbr><span>And</span><wbr></wbr><span>Consume</span><wbr></wbr><span>Remaining</span><wbr></wbr><span><span>Events</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1148033929%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
@@ -125,7 +125,7 @@
   <div>
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace">abstract fun <a href="cancel-and-consume-remaining-events.html">cancelAndConsumeRemainingEvents</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a>&lt;<a href="../-event/index.html">Event</a>&lt;<a href="index.html">T</a>&gt;&gt;<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
-<a data-name="1148033929%2FFunctions%2F788909594" anchor-label="cancelAndConsumeRemainingEvents" id="1148033929%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="brief "><a data-name="1148033929%2FFunctions%2F788909594" anchor-label="cancelAndConsumeRemainingEvents" id="1148033929%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>Cancel collecting events from the source <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span>.</div></div>
+<div class="brief "><p class="paragraph">Cancel collecting events from the source <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span>. Any events which have already been received will be returned.</p></div></div>
 </div>
                     </div>
                   </div>
@@ -133,7 +133,7 @@
 <a data-name="2223233%2FFunctions%2F788909594" anchor-label="cancelAndIgnoreRemainingEvents" id="2223233%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="cancel-and-ignore-remaining-events.html">cancelAndIgnoreRemainingEvents</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2223233%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="cancel-and-ignore-remaining-events.html"><span>cancel</span><wbr></wbr><span>And</span><wbr></wbr><span>Ignore</span><wbr></wbr><span>Remaining</span><wbr></wbr><span><span>Events</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2223233%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
@@ -142,7 +142,7 @@
   <div>
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace">abstract fun <a href="cancel-and-ignore-remaining-events.html">cancelAndIgnoreRemainingEvents</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-nothing/index.html">Nothing</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
-<a data-name="2223233%2FFunctions%2F788909594" anchor-label="cancelAndIgnoreRemainingEvents" id="2223233%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="brief "><a data-name="2223233%2FFunctions%2F788909594" anchor-label="cancelAndIgnoreRemainingEvents" id="2223233%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>Cancel collecting events from the source <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span> and ignore any events which have already been received.</div></div>
+<div class="brief "><p class="paragraph">Cancel collecting events from the source <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span> and ignore any events which have already been received. Calling this function will exit the <a href="../test.html">test</a> block.</p></div></div>
 </div>
                     </div>
                   </div>
@@ -150,14 +150,14 @@
 <a data-name="104363407%2FFunctions%2F788909594" anchor-label="expectComplete" id="104363407%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="expect-complete.html">expectComplete</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="104363407%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="expect-complete.html"><span>expect</span><wbr></wbr><span><span>Complete</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="104363407%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
                       <div class="title"><div class="divergent-group" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
   <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace strikethrough">open suspend fun <a href="expect-complete.html">expectComplete</a>()<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace strikethrough"><strike></strike><strike>open </strike><strike>suspend </strike><strike>fun </strike><a href="expect-complete.html"><strike>expectComplete</strike></a><strike>(</strike><strike>)</strike><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
@@ -167,14 +167,14 @@
 <a data-name="693299626%2FFunctions%2F788909594" anchor-label="expectError" id="693299626%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="expect-error.html">expectError</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="693299626%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="expect-error.html"><span>expect</span><wbr></wbr><span><span>Error</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="693299626%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
                       <div class="title"><div class="divergent-group" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
   <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace strikethrough">open suspend fun <a href="expect-error.html">expectError</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace strikethrough"><strike></strike><strike>open </strike><strike>suspend </strike><strike>fun </strike><a href="expect-error.html"><strike>expectError</strike></a><strike>(</strike><strike>)</strike><strike>: </strike><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
@@ -184,14 +184,14 @@
 <a data-name="1582739800%2FFunctions%2F788909594" anchor-label="expectEvent" id="1582739800%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="expect-event.html">expectEvent</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1582739800%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="expect-event.html"><span>expect</span><wbr></wbr><span><span>Event</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1582739800%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
                       <div class="title"><div class="divergent-group" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
   <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace strikethrough">open suspend fun <a href="expect-event.html">expectEvent</a>(): <a href="../-event/index.html">Event</a>&lt;<a href="index.html">T</a>&gt;<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace strikethrough"><strike></strike><strike>open </strike><strike>suspend </strike><strike>fun </strike><a href="expect-event.html"><strike>expectEvent</strike></a><strike>(</strike><strike>)</strike><strike>: </strike><a href="../-event/index.html">Event</a>&lt;<a href="index.html">T</a>&gt;<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
@@ -201,14 +201,14 @@
 <a data-name="1587823221%2FFunctions%2F788909594" anchor-label="expectItem" id="1587823221%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="expect-item.html">expectItem</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1587823221%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="expect-item.html"><span>expect</span><wbr></wbr><span><span>Item</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1587823221%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
                       <div class="title"><div class="divergent-group" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
   <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace strikethrough">open suspend fun <a href="expect-item.html">expectItem</a>(): <a href="index.html">T</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace strikethrough"><strike></strike><strike>open </strike><strike>suspend </strike><strike>fun </strike><a href="expect-item.html"><strike>expectItem</strike></a><strike>(</strike><strike>)</strike><strike>: </strike><a href="index.html"><strike>T</strike></a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
@@ -218,7 +218,7 @@
 <a data-name="-2074465897%2FFunctions%2F788909594" anchor-label="expectMostRecentItem" id="-2074465897%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="expect-most-recent-item.html">expectMostRecentItem</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2074465897%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="expect-most-recent-item.html"><span>expect</span><wbr></wbr><span>Most</span><wbr></wbr><span>Recent</span><wbr></wbr><span><span>Item</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2074465897%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
@@ -227,7 +227,7 @@
   <div>
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace">abstract fun <a href="expect-most-recent-item.html">expectMostRecentItem</a>(): <a href="index.html">T</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
-<a data-name="-2074465897%2FFunctions%2F788909594" anchor-label="expectMostRecentItem" id="-2074465897%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="brief "><a data-name="-2074465897%2FFunctions%2F788909594" anchor-label="expectMostRecentItem" id="-2074465897%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>Returns the most recent item that has already been received.</div></div>
+<div class="brief "><p class="paragraph">Returns the most recent item that has already been received. If a complete event has been received with no item being received previously, this function will throw an <span data-unresolved-link="app.cash.turbine/AssertionError///PointingToDeclaration/">AssertionError</span>. If an error event has been received, this function will throw the underlying exception.</p></div></div>
 </div>
                     </div>
                   </div>
@@ -235,7 +235,7 @@
 <a data-name="-1640574034%2FFunctions%2F788909594" anchor-label="expectNoEvents" id="-1640574034%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>
                 <div class="table-row" data-filterable-current=":dokkaHtml/commonMain" data-filterable-set=":dokkaHtml/commonMain">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="expect-no-events.html">expectNoEvents</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1640574034%2FFunctions%2F788909594"></span>
+                    <div class=""><span class="inline-flex"><a href="expect-no-events.html"><span>expect</span><wbr></wbr><span>No</span><wbr></wbr><span><span>Events</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1640574034%2FFunctions%2F788909594"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
@@ -244,7 +244,7 @@
   <div>
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><div class="symbol monospace">abstract fun <a href="expect-no-events.html">expectNoEvents</a>()<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
-<a data-name="-1640574034%2FFunctions%2F788909594" anchor-label="expectNoEvents" id="-1640574034%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="brief "><a data-name="-1640574034%2FFunctions%2F788909594" anchor-label="expectNoEvents" id="-1640574034%2FFunctions%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>Assert that there are no unconsumed events which have already been received.</div></div>
+<div class="brief "><p class="paragraph">Assert that there are no unconsumed events which have already been received.</p></div></div>
 </div>
                     </div>
                   </div>
@@ -259,7 +259,7 @@
                         </span></span></div>
                     <div>
                       <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><a data-name="-75490376%2FProperties%2F788909594" anchor-label="timeout" id="-75490376%2FProperties%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="symbol monospace"><div class="block"><div class="block">@<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.time/-experimental-time/index.html">ExperimentalTime</a>()</div></div>abstract val <a href="timeout.html">timeout</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.time/-duration/index.html">Duration</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-75490376%2FProperties%2F788909594" anchor-label="timeout" id="-75490376%2FProperties%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a>Duration that <a href="await-item.html">awaitItem</a>, <a href="await-complete.html">awaitComplete</a>, <a href="await-error.html">awaitError</a>, and <a href="await-event.html">awaitEvent</a> will wait before throwing a timeout exception.</div></div></div>
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/commonMain"><a data-name="-75490376%2FProperties%2F788909594" anchor-label="timeout" id="-75490376%2FProperties%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><div class="symbol monospace"><div class="block"><div class="block">@<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.time/-experimental-time/index.html">ExperimentalTime</a></div></div>abstract val <a href="timeout.html">timeout</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.time/-duration/index.html">Duration</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-75490376%2FProperties%2F788909594" anchor-label="timeout" id="-75490376%2FProperties%2F788909594" data-filterable-set=":dokkaHtml/commonMain"></a><p class="paragraph">Duration that <a href="await-item.html">awaitItem</a>, <a href="await-complete.html">awaitComplete</a>, <a href="await-error.html">awaitError</a>, and <a href="await-event.html">awaitEvent</a> will wait before throwing a timeout exception.</p></div></div></div>
                       </div>
                     </div>
                   </div>
