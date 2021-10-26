@@ -209,7 +209,7 @@ channelFlow {
 
 #### Hot Flows
 
-Emissions to hot flows that don't have active consumers are dropped. It's important to call `test` 
+Emissions to hot flows that don't have active consumers are dropped. It's important to call `test`
 (and therefore have an active collector) on a flow _before_ emissions to a flow are made. For example:
 
 ```kotlin
@@ -219,9 +219,9 @@ mutableSharedFlow.test {
   assertEquals(awaitItem(), 1)
   cancelAndConsumeRemainingEvents()
 }
-``` 
+```
 
-will fail with a timeout exception. 
+will fail with a timeout exception.
 
 ```
 kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 1000 ms
@@ -231,7 +231,7 @@ kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 1000 ms
 	at app.cash.turbine.ChannelBasedFlowTurbine.awaitItem(FlowTurbine.kt:243)
 ```
 
-Proper usage of Turbine with hot flows looks like the following. 
+Proper usage of Turbine with hot flows looks like the following.
 
 ```kotlin
 val mutableSharedFlow = MutableSharedFlow<Int>(replay = 0)
@@ -249,65 +249,6 @@ The hot flow types Kotlin currently provide are:
 * `SharedFlow`
 * Channels converted to flow with `Channel.consumeAsFlow`
 
-## Experimental API Usage
-
-Turbine uses Kotlin experimental APIs:
-
- * `Duration` is used to declare the event timeout.
-
-Since the library targets test code, the impact and risk of any breaking changes to these APIs are
-minimal and would likely only require a version bump.
-
-Instead of sprinkling the experimental annotations or `@OptIn` all over your tests, opt-in at the
-compiler level.
-
-### Groovy DSL
-
-```groovy
-compileTestKotlin {
-  kotlinOptions {
-    freeCompilerArgs += [
-        '-Xopt-in=kotlin.time.ExperimentalTime',
-    ]
-  }
-}
-```
-
-### Kotlin DSL
-
-```kotlin
-tasks.compileTestKotlin {
-  kotlinOptions {
-    freeCompilerArgs += listOf(
-        "-Xopt-in=kotlin.time.ExperimentalTime",
-    )
-  }
-}
-```
-
-For multiplatform projects:
-
-### Groovy DSL
-
-```groovy
-kotlin {
-  sourceSets.matching { it.name.endsWith("Test") }.all {
-    it.languageSettings {
-      optIn('kotlin.time.ExperimentalTime')
-    }
-  }
-}
-```
-
-### Kotlin DSL
-
-```kotlin
-kotlin.sourceSets.matching {
-  it.name.endsWith("Test")
-}.configureEach {
-  languageSettings.optIn("kotlin.time.ExperimentalTime")
-}
-```
 
 # License
 

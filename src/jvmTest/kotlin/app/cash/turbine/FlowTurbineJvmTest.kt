@@ -43,7 +43,26 @@ class FlowTurbineJvmTest {
     assertEquals("Timed out waiting for 1000 ms", actual.message)
   }
 
-  @Test fun timeoutEnforcedCustomValue() = jvmSuspendTest {
+  @Test fun timeoutEnforcedCustomLong() = jvmSuspendTest {
+    val subject = async {
+      neverFlow().test(timeoutMs = 10_000) {
+        awaitComplete()
+      }
+    }
+
+    advanceTimeBy(Duration.milliseconds(9999))
+    assertTrue(subject.isActive)
+
+    advanceTimeBy(Duration.milliseconds(1))
+    assertFalse(subject.isActive)
+
+    val actual = assertThrows<TimeoutCancellationException> {
+      subject.await()
+    }
+    assertEquals("Timed out waiting for 10000 ms", actual.message)
+  }
+
+  @Test fun timeoutEnforcedCustomDuration() = jvmSuspendTest {
     val subject = async {
       neverFlow().test(timeout = Duration.seconds(10)) {
         awaitComplete()
@@ -64,7 +83,7 @@ class FlowTurbineJvmTest {
 
   @Test fun timeoutCanBeZero() = jvmSuspendTest {
     val subject = async {
-      neverFlow().test(timeout = Duration.ZERO) {
+      neverFlow().test(timeoutMs = 0) {
         awaitComplete()
       }
     }

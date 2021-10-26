@@ -45,11 +45,11 @@ private const val debug = false
  * }
  * ```
  *
- * @param timeout Duration each suspending function on [FlowTurbine] will wait before timing out.
+ * @param timeoutMs Duration in milliseconds each suspending function on [FlowTurbine] will wait
+ * before timing out.
  */
-@ExperimentalTime // For timeout.
 public suspend fun <T> Flow<T>.test(
-  timeout: Duration = Duration.seconds(1),
+  timeoutMs: Long = 1_000L,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
   coroutineScope {
@@ -81,7 +81,7 @@ public suspend fun <T> Flow<T>.test(
       events.close()
     }
 
-    val flowTurbine = ChannelBasedFlowTurbine(events, collectJob, timeout)
+    val flowTurbine = ChannelBasedFlowTurbine(events, collectJob, timeoutMs)
     val ensureConsumed = try {
       flowTurbine.validate()
       if (debug) println("Validate lambda returning normally")
@@ -111,11 +111,10 @@ public suspend fun <T> Flow<T>.test(
  */
 public interface FlowTurbine<T> {
   /**
-   * Duration that [awaitItem], [awaitComplete], [awaitError], and [awaitEvent] will wait before
-   * throwing a timeout exception.
+   * Duration in milliseconds that [awaitItem], [awaitComplete], [awaitError], and [awaitEvent]
+   * will wait before throwing a timeout exception.
    */
-  @ExperimentalTime
-  public val timeout: Duration
+  public val timeoutMs: Long
 
   /**
    * Cancel collecting events from the source [Flow]. Any events which have already been received
@@ -215,17 +214,16 @@ public sealed class Event<out T> {
   }
 }
 
-@ExperimentalTime
 private class ChannelBasedFlowTurbine<T>(
   private val events: Channel<Event<T>>,
   private val collectJob: Job,
-  override val timeout: Duration
+  override val timeoutMs: Long,
 ) : FlowTurbine<T> {
   private suspend fun <T> withTimeout(body: suspend () -> T): T {
-    return if (timeout == Duration.ZERO) {
+    return if (timeoutMs == 0L) {
       body()
     } else {
-      withTimeout(timeout) {
+      withTimeout(timeoutMs) {
         body()
       }
     }
@@ -345,3 +343,41 @@ private class AssertionError(
   message: String,
   override val cause: Throwable?
 ) : kotlin.AssertionError(message)
+
+/**
+ * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
+ * consume and assert properties on them in order. If any exception occurs during validation the
+ * exception is rethrown from this method.
+ *
+ * ```kotlin
+ * flowOf("one", "two").test {
+ *   assertEquals("one", expectItem())
+ *   assertEquals("two", expectItem())
+ *   expectComplete()
+ * }
+ * ```
+ *
+ * **WARNING**: This function uses experimental time support in Kotlin and requires that your
+ * Kotlin version and Kotlin coroutines version exactly match the version used by Turbine.
+ *
+ * @param timeout Duration in milliseconds each suspending function on [FlowTurbine] will wait
+ * before timing out.
+ */
+@ExperimentalTime // For timeout.
+public suspend fun <T> Flow<T>.test(
+  timeout: Duration,
+  validate: suspend FlowTurbine<T>.() -> Unit
+) {
+  test(timeout.inWholeMilliseconds, validate)
+}
+
+/**
+ * Duration that [awaitItem][FlowTurbine.awaitItem], [awaitComplete][FlowTurbine.awaitComplete],
+ * [awaitError][FlowTurbine.awaitError], and [awaitEvent][FlowTurbine.awaitEvent] will wait before
+ * throwing a timeout exception.
+ *
+ * **WARNING**: This function uses experimental time support in Kotlin and requires that your
+ * Kotlin version and Kotlin coroutines version exactly match the version used by Turbine.
+ */
+@ExperimentalTime
+public val FlowTurbine<*>.timeout: Duration get() = Duration.milliseconds(timeoutMs)
