@@ -23,10 +23,6 @@ $dokka.location:app.cash.turbine/FlowTurbine/awaitItem/#/PointingToDeclaration/
 $dokka.location:app.cash.turbine/FlowTurbine/cancel/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/cancel.html
 $dokka.location:app.cash.turbine/FlowTurbine/cancelAndConsumeRemainingEvents/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/cancel-and-consume-remaining-events.html
 $dokka.location:app.cash.turbine/FlowTurbine/cancelAndIgnoreRemainingEvents/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/cancel-and-ignore-remaining-events.html
-$dokka.location:app.cash.turbine/FlowTurbine/expectComplete/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/expect-complete.html
-$dokka.location:app.cash.turbine/FlowTurbine/expectError/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/expect-error.html
-$dokka.location:app.cash.turbine/FlowTurbine/expectEvent/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/expect-event.html
-$dokka.location:app.cash.turbine/FlowTurbine/expectItem/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/expect-item.html
 $dokka.location:app.cash.turbine/FlowTurbine/expectMostRecentItem/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/expect-most-recent-item.html
 $dokka.location:app.cash.turbine/FlowTurbine/expectNoEvents/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/expect-no-events.html
 $dokka.location:app.cash.turbine/FlowTurbine/timeoutMs/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/timeout-ms.html
