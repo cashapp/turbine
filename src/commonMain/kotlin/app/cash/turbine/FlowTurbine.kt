@@ -160,9 +160,6 @@ public interface FlowTurbine<T> {
    */
   public suspend fun awaitEvent(): Event<T>
 
-  @Deprecated("Renamed", ReplaceWith("this.awaitEvent()"))
-  public suspend fun expectEvent(): Event<T> = awaitEvent()
-
   /**
    * Assert that the next event received was an item and return it.
    * If no events have been received, this function will suspend for up to [timeout].
@@ -171,9 +168,6 @@ public interface FlowTurbine<T> {
    * @throws kotlinx.coroutines.TimeoutCancellationException if no event was received in time.
    */
   public suspend fun awaitItem(): T
-
-  @Deprecated("Renamed", ReplaceWith("this.awaitItem()"))
-  public suspend fun expectItem(): T = awaitItem()
 
   /**
    * Assert that the next event received was the flow completing.
@@ -184,9 +178,6 @@ public interface FlowTurbine<T> {
    */
   public suspend fun awaitComplete()
 
-  @Deprecated("Renamed", ReplaceWith("this.awaitComplete()"))
-  public suspend fun expectComplete(): Unit = awaitComplete()
-
   /**
    * Assert that the next event received was an error terminating the flow.
    * If no events have been received, this function will suspend for up to [timeout].
@@ -195,9 +186,6 @@ public interface FlowTurbine<T> {
    * @throws kotlinx.coroutines.TimeoutCancellationException if no event was received in time.
    */
   public suspend fun awaitError(): Throwable
-
-  @Deprecated("Renamed", ReplaceWith("this.awaitError()"))
-  public suspend fun expectError(): Throwable = awaitError()
 }
 
 @SharedImmutable
