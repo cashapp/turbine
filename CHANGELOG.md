@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 
+## [0.7.0]
+### Changed
+- Moved APIs using Kotlin's experimental time to separate extensions. You can now use the library
+  without worrying about incompatibilities with Kotlin version or coroutine library version.
+- Removed APIs deprecated in 0.6.x.
+
 ## [0.6.1]
 ### Added
 - Support Apple silicon targets for native users.
@@ -63,7 +69,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.6.1...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/cashapp/turbine/releases/tag/0.7.0
 [0.6.1]: https://github.com/cashapp/turbine/releases/tag/0.6.1
 [0.6.0]: https://github.com/cashapp/turbine/releases/tag/0.6.0
 [0.5.2]: https://github.com/cashapp/turbine/releases/tag/0.5.2
