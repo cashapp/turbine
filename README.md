@@ -22,7 +22,7 @@ repositories {
   mavenCentral()
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:0.6.1'
+  testImplementation 'app.cash.turbine:turbine:0.7.0'
 }
 ```
 
@@ -37,7 +37,7 @@ repositories {
   }
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:0.7.0-SNAPSHOT'
+  testImplementation 'app.cash.turbine:turbine:0.8.0-SNAPSHOT'
 }
 ```
 
@@ -182,7 +182,7 @@ channelFlow {
     Thread.sleep(2_000)
     send("item")
   }
-}.test(timeout = 3.seconds) {
+}.test(timeout = 3_000) {
   assertEquals("item", awaitItem())
   awaitComplete()
 }
