@@ -242,7 +242,7 @@ mutableSharedFlow.test {
 }
 ```
 
-The hot flow types Kotlin currently provide are:
+The hot flow types Kotlin currently provides are:
 * `MutableStateFlow`
 * `StateFlow`
 * `MutableSharedFlow`
