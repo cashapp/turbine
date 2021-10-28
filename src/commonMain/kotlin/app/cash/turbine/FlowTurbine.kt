@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
@@ -162,19 +163,19 @@ public interface FlowTurbine<T> {
    * Cancel collecting events from the source [Flow]. Any events which have already been received
    * will still need consumed using the "await" functions.
    */
-  public fun cancel()
+  public suspend fun cancel()
 
   /**
    * Cancel collecting events from the source [Flow] and ignore any events which have already
    * been received. Calling this function will exit the [test] block.
    */
-  public fun cancelAndIgnoreRemainingEvents()
+  public suspend fun cancelAndIgnoreRemainingEvents()
 
   /**
    * Cancel collecting events from the source [Flow]. Any events which have already been received
    * will be returned.
    */
-  public fun cancelAndConsumeRemainingEvents(): List<Event<T>>
+  public suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>>
 
   /**
    * Assert that there are no unconsumed events which have already been received.
@@ -242,16 +243,16 @@ private class ChannelBasedFlowTurbine<T>(
 ) : FlowTurbine<T> {
   private var ignoreRemainingEvents = false
 
-  override fun cancel() {
-    collectJob.cancel()
+  override suspend fun cancel() {
+    collectJob.cancelAndJoin()
   }
 
-  override fun cancelAndIgnoreRemainingEvents() {
+  override suspend fun cancelAndIgnoreRemainingEvents() {
     cancel()
     ignoreRemainingEvents = true
   }
 
-  override fun cancelAndConsumeRemainingEvents(): List<Event<T>> {
+  override suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>> {
     cancel()
     return buildList {
       while (true) {

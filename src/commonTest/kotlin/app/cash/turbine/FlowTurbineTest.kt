@@ -24,6 +24,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,6 +37,8 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 
 class FlowTurbineTest {
   @Test fun exceptionsPropagate() = runTest {
@@ -55,6 +58,23 @@ class FlowTurbineTest {
     neverFlow()
       .onStart { collecting = true }
       .onCompletion { collecting = false }
+      .test {
+        assertTrue(collecting)
+        cancel()
+        assertFalse(collecting)
+      }
+  }
+
+  @Test fun cancelAwaitsFlowCompletion() = runTest {
+    var collecting = false
+    neverFlow()
+      .onStart { collecting = true }
+      .onCompletion {
+        withContext(NonCancellable) {
+          yield()
+          collecting = false
+        }
+      }
       .test {
         assertTrue(collecting)
         cancel()
