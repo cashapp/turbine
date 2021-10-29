@@ -37,20 +37,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class FlowTurbineTest {
-  @Test fun timeoutLong() = suspendTest {
-    neverFlow().test(timeoutMs = 1_234L) {
-      assertEquals(1_234L, timeoutMs)
-      assertEquals(Duration.milliseconds(1_234L), timeout)
-    }
-  }
-
-  @Test fun timeoutDuration() = suspendTest {
-    neverFlow().test(timeout = Duration.milliseconds(1_234L)) {
-      assertEquals(1_234L, timeoutMs)
-      assertEquals(Duration.milliseconds(1_234L), timeout)
-    }
-  }
-
   @Test fun exceptionsPropagate() = suspendTest {
     // Use a custom subtype to prevent coroutines from breaking referential equality.
     val expected = object : RuntimeException("hello") {}
