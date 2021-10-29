@@ -111,12 +111,6 @@ public suspend fun <T> Flow<T>.test(
  */
 public interface FlowTurbine<T> {
   /**
-   * Duration in milliseconds that [awaitItem], [awaitComplete], [awaitError], and [awaitEvent]
-   * will wait before throwing a timeout exception.
-   */
-  public val timeoutMs: Long
-
-  /**
    * Cancel collecting events from the source [Flow]. Any events which have already been received
    * will still need consumed using the "await" functions.
    */
@@ -205,7 +199,7 @@ public sealed class Event<out T> {
 private class ChannelBasedFlowTurbine<T>(
   private val events: Channel<Event<T>>,
   private val collectJob: Job,
-  override val timeoutMs: Long,
+  private val timeoutMs: Long,
 ) : FlowTurbine<T> {
   private suspend fun <T> withTimeout(body: suspend () -> T): T {
     return if (timeoutMs == 0L) {
@@ -358,14 +352,3 @@ public suspend fun <T> Flow<T>.test(
 ) {
   test(timeout.inWholeMilliseconds, validate)
 }
-
-/**
- * Duration that [awaitItem][FlowTurbine.awaitItem], [awaitComplete][FlowTurbine.awaitComplete],
- * [awaitError][FlowTurbine.awaitError], and [awaitEvent][FlowTurbine.awaitEvent] will wait before
- * throwing a timeout exception.
- *
- * **WARNING**: This function uses experimental time support in Kotlin and requires that your
- * Kotlin version and Kotlin coroutines version exactly match the version used by Turbine.
- */
-@ExperimentalTime
-public val FlowTurbine<*>.timeout: Duration get() = Duration.milliseconds(timeoutMs)
