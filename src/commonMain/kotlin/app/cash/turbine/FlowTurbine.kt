@@ -17,7 +17,7 @@ package app.cash.turbine
 
 import kotlin.native.concurrent.SharedImmutable
 import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
@@ -48,10 +48,38 @@ private const val debug = false
  * @param timeoutMs Duration in milliseconds each suspending function on [FlowTurbine] will wait
  * before timing out.
  */
+@Deprecated("Use overload which accepts a Duration",
+  ReplaceWith("this.test(timeoutMs.milliseconds, validate)",
+    "kotlin.time.Duration.Companion.milliseconds"))
 public suspend fun <T> Flow<T>.test(
   timeoutMs: Long = 1_000L,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
+  test(timeoutMs.milliseconds, validate)
+}
+
+/**
+ * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
+ * consume and assert properties on them in order. If any exception occurs during validation the
+ * exception is rethrown from this method.
+ *
+ * ```kotlin
+ * flowOf("one", "two").test {
+ *   assertEquals("one", expectItem())
+ *   assertEquals("two", expectItem())
+ *   expectComplete()
+ * }
+ * ```
+ *
+ * @param timeout Duration each suspending function on [FlowTurbine] will wait before timing out.
+ */
+public suspend fun <T> Flow<T>.test(
+  timeout: Duration,
+  validate: suspend FlowTurbine<T>.() -> Unit
+) {
+  // Once kotlinx.coroutines 1.6 ships pipe Duration all the way through.
+  val timeoutMs = timeout.inWholeMilliseconds
+
   coroutineScope {
     val events = Channel<Event<T>>(UNLIMITED)
 
@@ -326,29 +354,3 @@ private class AssertionError(
   override val cause: Throwable?
 ) : kotlin.AssertionError(message)
 
-/**
- * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
- * consume and assert properties on them in order. If any exception occurs during validation the
- * exception is rethrown from this method.
- *
- * ```kotlin
- * flowOf("one", "two").test {
- *   assertEquals("one", expectItem())
- *   assertEquals("two", expectItem())
- *   expectComplete()
- * }
- * ```
- *
- * **WARNING**: This function uses experimental time support in Kotlin and requires that your
- * Kotlin version and Kotlin coroutines version exactly match the version used by Turbine.
- *
- * @param timeout Duration in milliseconds each suspending function on [FlowTurbine] will wait
- * before timing out.
- */
-@ExperimentalTime // For timeout.
-public suspend fun <T> Flow<T>.test(
-  timeout: Duration,
-  validate: suspend FlowTurbine<T>.() -> Unit
-) {
-  test(timeout.inWholeMilliseconds, validate)
-}

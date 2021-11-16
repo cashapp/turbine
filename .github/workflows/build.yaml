@@ -13,11 +13,7 @@ env:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [macOS-latest, windows-latest]
-
-    runs-on: ${{matrix.os}}
+    runs-on: macos-11
 
     steps:
       - uses: actions/checkout@v2
@@ -30,19 +26,13 @@ jobs:
       - run: ./gradlew build
 
       - run: ./gradlew publish
-        if: ${{ github.ref == 'refs/heads/trunk' && github.repository == 'cashapp/turbine' && matrix.os == 'macOS-latest' }}
-        env:
-          ORG_GRADLE_PROJECT_SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-          ORG_GRADLE_PROJECT_SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-
-      - run: ./gradlew publishMingwX64PublicationToMavenRepository
-        if: ${{ github.ref == 'refs/heads/trunk' && github.repository == 'cashapp/turbine' && matrix.os == 'windows-latest' }}
+        if: ${{ github.ref == 'refs/heads/trunk' && github.repository == 'cashapp/turbine' }}
         env:
           ORG_GRADLE_PROJECT_SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           ORG_GRADLE_PROJECT_SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
 
       - name: Deploy docs to website
-        if: ${{ github.ref == 'refs/heads/trunk' && github.repository == 'cashapp/turbine' && matrix.os == 'macOS-latest' }}
+        if: ${{ github.ref == 'refs/heads/trunk' && github.repository == 'cashapp/turbine' }}
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
