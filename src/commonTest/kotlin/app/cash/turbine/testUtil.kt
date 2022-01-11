@@ -15,17 +15,13 @@
  */
 package app.cash.turbine
 
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.suspendCancellableCoroutine
 
 /** A flow that never emits anything. */
-fun neverFlow(): Flow<Nothing> = flow {
-  suspendCancellableCoroutine {
-    // Do nothing!
-  }
-}
+fun neverFlow(): Flow<Nothing> = flow { awaitCancellation() }
 
 expect fun suspendTest(body: suspend CoroutineScope.() -> Unit)
 
