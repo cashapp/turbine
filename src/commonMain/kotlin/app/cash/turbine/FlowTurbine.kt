@@ -208,6 +208,14 @@ public interface FlowTurbine<T> {
   public suspend fun awaitItem(): T
 
   /**
+   * Assert that [count] item events were received and ignore them.
+   * This function will suspend if no events have been received.
+   *
+   * @throws AssertionError if one of the events was completion or an error.
+   */
+  public suspend fun skipItems(count: Int)
+
+  /**
    * Assert that the next event received was the flow completing.
    * This function will suspend if no events have been received.
    *
@@ -277,6 +285,18 @@ private class ChannelBasedFlowTurbine<T>(
       unexpectedEvent(event, "item")
     }
     return event.value
+  }
+
+  override suspend fun skipItems(count: Int) {
+    repeat(count) { index ->
+      when (val event = awaitEvent()) {
+        Event.Complete, is Event.Error -> {
+          val cause = (event as? Event.Error)?.throwable
+          throw AssertionError("Expected $count items but got $index items and $event", cause)
+        }
+        is Event.Item<T> -> { /* Success */ }
+      }
+    }
   }
 
   override suspend fun awaitComplete() {
