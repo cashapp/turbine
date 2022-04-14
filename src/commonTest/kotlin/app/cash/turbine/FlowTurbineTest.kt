@@ -453,4 +453,33 @@ class FlowTurbineTest {
       cancelAndIgnoreRemainingEvents()
     }
   }
+
+  @Test fun expectItemsAreSkipped() = runTest {
+    flowOf(1, 2, 3).test {
+      skipItems(2)
+      assertEquals(3, awaitItem())
+      awaitComplete()
+    }
+  }
+
+  @Test fun expectErrorOnCompletionBeforeAllItemsWereSkipped() = runTest {
+    flowOf(1).test {
+      assertFailsWith<AssertionError> {
+        skipItems(2)
+      }
+    }
+  }
+
+  @Test fun expectErrorOnErrorReceivedBeforeAllItemsWereSkipped() = runTest {
+    val error = RuntimeException()
+    flow {
+      emit(1)
+      throw error
+    }.test {
+      val actual = assertFailsWith<AssertionError> {
+        skipItems(2)
+      }
+      assertSame(error, actual.cause)
+    }
+  }
 }
