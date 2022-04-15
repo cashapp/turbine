@@ -18,6 +18,7 @@ package app.cash.turbine
 import kotlin.native.concurrent.SharedImmutable
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
@@ -52,7 +53,7 @@ private const val debug = false
   ReplaceWith("this.test(timeoutMs.milliseconds, validate)",
     "kotlin.time.Duration.Companion.milliseconds"))
 public suspend fun <T> Flow<T>.test(
-  timeoutMs: Long = 1_000L,
+  timeoutMs: Long,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
   test(timeoutMs.milliseconds, validate)
@@ -74,7 +75,7 @@ public suspend fun <T> Flow<T>.test(
  * @param timeout Duration each suspending function on [FlowTurbine] will wait before timing out.
  */
 public suspend fun <T> Flow<T>.test(
-  timeout: Duration,
+  timeout: Duration = 1.seconds,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
   // Once kotlinx.coroutines 1.6 ships pipe Duration all the way through.
