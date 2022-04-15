@@ -230,16 +230,6 @@ private class ChannelBasedFlowTurbine<T>(
   private val collectJob: Job,
   private val timeoutMs: Long,
 ) : FlowTurbine<T> {
-  private suspend fun <T> withTimeout(body: suspend () -> T): T {
-    return if (timeoutMs == 0L) {
-      body()
-    } else {
-      withTimeout(timeoutMs) {
-        body()
-      }
-    }
-  }
-
   override fun cancel() {
     collectJob.cancel()
   }
@@ -266,8 +256,12 @@ private class ChannelBasedFlowTurbine<T>(
   }
 
   override suspend fun awaitEvent(): Event<T> {
-    return withTimeout {
+    return if (timeoutMs == 0L) {
       events.receive()
+    } else {
+      withTimeout(timeoutMs) {
+        events.receive()
+      }
     }
   }
 
