@@ -15,8 +15,8 @@
  */
 package app.cash.turbine
 
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -24,17 +24,3 @@ import kotlinx.coroutines.flow.flow
 fun neverFlow(): Flow<Nothing> = flow { awaitCancellation() }
 
 expect fun suspendTest(body: suspend CoroutineScope.() -> Unit)
-
-inline fun <reified T : Throwable> assertThrows(body: () -> Unit): T {
-  try {
-    body()
-  } catch (t: Throwable) {
-    if (t is T) {
-      return t
-    }
-    throw t
-  }
-  throw AssertionError(
-    "Expected body to throw ${T::class.simpleName} but it completed successfully"
-  )
-}

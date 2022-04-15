@@ -16,6 +16,7 @@
 package app.cash.turbine
 
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.days
@@ -39,7 +40,7 @@ class FlowTurbineJvmTest {
     advanceTimeBy(1.milliseconds)
     assertFalse(subject.isActive)
 
-    val actual = assertThrows<TimeoutCancellationException> {
+    val actual = assertFailsWith<TimeoutCancellationException> {
       subject.await()
     }
     assertEquals("Timed out waiting for 1000 ms", actual.message)
@@ -58,7 +59,7 @@ class FlowTurbineJvmTest {
     advanceTimeBy(1.milliseconds)
     assertFalse(subject.isActive)
 
-    val actual = assertThrows<TimeoutCancellationException> {
+    val actual = assertFailsWith<TimeoutCancellationException> {
       subject.await()
     }
     assertEquals("Timed out waiting for 10000 ms", actual.message)
@@ -77,7 +78,7 @@ class FlowTurbineJvmTest {
     advanceTimeBy(1.milliseconds)
     assertFalse(subject.isActive)
 
-    val actual = assertThrows<TimeoutCancellationException> {
+    val actual = assertFailsWith<TimeoutCancellationException> {
       subject.await()
     }
     assertEquals("Timed out waiting for 10000 ms", actual.message)
