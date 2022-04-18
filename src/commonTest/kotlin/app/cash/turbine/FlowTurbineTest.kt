@@ -21,9 +21,15 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.ZERO
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -35,9 +41,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 
 class FlowTurbineTest {
-  @Test fun exceptionsPropagate() = suspendTest {
+  @Test fun exceptionsPropagate() = runTest {
     // Use a custom subtype to prevent coroutines from breaking referential equality.
     val expected = object : RuntimeException("hello") {}
 
@@ -49,7 +58,7 @@ class FlowTurbineTest {
     assertSame(expected, actual)
   }
 
-  @Test fun cancelStopsFlowCollection() = suspendTest {
+  @Test fun cancelStopsFlowCollection() = runTest {
     var collecting = false
     neverFlow()
       .onStart { collecting = true }
@@ -61,7 +70,7 @@ class FlowTurbineTest {
       }
   }
 
-  @Test fun endOfBlockStopsFlowCollection() = suspendTest {
+  @Test fun endOfBlockStopsFlowCollection() = runTest {
     var collecting = false
     neverFlow()
       .onStart { collecting = true }
@@ -72,7 +81,7 @@ class FlowTurbineTest {
     assertFalse(collecting)
   }
 
-  @Test fun exceptionStopsFlowCollection() = suspendTest {
+  @Test fun exceptionStopsFlowCollection() = runTest {
     var collecting = false
     assertFailsWith<RuntimeException> {
       neverFlow()
@@ -86,7 +95,7 @@ class FlowTurbineTest {
     assertFalse(collecting)
   }
 
-  @Test fun ignoreRemainingEventsStopsFlowCollection() = suspendTest {
+  @Test fun ignoreRemainingEventsStopsFlowCollection() = runTest {
     var collecting = false
     neverFlow()
       .onStart { collecting = true }
@@ -98,14 +107,14 @@ class FlowTurbineTest {
     assertFalse(collecting)
   }
 
-  @Test fun expectNoEvents() = suspendTest {
+  @Test fun expectNoEvents() = runTest {
     neverFlow().test {
       expectNoEvents()
       cancel()
     }
   }
 
-  @Test fun unconsumedItemThrows() = suspendTest {
+  @Test fun unconsumedItemThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       flow {
         emit("item!")
@@ -121,7 +130,7 @@ class FlowTurbineTest {
     )
   }
 
-  @Test fun unconsumedCompleteThrows() = suspendTest {
+  @Test fun unconsumedCompleteThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       emptyFlow<Nothing>().test { }
     }
@@ -134,7 +143,7 @@ class FlowTurbineTest {
     )
   }
 
-  @Test fun unconsumedErrorThrows() = suspendTest {
+  @Test fun unconsumedErrorThrows() = runTest {
     val expected = RuntimeException()
     val actual = assertFailsWith<AssertionError> {
       flow<Nothing> { throw expected }.test { }
@@ -149,7 +158,7 @@ class FlowTurbineTest {
     assertSame(expected, actual.cause)
   }
 
-  @Test fun unconsumedItemThrowsWithCancel() = suspendTest {
+  @Test fun unconsumedItemThrowsWithCancel() = runTest {
     val actual = assertFailsWith<AssertionError> {
       flow {
         emit("one")
@@ -170,7 +179,7 @@ class FlowTurbineTest {
     )
   }
 
-  @Test fun unconsumedCompleteThrowsWithCancel() = suspendTest {
+  @Test fun unconsumedCompleteThrowsWithCancel() = runTest {
     val actual = assertFailsWith<AssertionError> {
       flowOf("one").test {
         // Expect one item to ensure we start collecting and receive complete.
@@ -187,7 +196,7 @@ class FlowTurbineTest {
     )
   }
 
-  @Test fun unconsumedErrorThrowsWithCancel() = suspendTest {
+  @Test fun unconsumedErrorThrowsWithCancel() = runTest {
     val expected = RuntimeException()
     val actual = assertFailsWith<AssertionError> {
       flow {
@@ -209,7 +218,7 @@ class FlowTurbineTest {
     assertSame(expected, actual.cause)
   }
 
-  @Test fun unconsumedItemReturnedWithConsumingCancel() = suspendTest {
+  @Test fun unconsumedItemReturnedWithConsumingCancel() = runTest {
     flow {
       emit("one")
       emit("two")
@@ -223,7 +232,7 @@ class FlowTurbineTest {
     }
   }
 
-  @Test fun unconsumedCompleteReturnedWithConsumingCancel() = suspendTest {
+  @Test fun unconsumedCompleteReturnedWithConsumingCancel() = runTest {
     flowOf("one").test {
       // Expect one item to ensure we start collecting and receive complete.
       assertEquals("one", awaitItem())
@@ -233,7 +242,7 @@ class FlowTurbineTest {
     }
   }
 
-  @Test fun unconsumedErrorReturnedWithConsumingCancel() = suspendTest {
+  @Test fun unconsumedErrorReturnedWithConsumingCancel() = runTest {
     val expected = RuntimeException()
     flow {
       emit("one")
@@ -247,25 +256,25 @@ class FlowTurbineTest {
     }
   }
 
-  @Test fun unconsumedItemCanBeIgnored() = suspendTest {
+  @Test fun unconsumedItemCanBeIgnored() = runTest {
     flowOf("item!").test {
       cancelAndIgnoreRemainingEvents()
     }
   }
 
-  @Test fun unconsumedCompleteCanBeIgnored() = suspendTest {
+  @Test fun unconsumedCompleteCanBeIgnored() = runTest {
     emptyFlow<Nothing>().test {
       cancelAndIgnoreRemainingEvents()
     }
   }
 
-  @Test fun unconsumedErrorCanBeIgnored() = suspendTest {
+  @Test fun unconsumedErrorCanBeIgnored() = runTest {
     flow<Nothing> { throw RuntimeException() }.test {
       cancelAndIgnoreRemainingEvents()
     }
   }
 
-  @Test fun expectItem() = suspendTest {
+  @Test fun expectItem() = runTest {
     val item = Any()
     flowOf(item).test {
       assertSame(item, awaitItem())
@@ -273,7 +282,7 @@ class FlowTurbineTest {
     }
   }
 
-  @Test fun expectItemButWasCloseThrows() = suspendTest {
+  @Test fun expectItemButWasCloseThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       emptyFlow<Unit>().test {
         awaitItem()
@@ -282,7 +291,7 @@ class FlowTurbineTest {
     assertEquals("Expected item but found Complete", actual.message)
   }
 
-  @Test fun expectItemButWasErrorThrows() = suspendTest {
+  @Test fun expectItemButWasErrorThrows() = runTest {
     val error = RuntimeException()
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw error }.test {
@@ -293,13 +302,13 @@ class FlowTurbineTest {
     assertSame(error, actual.cause)
   }
 
-  @Test fun expectComplete() = suspendTest {
+  @Test fun expectComplete() = runTest {
     emptyFlow<Nothing>().test {
       awaitComplete()
     }
   }
 
-  @Test fun expectCompleteButWasItemThrows() = suspendTest {
+  @Test fun expectCompleteButWasItemThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       flowOf("item!").test {
         awaitComplete()
@@ -308,20 +317,20 @@ class FlowTurbineTest {
     assertEquals("Expected complete but found Item(item!)", actual.message)
   }
 
-  @Test fun expectCompleteButWasErrorThrows() = suspendTest {
+  @Test fun expectCompleteButWasErrorThrows() = runTest {
     emptyFlow<Nothing>().test {
       awaitComplete()
     }
   }
 
-  @Test fun expectError() = suspendTest {
+  @Test fun expectError() = runTest {
     val error = RuntimeException()
     flow<Nothing> { throw error }.test {
       assertSame(error, awaitError())
     }
   }
 
-  @Test fun expectErrorButWasItemThrows() = suspendTest {
+  @Test fun expectErrorButWasItemThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       flowOf("item!").test {
         awaitError()
@@ -330,7 +339,7 @@ class FlowTurbineTest {
     assertEquals("Expected error but found Item(item!)", actual.message)
   }
 
-  @Test fun expectErrorButWasCompleteThrows() = suspendTest {
+  @Test fun expectErrorButWasCompleteThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       emptyFlow<Nothing>().test {
         awaitError()
@@ -339,7 +348,7 @@ class FlowTurbineTest {
     assertEquals("Expected error but found Complete", actual.message)
   }
 
-  @Test fun expectItemEvent() = suspendTest {
+  @Test fun expectItemEvent() = runTest {
     val item = Any()
     flowOf(item).test {
       val event = awaitEvent()
@@ -348,7 +357,7 @@ class FlowTurbineTest {
     }
   }
 
-  @Test fun expectCompleteEvent() = suspendTest {
+  @Test fun expectCompleteEvent() = runTest {
     emptyFlow<Nothing>().test {
       val event = awaitEvent()
       assertEquals(Event.Complete, event)
@@ -356,7 +365,7 @@ class FlowTurbineTest {
     }
   }
 
-  @Test fun expectErrorEvent() = suspendTest {
+  @Test fun expectErrorEvent() = runTest {
     val exception = RuntimeException()
     flow<Nothing> { throw exception }.test {
       val event = awaitEvent()
@@ -365,7 +374,7 @@ class FlowTurbineTest {
     }
   }
 
-  @Test fun expectWaitsForEvents() = suspendTest {
+  @Test fun expectWaitsForEvents() = runTest {
     val channel = Channel<String>(RENDEZVOUS)
     var position = 0
 
@@ -390,7 +399,7 @@ class FlowTurbineTest {
     assertEquals(3, position)
   }
 
-  @Test fun exceptionsPropagateWhenExpectMostRecentItem() = suspendTest {
+  @Test fun exceptionsPropagateWhenExpectMostRecentItem() = runTest {
     // Use a custom subtype to prevent coroutines from breaking referential equality.
     val expected = object : RuntimeException("hello") {}
 
@@ -407,7 +416,7 @@ class FlowTurbineTest {
     assertSame(expected, actual)
   }
 
-  @Test fun expectMostRecentItemButNoItemWasFoundThrows() = suspendTest {
+  @Test fun expectMostRecentItemButNoItemWasFoundThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       emptyFlow<Any>().test {
         expectMostRecentItem()
@@ -416,7 +425,7 @@ class FlowTurbineTest {
     assertEquals("No item was found", actual.message)
   }
 
-  @Test fun expectMostRecentItem() = suspendTest {
+  @Test fun expectMostRecentItem() = runTest {
     val onTwoSent = CompletableDeferred<Unit>()
     val onTwoContinue = CompletableDeferred<Unit>()
     val onCompleteSent = CompletableDeferred<Unit>()
@@ -446,10 +455,85 @@ class FlowTurbineTest {
       }
   }
 
-  @Test fun assertNullValuesWithExpectMostRecentItem() = suspendTest {
+  @Test fun assertNullValuesWithExpectMostRecentItem() = runTest {
     flowOf(1, 2, null).test {
       assertEquals(null, expectMostRecentItem())
       cancelAndIgnoreRemainingEvents()
     }
+  }
+
+  @Test fun timeoutEnforcedByDefault() = runTest {
+    val job = async {
+      neverFlow().test {
+        awaitComplete()
+      }
+    }
+
+    advanceTimeBy(999.milliseconds)
+    runCurrent()
+    assertTrue(job.isActive)
+    advanceTimeBy(1.milliseconds)
+    runCurrent()
+    assertFalse(job.isActive)
+
+    val actual = assertFailsWith<TimeoutCancellationException> {
+      job.await()
+    }
+    assertEquals("Timed out waiting for 1000 ms", actual.message)
+  }
+
+  @Test fun timeoutEnforcedCustom() = runTest {
+    val job = async {
+      neverFlow().test(timeout = 10.seconds) {
+        awaitComplete()
+      }
+    }
+
+    advanceTimeBy(9.seconds + 999.milliseconds)
+    runCurrent()
+    assertTrue(job.isActive)
+    advanceTimeBy(1.milliseconds)
+    runCurrent()
+    assertFalse(job.isActive)
+
+    val actual = assertFailsWith<TimeoutCancellationException> {
+      job.await()
+    }
+    assertEquals("Timed out waiting for 10000 ms", actual.message)
+  }
+
+  @Suppress("DEPRECATION")
+  @Test fun timeoutEnforcedCustomLong() = runTest {
+    val job = async {
+      neverFlow().test(timeoutMs = 10_000) {
+        awaitComplete()
+      }
+    }
+
+    advanceTimeBy(9_999)
+    runCurrent()
+    assertTrue(job.isActive)
+    advanceTimeBy(1)
+    runCurrent()
+    assertFalse(job.isActive)
+
+    val actual = assertFailsWith<TimeoutCancellationException> {
+      job.await()
+    }
+    assertEquals("Timed out waiting for 10000 ms", actual.message)
+  }
+
+  @Test fun timeoutCanBeZero() = runTest {
+    val job = async {
+      neverFlow().test(timeout = ZERO) {
+        awaitComplete()
+      }
+    }
+
+    advanceTimeBy(10.days)
+    runCurrent()
+    assertTrue(job.isActive)
+
+    job.cancel()
   }
 }
