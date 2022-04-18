@@ -17,6 +17,7 @@ package app.cash.turbine
 
 import kotlin.native.concurrent.SharedImmutable
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
@@ -27,7 +28,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 
@@ -78,9 +78,6 @@ public suspend fun <T> Flow<T>.test(
   timeout: Duration = 1.seconds,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
-  // Once kotlinx.coroutines 1.6 ships pipe Duration all the way through.
-  val timeoutMs = timeout.inWholeMilliseconds
-
   coroutineScope {
     val events = Channel<Event<T>>(UNLIMITED)
 
@@ -110,7 +107,7 @@ public suspend fun <T> Flow<T>.test(
       }
     }
 
-    val flowTurbine = ChannelBasedFlowTurbine(events, collectJob, timeoutMs)
+    val flowTurbine = ChannelBasedFlowTurbine(events, collectJob, timeout)
     val ensureConsumed = try {
       flowTurbine.validate()
       if (debug) println("Validate lambda returning normally")
@@ -228,7 +225,7 @@ public sealed class Event<out T> {
 private class ChannelBasedFlowTurbine<T>(
   private val events: Channel<Event<T>>,
   private val collectJob: Job,
-  private val timeoutMs: Long,
+  private val timeout: Duration,
 ) : FlowTurbine<T> {
   override fun cancel() {
     collectJob.cancel()
@@ -241,7 +238,7 @@ private class ChannelBasedFlowTurbine<T>(
 
   override fun cancelAndConsumeRemainingEvents(): List<Event<T>> {
     cancel()
-    return mutableListOf<Event<T>>().apply {
+    return buildList {
       while (true) {
         this += events.tryReceive().getOrNull() ?: break
       }
@@ -256,10 +253,10 @@ private class ChannelBasedFlowTurbine<T>(
   }
 
   override suspend fun awaitEvent(): Event<T> {
-    return if (timeoutMs == 0L) {
+    return if (timeout == ZERO) {
       events.receive()
     } else {
-      withTimeout(timeoutMs) {
+      withTimeout(timeout) {
         events.receive()
       }
     }
