@@ -15,12 +15,16 @@
  */
 package app.cash.turbine
 
-import kotlinx.coroutines.CoroutineScope
+import kotlin.time.Duration
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 
 /** A flow that never emits anything. */
 fun neverFlow(): Flow<Nothing> = flow { awaitCancellation() }
 
-expect fun suspendTest(body: suspend CoroutineScope.() -> Unit)
+fun TestScope.advanceTimeBy(duration: Duration) {
+  advanceTimeBy(duration.inWholeMilliseconds)
+}
