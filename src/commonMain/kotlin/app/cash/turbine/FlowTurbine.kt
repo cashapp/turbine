@@ -104,10 +104,10 @@ public suspend fun <T> Flow<T>.test(
 
       if (terminalEvent != null) {
         events.send(terminalEvent)
-      }
 
-      if (debug) println("Collect closing event channel")
-      events.close()
+        if (debug) println("Collect closing event channel")
+        events.close()
+      }
     }
 
     val flowTurbine = ChannelBasedFlowTurbine(events, collectJob, timeoutMs)
