@@ -32,7 +32,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
-import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -375,28 +375,28 @@ class FlowTurbineTest {
   }
 
   @Test fun expectWaitsForEvents() = runTest {
-    val channel = Channel<String>(RENDEZVOUS)
-    var position = 0
+    val flow = MutableSharedFlow<String>()
+    val position = Channel<Int>(RENDEZVOUS)
 
     // Start undispatched so we suspend inside the test{} block.
     launch(start = UNDISPATCHED, context = Unconfined) {
-      channel.consumeAsFlow().test {
-        position = 1
+      flow.test {
+        position.send(1)
         assertEquals("one", awaitItem())
-        position = 2
+        position.send(2)
         assertEquals("two", awaitItem())
-        position = 3
+        position.send(3)
         cancel()
       }
     }
 
-    assertEquals(1, position)
+    assertEquals(1, position.receive())
 
-    channel.send("one")
-    assertEquals(2, position)
+    flow.emit("one")
+    assertEquals(2, position.receive())
 
-    channel.send("two")
-    assertEquals(3, position)
+    flow.emit("two")
+    assertEquals(3, position.receive())
   }
 
   @Test fun exceptionsPropagateWhenExpectMostRecentItem() = runTest {
