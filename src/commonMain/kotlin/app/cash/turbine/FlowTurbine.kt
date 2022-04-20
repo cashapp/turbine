@@ -115,11 +115,11 @@ public suspend fun <T> Flow<T>.test(
       true
     } catch (e: CancellationException) {
       if (e !== ignoreRemainingEventsException) {
-        if (debug) println("Validate ignoring remaining events")
+        if (debug) println("Validate canceling")
         throw e
       }
 
-      if (debug) println("Validate canceling $e")
+      if (debug) println("Validate ignoring remaining events")
       false
     }
 
