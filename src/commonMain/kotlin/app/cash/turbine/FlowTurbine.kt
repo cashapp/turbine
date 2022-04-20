@@ -22,6 +22,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -29,6 +30,7 @@ import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 
 private const val debug = false
@@ -47,7 +49,8 @@ private const val debug = false
  * ```
  *
  * @param timeoutMs Duration in milliseconds each suspending function on [FlowTurbine] will wait
- * before timing out.
+ * before timing out. Must be a positive value, or zero for no timeout. This guards against flows
+ * which never emit and always uses wall clock time.
  */
 @Deprecated("Use overload which accepts a Duration",
   ReplaceWith("this.test(timeoutMs.milliseconds, validate)",
@@ -73,11 +76,48 @@ public suspend fun <T> Flow<T>.test(
  * ```
  *
  * @param timeout Duration each suspending function on [FlowTurbine] will wait before timing out.
+ * Must be a positive value, or zero for no timeout. This guards against flows which never emit and
+ * always uses wall clock time.
  */
+@Deprecated(
+  "timeout parameter renamed to wallClockTimeout to accurately reflect its time source",
+  ReplaceWith("this.test(wallClockTimeout = timeout, validate)"),
+  DeprecationLevel.ERROR
+)
+@Suppress("UNUSED_PARAMETER") // Needed to create a different signature than the real function.
 public suspend fun <T> Flow<T>.test(
   timeout: Duration = 1.seconds,
+  dummyArgument: Nothing? = null,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
+  test(wallClockTimeout = timeout, validate = validate)
+}
+
+/**
+ * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
+ * consume and assert properties on them in order. If any exception occurs during validation the
+ * exception is rethrown from this method.
+ *
+ * ```kotlin
+ * flowOf("one", "two").test {
+ *   assertEquals("one", expectItem())
+ *   assertEquals("two", expectItem())
+ *   expectComplete()
+ * }
+ * ```
+ *
+ * @param wallClockTimeout Duration each suspending function on [FlowTurbine] will wait before
+ * timing out. Must be a positive value, or zero for no timeout. This guards against flows which
+ * never emit and always uses wall clock time.
+ */
+public suspend fun <T> Flow<T>.test(
+  wallClockTimeout: Duration = 1.seconds,
+  validate: suspend FlowTurbine<T>.() -> Unit
+) {
+  require(!wallClockTimeout.isNegative()) {
+    "Wall clock timeout must be >= 0: $wallClockTimeout"
+  }
+
   coroutineScope {
     val events = Channel<Event<T>>(UNLIMITED)
 
@@ -107,7 +147,7 @@ public suspend fun <T> Flow<T>.test(
       }
     }
 
-    val flowTurbine = ChannelBasedFlowTurbine(events, collectJob, timeout)
+    val flowTurbine = ChannelBasedFlowTurbine(events, collectJob, wallClockTimeout)
     val ensureConsumed = try {
       flowTurbine.validate()
       if (debug) println("Validate lambda returning normally")
@@ -225,7 +265,7 @@ public sealed class Event<out T> {
 private class ChannelBasedFlowTurbine<T>(
   private val events: Channel<Event<T>>,
   private val collectJob: Job,
-  private val timeout: Duration,
+  private val wallClockTimeout: Duration,
 ) : FlowTurbine<T> {
   override fun cancel() {
     collectJob.cancel()
@@ -253,10 +293,18 @@ private class ChannelBasedFlowTurbine<T>(
   }
 
   override suspend fun awaitEvent(): Event<T> {
-    return if (timeout == ZERO) {
-      events.receive()
-    } else {
-      withTimeout(timeout) {
+    if (wallClockTimeout == ZERO) {
+      return events.receive()
+    }
+
+    // Fast-path check for existing event to avoid dispatching.
+    events.tryReceive().getOrNull()?.let {
+      return it
+    }
+
+    // Run timeout on a dispatcher not susceptible to fake time.
+    return withContext(Dispatchers.Default) {
+      withTimeout(wallClockTimeout) {
         events.receive()
       }
     }
