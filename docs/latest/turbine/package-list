@@ -1,6 +1,7 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
 $dokka.location:app.cash.turbine////PointingToDeclaration/turbine/app.cash.turbine/index.html
+$dokka.location:app.cash.turbine//test/Flow<T>[TypeParam(bounds=[kotlin.Any?])]#Duration#kotlin.Nothing?#kotlin.coroutines.SuspendFunction1[app.cash.turbine.FlowTurbine[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/turbine/app.cash.turbine/test.html
 $dokka.location:app.cash.turbine//test/Flow<T>[TypeParam(bounds=[kotlin.Any?])]#Duration#kotlin.coroutines.SuspendFunction1[app.cash.turbine.FlowTurbine[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/turbine/app.cash.turbine/test.html
 $dokka.location:app.cash.turbine//test/Flow<T>[TypeParam(bounds=[kotlin.Any?])]#kotlin.Long#kotlin.coroutines.SuspendFunction1[app.cash.turbine.FlowTurbine[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/turbine/app.cash.turbine/test.html
 $dokka.location:app.cash.turbine/Event.Complete///PointingToDeclaration/turbine/app.cash.turbine/-event/-complete/index.html
