@@ -21,18 +21,11 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
-import kotlin.test.fail
-import kotlin.time.Duration.Companion.ZERO
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Unconfined
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
@@ -43,7 +36,6 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 
 class FlowTurbineTest {
   @Test fun exceptionsPropagate() = runTest {
@@ -460,94 +452,5 @@ class FlowTurbineTest {
       assertEquals(null, expectMostRecentItem())
       cancelAndIgnoreRemainingEvents()
     }
-  }
-
-  @Test fun wallClockTimeoutNotExceeded() = runTest {
-    flow {
-      // Delay on a dispatcher which does not use fake time.
-      withContext(Dispatchers.Default) {
-        delay(100.milliseconds)
-      }
-      emit(1)
-
-      // Delay on a dispatcher which does not use fake time.
-      withContext(Dispatchers.Default) {
-        delay(100.milliseconds)
-      }
-      emit(2)
-    }.test {
-      assertEquals(1, awaitItem())
-      assertEquals(2, awaitItem())
-      awaitComplete()
-    }
-  }
-
-  @Test fun wallClockTimeoutEnforcedByDefault() = runTest {
-    val actual = assertFailsWith<TimeoutCancellationException> {
-      flow {
-        // Delay on a dispatcher which does not use fake time.
-        withContext(Dispatchers.Default) {
-          delay(1100.milliseconds)
-        }
-        emit(1)
-      }.test {
-        awaitItem()
-      }
-    }
-    assertEquals("Timed out waiting for 1000 ms", actual.message)
-  }
-
-  @Test fun wallClockTimeoutEnforcedCustom() = runTest {
-    val actual = assertFailsWith<TimeoutCancellationException> {
-      neverFlow().test(wallClockTimeout = 300.milliseconds) {
-        awaitComplete()
-      }
-    }
-    assertEquals("Timed out waiting for 300 ms", actual.message)
-  }
-
-  @Suppress("DEPRECATION")
-  @Test fun wallClockTimeoutEnforcedCustomLong() = runTest {
-    val actual = assertFailsWith<TimeoutCancellationException> {
-      neverFlow().test(timeoutMs = 300) {
-        awaitComplete()
-      }
-    }
-    assertEquals("Timed out waiting for 300 ms", actual.message)
-  }
-
-  @Suppress("DEPRECATION_ERROR")
-  @Test fun wallClockTimeoutEnforcedOldNamedArgument() = runTest {
-    val actual = assertFailsWith<TimeoutCancellationException> {
-      neverFlow().test(timeout = 300.milliseconds) {
-        awaitComplete()
-      }
-    }
-    assertEquals("Timed out waiting for 300 ms", actual.message)
-  }
-
-  @Test fun wallClockTimeoutCanBeZero() = runTest {
-    val job = launch {
-      neverFlow().test(wallClockTimeout = ZERO) {
-        awaitComplete()
-      }
-    }
-
-    // Delay on a dispatcher which does not use fake time.
-    withContext(Dispatchers.Default) {
-      // We can't test forever, but if we get past 1 second we're probably waiting forever.
-      delay(1.5.seconds)
-    }
-
-    job.cancel()
-  }
-
-  @Test fun wallClockTimeoutNegativeThrows() = runTest {
-    val actual = assertFailsWith<IllegalArgumentException> {
-      neverFlow().test(wallClockTimeout = -1.seconds) {
-        fail()
-      }
-    }
-    assertEquals("Wall clock timeout must be >= 0: -1s", actual.message)
   }
 }

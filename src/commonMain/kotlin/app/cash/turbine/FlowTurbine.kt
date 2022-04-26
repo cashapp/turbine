@@ -17,12 +17,9 @@ package app.cash.turbine
 
 import kotlin.native.concurrent.SharedImmutable
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.ZERO
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -30,8 +27,6 @@ import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 
 private const val debug = false
 
@@ -47,19 +42,17 @@ private const val debug = false
  *   expectComplete()
  * }
  * ```
- *
- * @param timeoutMs Duration in milliseconds each suspending function on [FlowTurbine] will wait
- * before timing out. Must be a positive value, or zero for no timeout. This guards against flows
- * which never emit and always uses wall clock time.
  */
-@Deprecated("Use overload which accepts a Duration",
-  ReplaceWith("this.test(timeoutMs.milliseconds, validate)",
-    "kotlin.time.Duration.Companion.milliseconds"))
+@Deprecated("Timeout parameter removed. Use runTest which has a timeout or wrap in withTimeout.",
+  ReplaceWith("this.test(validate)"),
+  DeprecationLevel.ERROR,
+)
+@Suppress("UNUSED_PARAMETER")
 public suspend fun <T> Flow<T>.test(
   timeoutMs: Long,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
-  test(timeoutMs.milliseconds, validate)
+  test(validate)
 }
 
 /**
@@ -74,23 +67,17 @@ public suspend fun <T> Flow<T>.test(
  *   expectComplete()
  * }
  * ```
- *
- * @param timeout Duration each suspending function on [FlowTurbine] will wait before timing out.
- * Must be a positive value, or zero for no timeout. This guards against flows which never emit and
- * always uses wall clock time.
  */
-@Deprecated(
-  "timeout parameter renamed to wallClockTimeout to accurately reflect its time source",
-  ReplaceWith("this.test(wallClockTimeout = timeout, validate)"),
-  DeprecationLevel.ERROR
+@Deprecated("Timeout parameter removed. Use runTest which has a timeout or wrap in withTimeout.",
+  ReplaceWith("this.test(validate)"),
+  DeprecationLevel.ERROR,
 )
-@Suppress("UNUSED_PARAMETER") // Needed to create a different signature than the real function.
+@Suppress("UNUSED_PARAMETER")
 public suspend fun <T> Flow<T>.test(
   timeout: Duration = 1.seconds,
-  dummyArgument: Nothing? = null,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
-  test(wallClockTimeout = timeout, validate = validate)
+  test(validate)
 }
 
 /**
@@ -105,19 +92,10 @@ public suspend fun <T> Flow<T>.test(
  *   expectComplete()
  * }
  * ```
- *
- * @param wallClockTimeout Duration each suspending function on [FlowTurbine] will wait before
- * timing out. Must be a positive value, or zero for no timeout. This guards against flows which
- * never emit and always uses wall clock time.
  */
 public suspend fun <T> Flow<T>.test(
-  wallClockTimeout: Duration = 1.seconds,
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
-  require(!wallClockTimeout.isNegative()) {
-    "Wall clock timeout must be >= 0: $wallClockTimeout"
-  }
-
   coroutineScope {
     val events = Channel<Event<T>>(UNLIMITED)
 
@@ -147,7 +125,7 @@ public suspend fun <T> Flow<T>.test(
       }
     }
 
-    val flowTurbine = ChannelBasedFlowTurbine(events, collectJob, wallClockTimeout)
+    val flowTurbine = ChannelBasedFlowTurbine(events, collectJob)
     val ensureConsumed = try {
       flowTurbine.validate()
       if (debug) println("Validate lambda returning normally")
@@ -265,7 +243,6 @@ public sealed class Event<out T> {
 private class ChannelBasedFlowTurbine<T>(
   private val events: Channel<Event<T>>,
   private val collectJob: Job,
-  private val wallClockTimeout: Duration,
 ) : FlowTurbine<T> {
   override fun cancel() {
     collectJob.cancel()
@@ -293,21 +270,7 @@ private class ChannelBasedFlowTurbine<T>(
   }
 
   override suspend fun awaitEvent(): Event<T> {
-    if (wallClockTimeout == ZERO) {
-      return events.receive()
-    }
-
-    // Fast-path check for existing event to avoid dispatching.
-    events.tryReceive().getOrNull()?.let {
-      return it
-    }
-
-    // Run timeout on a dispatcher not susceptible to fake time.
-    return withContext(Dispatchers.Default) {
-      withTimeout(wallClockTimeout) {
-        events.receive()
-      }
-    }
+    return events.receive()
   }
 
   override suspend fun awaitItem(): T {
