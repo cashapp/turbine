@@ -191,36 +191,31 @@ public interface FlowTurbine<T> {
 
   /**
    * Assert that an event was received and return it.
-   * If no events have been received, this function will suspend for up to [timeout].
-   *
-   * @throws kotlinx.coroutines.TimeoutCancellationException if no event was received in time.
+   * This function will suspend if no events have been received.
    */
   public suspend fun awaitEvent(): Event<T>
 
   /**
    * Assert that the next event received was an item and return it.
-   * If no events have been received, this function will suspend for up to [timeout].
+   * This function will suspend if no events have been received.
    *
    * @throws AssertionError if the next event was completion or an error.
-   * @throws kotlinx.coroutines.TimeoutCancellationException if no event was received in time.
    */
   public suspend fun awaitItem(): T
 
   /**
    * Assert that the next event received was the flow completing.
-   * If no events have been received, this function will suspend for up to [timeout].
+   * This function will suspend if no events have been received.
    *
    * @throws AssertionError if the next event was an item or an error.
-   * @throws kotlinx.coroutines.TimeoutCancellationException if no event was received in time.
    */
   public suspend fun awaitComplete()
 
   /**
    * Assert that the next event received was an error terminating the flow.
-   * If no events have been received, this function will suspend for up to [timeout].
+   * This function will suspend if no events have been received.
    *
    * @throws AssertionError if the next event was an item or completion.
-   * @throws kotlinx.coroutines.TimeoutCancellationException if no event was received in time.
    */
   public suspend fun awaitError(): Throwable
 }
