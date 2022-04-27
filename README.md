@@ -156,40 +156,8 @@ channelFlow {
 }
 ```
 
-By default, when one of the "await" methods suspends waiting for an event it will timeout after
-one second.
-
-```kotlin
-channelFlow {
-  withContext(IO) {
-    Thread.sleep(2_000)
-    send("item")
-  }
-}.test {
-  assertEquals("item", awaitItem())
-  awaitComplete()
-}
-```
-```
-Exception in thread "main" TimeoutCancellationException: Timed out waiting for 1000 ms
-```
-
-A longer timeout can be specified as an argument to `test`.
-
-```kotlin
-channelFlow {
-  withContext(IO) {
-    Thread.sleep(2_000)
-    send("item")
-  }
-}.test(timeout = 3_000) {
-  assertEquals("item", awaitItem())
-  awaitComplete()
-}
-```
-
-Asynchronous flows can be canceled at any time and will not require consuming a complete or
-error event.
+Asynchronous flows can be canceled at any time so long as you have consumed all emitted events.
+Allowing the `test` lambda to complete will implicitly cancel the flow.
 
 ```kotlin
 channelFlow {
@@ -203,14 +171,33 @@ channelFlow {
   assertEquals("item 0", awaitItem())
   assertEquals("item 1", awaitItem())
   assertEquals("item 2", awaitItem())
+}
+```
+
+Flows can also be explicitly canceled at any point.
+
+```kotlin
+channelFlow {
+  withContext(IO) {
+    repeat(10) {
+      Thread.sleep(200)
+      send("item $it")
+    }
+  }
+}.test {
+  Thread.sleep(700)
   cancel()
+
+  assertEquals("item 0", awaitItem())
+  assertEquals("item 1", awaitItem())
+  assertEquals("item 2", awaitItem())
 }
 ```
 
 #### Hot Flows
 
-Emissions to hot flows that don't have active consumers are dropped. It's important to call `test`
-(and therefore have an active collector) on a flow _before_ emissions to a flow are made. For example:
+Emissions to hot flows that don't have active consumers are dropped. Call `test` on a flow _before_
+emitting or the item will be missed.
 
 ```kotlin
 val mutableSharedFlow = MutableSharedFlow<Int>(replay = 0)
@@ -220,15 +207,13 @@ mutableSharedFlow.test {
   cancelAndConsumeRemainingEvents()
 }
 ```
-
-will fail with a timeout exception.
-
 ```
-kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 1000 ms
-	(Coroutine boundary)
-	at app.cash.turbine.ChannelBasedFlowTurbine$awaitEvent$2.invokeSuspend(FlowTurbine.kt:238)
-	at app.cash.turbine.ChannelBasedFlowTurbine$withTimeout$2.invokeSuspend(FlowTurbine.kt:206)
-	at app.cash.turbine.ChannelBasedFlowTurbine.awaitItem(FlowTurbine.kt:243)
+kotlinx.coroutines.test.UncompletedCoroutinesError: After waiting for 60000 ms, the test coroutine is not completing, there were active child jobs: [ScopeCoroutine{Completing}@478db956]
+	at app//kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt$runTestCoroutine$3$3.invokeSuspend(TestBuilders.kt:304)
+	at ???(Coroutine boundary.?(?)
+	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt.runTestCoroutine(TestBuilders.kt:288)
+	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt$runTest$1$1.invokeSuspend(TestBuilders.kt:167)
+	at kotlinx.coroutines.test.TestBuildersJvmKt$createTestResult$1.invokeSuspend(TestBuildersJvm.kt:13)
 ```
 
 Proper usage of Turbine with hot flows looks like the following.
