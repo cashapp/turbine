@@ -56,7 +56,7 @@ someFlow.test {
 }
 ```
 
-#### Consuming Events
+### Consuming Events
 
 Inside the `test` block you must consume all received events from the flow. Failing to consume all
 events will fail your test.
@@ -112,7 +112,7 @@ flowOf("one", "two", "three")
   }
 ```
 
-#### Consuming Errors
+### Consuming Errors
 
 Unlike `collect`, a flow which causes an exception will still be exposed as an event that you
 must consume.
@@ -139,7 +139,7 @@ Caused by: java.lang.RuntimeException: broken!
     ... 32 more
 ```
 
-#### Asynchronous Flows
+### Asynchronous Flows
 
 Calls to `awaitItem()`, `awaitComplete()`, and `awaitError()` are suspending and will wait
 for events from asynchronous flows.
@@ -194,7 +194,7 @@ channelFlow {
 }
 ```
 
-#### Hot Flows
+### Hot Flows
 
 Emissions to hot flows that don't have active consumers are dropped. Call `test` on a flow _before_
 emitting or the item will be missed.
@@ -233,6 +233,63 @@ The hot flow types Kotlin currently provides are:
 * `MutableSharedFlow`
 * `SharedFlow`
 * Channels converted to flow with `Channel.consumeAsFlow`
+
+### Multiple turbines
+
+Multiple flows can be tested at once using the `testIn` function which returns the turbine test
+object which would otherwise be used as a lambda receiver in the `test` function.
+
+```kotlin
+runTest {
+  val turbine1 = flowOf(1).testIn(this)
+  val turbine2 = flowOf(2).testIn(this)
+  assertEquals(1, turbine1.awaitItem())
+  assertEquals(2, turbine2.awaitItem())
+  turbine1.awaitComplete()
+  turbine2.awaitComplete()
+}
+```
+
+Unconsumed events will throw an exception when the scope ends.
+
+```kotlin
+runTest {
+  val turbine1 = flowOf(1).testIn(this)
+  val turbine2 = flowOf(2).testIn(this)
+  assertEquals(1, turbine1.awaitItem())
+  assertEquals(2, turbine2.awaitItem())
+  turbine1.awaitComplete()
+  // turbine2.awaitComplete()   <-- NEWLY COMMENTED OUT
+}
+```
+```
+kotlinx.coroutines.CompletionHandlerException: Exception in completion handler InvokeOnCompletion@6d167f58[job@3403e2ac] for TestScope[test started]
+	at app//kotlinx.coroutines.JobSupport.completeStateFinalization(JobSupport.kt:320)
+	at app//kotlinx.coroutines.JobSupport.tryFinalizeSimpleState(JobSupport.kt:295)
+	... 70 more
+Caused by: app.cash.turbine.AssertionError: Unconsumed events found:
+ - Complete
+	at app//app.cash.turbine.ChannelBasedFlowTurbine.ensureAllEventsConsumed(FlowTurbine.kt:333)
+	at app//app.cash.turbine.FlowTurbineKt$testIn$1.invoke(FlowTurbine.kt:115)
+	at app//app.cash.turbine.FlowTurbineKt$testIn$1.invoke(FlowTurbine.kt:112)
+	at app//kotlinx.coroutines.InvokeOnCompletion.invoke(JobSupport.kt:1391)
+	at app//kotlinx.coroutines.JobSupport.completeStateFinalization(JobSupport.kt:318)
+	... 72 more
+```
+
+Unlike the `test` lambda, flows are not automatically canceled. Long-running asynchronous or
+infinite flows must be explicitly canceled.
+
+```kotlin
+runTest {
+  val state = MutableStateFlow(1)
+  val turbine = state.testIn(this)
+  assertEquals(1, turbine.awaitItem())
+  state.emit(2)
+  assertEquals(2, turbine.awaitItem())
+  turbine.cancel()
+}
+```
 
 
 # License

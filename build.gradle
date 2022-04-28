@@ -82,6 +82,7 @@ kotlin {
   sourceSets.matching { it.name.endsWith("Test") }.all {
     it.languageSettings {
       optIn('kotlinx.coroutines.DelicateCoroutinesApi')
+      optIn('kotlinx.coroutines.InternalCoroutinesApi')
       optIn('kotlinx.coroutines.ExperimentalCoroutinesApi')
     }
   }

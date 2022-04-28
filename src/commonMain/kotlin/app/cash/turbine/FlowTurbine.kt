@@ -15,10 +15,10 @@
  */
 package app.cash.turbine
 
-import kotlin.native.concurrent.SharedImmutable
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.Job
@@ -26,6 +26,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 private const val debug = false
@@ -97,56 +98,59 @@ public suspend fun <T> Flow<T>.test(
   validate: suspend FlowTurbine<T>.() -> Unit
 ) {
   coroutineScope {
-    val events = Channel<Event<T>>(UNLIMITED)
-
-    val collectJob = launch(start = UNDISPATCHED, context = Unconfined) {
-      val terminalEvent = try {
-        if (debug) println("Collect starting!")
-        collect { item ->
-          if (debug) println("Collect got: $item")
-          events.send(Event.Item(item))
-        }
-
-        if (debug) println("Collect complete!")
-        Event.Complete
-      } catch (_: CancellationException) {
-        if (debug) println("Collect canceled!")
-        null
-      } catch (t: Throwable) {
-        if (debug) println("Collect error! $t")
-        Event.Error(t)
-      }
-
-      if (terminalEvent != null) {
-        events.send(terminalEvent)
-
-        if (debug) println("Collect closing event channel")
-        events.close()
-      }
-    }
-
-    val flowTurbine = ChannelBasedFlowTurbine(events, collectJob)
-    val ensureConsumed = try {
-      flowTurbine.validate()
-      if (debug) println("Validate lambda returning normally")
-
-      true
-    } catch (e: CancellationException) {
-      if (e !== ignoreRemainingEventsException) {
-        if (debug) println("Validate canceling")
-        throw e
-      }
-
-      if (debug) println("Validate ignoring remaining events")
-      false
-    }
-
-    flowTurbine.cancel()
-
-    if (ensureConsumed) {
-      flowTurbine.ensureAllEventsConsumed()
+    collectTurbineIn(this).apply {
+      validate()
+      cancel()
+      ensureAllEventsConsumed()
     }
   }
+}
+
+public fun <T> Flow<T>.testIn(scope: CoroutineScope): FlowTurbine<T> {
+  val turbine = collectTurbineIn(scope)
+
+  scope.coroutineContext.job.invokeOnCompletion { exception ->
+    if (debug) println("Scope ending ${exception ?: ""}")
+
+    // Only validate events were consumed if the scope is exiting normally.
+    if (exception == null) {
+      turbine.ensureAllEventsConsumed()
+    }
+  }
+
+  return turbine
+}
+
+private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): ChannelBasedFlowTurbine<T> {
+  val events = Channel<Event<T>>(UNLIMITED)
+
+  val collectJob = scope.launch(start = UNDISPATCHED, context = Unconfined) {
+    val terminalEvent = try {
+      if (debug) println("Collect starting!")
+      collect { item ->
+        if (debug) println("Collect got: $item")
+        events.send(Event.Item(item))
+      }
+
+      if (debug) println("Collect complete!")
+      Event.Complete
+    } catch (_: CancellationException) {
+      if (debug) println("Collect canceled!")
+      null
+    } catch (t: Throwable) {
+      if (debug) println("Collect error! $t")
+      Event.Error(t)
+    }
+
+    if (terminalEvent != null) {
+      events.send(terminalEvent)
+
+      if (debug) println("Collect closing event channel")
+      events.close()
+    }
+  }
+
+  return ChannelBasedFlowTurbine(events, collectJob)
 }
 
 /**
@@ -164,7 +168,7 @@ public interface FlowTurbine<T> {
    * Cancel collecting events from the source [Flow] and ignore any events which have already
    * been received. Calling this function will exit the [test] block.
    */
-  public fun cancelAndIgnoreRemainingEvents(): Nothing
+  public fun cancelAndIgnoreRemainingEvents()
 
   /**
    * Cancel collecting events from the source [Flow]. Any events which have already been received
@@ -220,9 +224,6 @@ public interface FlowTurbine<T> {
   public suspend fun awaitError(): Throwable
 }
 
-@SharedImmutable
-private val ignoreRemainingEventsException = CancellationException("Ignore remaining events")
-
 public sealed class Event<out T> {
   public object Complete : Event<Nothing>() {
     override fun toString(): String = "Complete"
@@ -239,13 +240,15 @@ private class ChannelBasedFlowTurbine<T>(
   private val events: Channel<Event<T>>,
   private val collectJob: Job,
 ) : FlowTurbine<T> {
+  private var ignoreRemainingEvents = false
+
   override fun cancel() {
     collectJob.cancel()
   }
 
-  override fun cancelAndIgnoreRemainingEvents(): Nothing {
+  override fun cancelAndIgnoreRemainingEvents() {
     cancel()
-    throw ignoreRemainingEventsException
+    ignoreRemainingEvents = true
   }
 
   override fun cancelAndConsumeRemainingEvents(): List<Event<T>> {
@@ -315,6 +318,8 @@ private class ChannelBasedFlowTurbine<T>(
   }
 
   fun ensureAllEventsConsumed() {
+    if (ignoreRemainingEvents) return
+
     val unconsumed = mutableListOf<Event<T>>()
     var cause: Throwable? = null
     while (true) {
