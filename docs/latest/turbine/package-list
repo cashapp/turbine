@@ -26,5 +26,6 @@ $dokka.location:app.cash.turbine/FlowTurbine/cancelAndConsumeRemainingEvents/#/P
 $dokka.location:app.cash.turbine/FlowTurbine/cancelAndIgnoreRemainingEvents/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/cancel-and-ignore-remaining-events.html
 $dokka.location:app.cash.turbine/FlowTurbine/expectMostRecentItem/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/expect-most-recent-item.html
 $dokka.location:app.cash.turbine/FlowTurbine/expectNoEvents/#/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/expect-no-events.html
+$dokka.location:app.cash.turbine/FlowTurbine/skipItems/#kotlin.Int/PointingToDeclaration/turbine/app.cash.turbine/-flow-turbine/skip-items.html
 app.cash.turbine
 
