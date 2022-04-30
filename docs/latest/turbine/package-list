@@ -1,10 +1,10 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
 $dokka.location:app.cash.turbine////PointingToDeclaration/turbine/app.cash.turbine/index.html
-$dokka.location:app.cash.turbine//test/Flow<T>[TypeParam(bounds=[kotlin.Any?])]#Duration#kotlin.coroutines.SuspendFunction1[app.cash.turbine.FlowTurbine[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/turbine/app.cash.turbine/test.html
-$dokka.location:app.cash.turbine//test/Flow<T>[TypeParam(bounds=[kotlin.Any?])]#kotlin.Long#kotlin.coroutines.SuspendFunction1[app.cash.turbine.FlowTurbine[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/turbine/app.cash.turbine/test.html
-$dokka.location:app.cash.turbine//test/Flow<T>[TypeParam(bounds=[kotlin.Any?])]#kotlin.coroutines.SuspendFunction1[app.cash.turbine.FlowTurbine[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/turbine/app.cash.turbine/test.html
-$dokka.location:app.cash.turbine//testIn/Flow<T>[TypeParam(bounds=[kotlin.Any?])]#CoroutineScope/PointingToDeclaration/turbine/app.cash.turbine/test-in.html
+$dokka.location:app.cash.turbine//test/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#kotlin.Long#kotlin.coroutines.SuspendFunction1[app.cash.turbine.FlowTurbine[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/turbine/app.cash.turbine/test.html
+$dokka.location:app.cash.turbine//test/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#kotlin.coroutines.SuspendFunction1[app.cash.turbine.FlowTurbine[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/turbine/app.cash.turbine/test.html
+$dokka.location:app.cash.turbine//test/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#kotlin.time.Duration#kotlin.coroutines.SuspendFunction1[app.cash.turbine.FlowTurbine[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/turbine/app.cash.turbine/test.html
+$dokka.location:app.cash.turbine//testIn/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#kotlinx.coroutines.CoroutineScope/PointingToDeclaration/turbine/app.cash.turbine/test-in.html
 $dokka.location:app.cash.turbine/Event.Complete///PointingToDeclaration/turbine/app.cash.turbine/-event/-complete/index.html
 $dokka.location:app.cash.turbine/Event.Complete/toString/#/PointingToDeclaration/turbine/app.cash.turbine/-event/-complete/to-string.html
 $dokka.location:app.cash.turbine/Event.Error///PointingToDeclaration/turbine/app.cash.turbine/-event/-error/index.html
