@@ -1,9 +1,9 @@
 buildscript {
   dependencies {
-    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.20'
+    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21'
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.15.1'
     classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
-    classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.5.30'
+    classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.6.21'
   }
 
   ext.versions = [
@@ -123,11 +123,11 @@ signing {
 }
 
 apply plugin: 'org.jetbrains.dokka'
-tasks.withType(org.jetbrains.dokka.gradle.DokkaTask).configureEach { task ->
-  task.dokkaSourceSets {
+dokkaHtml {
+  dokkaSourceSets {
     configureEach {
       externalDocumentationLink {
-        url.set(new URL('https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/'))
+        url.set(new URL('https://kotlin.github.io/kotlinx.coroutines/'))
       }
     }
   }
