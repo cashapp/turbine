@@ -99,6 +99,7 @@ apply plugin: 'org.jetbrains.dokka'
 dokkaHtml {
   dokkaSourceSets {
     configureEach {
+      skipDeprecated.set(true)
       externalDocumentationLink {
         url.set(new URL('https://kotlin.github.io/kotlinx.coroutines/'))
       }
