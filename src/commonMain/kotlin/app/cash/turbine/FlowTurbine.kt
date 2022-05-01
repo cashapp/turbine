@@ -107,6 +107,21 @@ public suspend fun <T> Flow<T>.test(
   }
 }
 
+/**
+ * Terminal flow operator that collects events from given flow and returns a [FlowTurbine] for
+ * consuming and asserting properties on them in order. If any exception occurs during validation the
+ * exception is rethrown from this method.
+ *
+ * ```kotlin
+ * val turbine = flowOf("one", "two").testIn(this) {
+ * assertEquals("one", turbine.expectItem())
+ * assertEquals("two", turbine.expectItem())
+ * turbine.expectComplete()
+ * ```
+ *
+ * Unlike [test] which automatically cancels the flow at the end of the lambda, the returned
+ * [FlowTurbine] must either consume a terminal event (complete or error) or be explicitly canceled.
+  */
 public fun <T> Flow<T>.testIn(scope: CoroutineScope): FlowTurbine<T> {
   val turbine = collectTurbineIn(scope)
 
