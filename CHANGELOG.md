@@ -3,6 +3,17 @@
 ## [Unreleased]
 
 
+## [0.8.0]
+### Added
+- New `testIn` API allows testing multiple flows without nesting lambdas.
+- New `skip(Int)` API can replace one or more calls to `awaitItem()` where the result is not needed.
+
+### Changed
+- Removed timeout parameter. The new `runTest` API from kotlinx.coroutines enforces a timeout automatically.
+- Documented that flows are implicitly canceled at the end of the `test` lambda. This has been the behavior for a few versions by accident, but now it is explicit and documented.
+- Cancel (and friends) are now suspending functions to ensure that non-canceleable coroutines complete and their effects are observed deterministically.
+
+
 ## [0.7.0]
 ### Changed
 - Moved APIs using Kotlin's experimental time to separate extensions. You can now use the library
@@ -69,7 +80,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.7.0...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/cashapp/turbine/releases/tag/0.8.0
 [0.7.0]: https://github.com/cashapp/turbine/releases/tag/0.7.0
 [0.6.1]: https://github.com/cashapp/turbine/releases/tag/0.6.1
 [0.6.0]: https://github.com/cashapp/turbine/releases/tag/0.6.0
