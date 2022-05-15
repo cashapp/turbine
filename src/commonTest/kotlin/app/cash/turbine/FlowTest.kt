@@ -22,13 +22,21 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -37,6 +45,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
@@ -505,5 +514,32 @@ class FlowTest {
       }
       assertSame(error, actual.cause)
     }
+  }
+
+  @ExperimentalTime
+  @Test fun respectRunTestDelaySkippingBehavior() = runTest {
+    fun <T> Flow<T>.throttleFirst(period: Duration): Flow<T> = flow {
+      conflate().collect {
+        emit(it)
+        delay(period)
+      }
+    }
+    val realTime = measureTime {
+      flow {
+        repeat(5) {
+          emit(it)
+          delay(1.seconds)
+        }
+      }
+        .throttleFirst(5.seconds)
+        .test {
+          assertEquals(0, awaitItem())
+          assertEquals(4, awaitItem())
+        }
+    }
+    assertTrue(realTime < 4.seconds)
+    val testSchedulerTime = currentTime.milliseconds
+    assertTrue(testSchedulerTime > realTime)
+    assertEquals(testSchedulerTime, 5.seconds)
   }
 }
