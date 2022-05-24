@@ -113,7 +113,7 @@ public suspend fun <T> Flow<T>.test(
  * exception is rethrown from this method.
  *
  * ```kotlin
- * val turbine = flowOf("one", "two").testIn(this) {
+ * val turbine = flowOf("one", "two").testIn(this)
  * assertEquals("one", turbine.expectItem())
  * assertEquals("two", turbine.expectItem())
  * turbine.expectComplete()
