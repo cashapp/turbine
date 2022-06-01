@@ -248,18 +248,6 @@ public interface FlowTurbine<T> {
   public suspend fun awaitError(): Throwable
 }
 
-public sealed class Event<out T> {
-  public object Complete : Event<Nothing>() {
-    override fun toString(): String = "Complete"
-  }
-  public data class Error(val throwable: Throwable) : Event<Nothing>() {
-    override fun toString(): String = "Error(${throwable::class.simpleName})"
-  }
-  public data class Item<T>(val value: T) : Event<T>() {
-    override fun toString(): String = "Item($value)"
-  }
-}
-
 private class ChannelBasedFlowTurbine<T>(
   private val events: Channel<Event<T>>,
   private val collectJob: Job,
@@ -308,7 +296,7 @@ private class ChannelBasedFlowTurbine<T>(
       when (val event = awaitEvent()) {
         Event.Complete, is Event.Error -> {
           val cause = (event as? Event.Error)?.throwable
-          throw AssertionError("Expected $count items but got $index items and $event", cause)
+          throw TurbineAssertionError("Expected $count items but got $index items and $event", cause)
         }
         is Event.Item<T> -> { /* Success */ }
       }
@@ -350,7 +338,7 @@ private class ChannelBasedFlowTurbine<T>(
 
   private fun unexpectedEvent(event: Event<*>, expected: String): Nothing {
     val cause = (event as? Event.Error)?.throwable
-    throw AssertionError("Expected $expected but found $event", cause)
+    throw TurbineAssertionError("Expected $expected but found $event", cause)
   }
 
   fun ensureAllEventsConsumed() {
@@ -368,7 +356,7 @@ private class ChannelBasedFlowTurbine<T>(
     }
     if (debug) println("Unconsumed events: $unconsumed")
     if (unconsumed.isNotEmpty()) {
-      throw AssertionError(
+      throw TurbineAssertionError(
         buildString {
           append("Unconsumed events found:")
           for (event in unconsumed) {
@@ -380,16 +368,4 @@ private class ChannelBasedFlowTurbine<T>(
     }
   }
 }
-
-/**
- * A plain [AssertionError] working around three bugs:
- *
- *  1. No two-arg constructor in common (https://youtrack.jetbrains.com/issue/KT-40728).
- *  2. No two-arg constructor in Java 6.
- *  3. Public exceptions with public constructors have referential equality broken by coroutines.
- */
-private class AssertionError(
-  message: String,
-  override val cause: Throwable?
-) : kotlin.AssertionError(message)
 
