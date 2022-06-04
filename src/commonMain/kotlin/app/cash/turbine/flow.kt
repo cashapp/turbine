@@ -21,6 +21,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -48,7 +49,7 @@ import kotlinx.coroutines.launch
 @Suppress("UNUSED_PARAMETER")
 public suspend fun <T> Flow<T>.test(
   timeoutMs: Long,
-  validate: suspend FlowTurbine<T>.() -> Unit
+  validate: suspend TurbineChannel<T>.() -> Unit
 ) {
   test(validate)
 }
@@ -73,7 +74,7 @@ public suspend fun <T> Flow<T>.test(
 @Suppress("UNUSED_PARAMETER")
 public suspend fun <T> Flow<T>.test(
   timeout: Duration = 1.seconds,
-  validate: suspend FlowTurbine<T>.() -> Unit
+  validate: suspend TurbineChannel<T>.() -> Unit
 ) {
   test(validate)
 }
@@ -92,7 +93,7 @@ public suspend fun <T> Flow<T>.test(
  * ```
  */
 public suspend fun <T> Flow<T>.test(
-  validate: suspend FlowTurbine<T>.() -> Unit
+  validate: suspend TurbineChannel<T>.() -> Unit
 ) {
   coroutineScope {
     collectTurbineIn(this).apply {
@@ -104,7 +105,7 @@ public suspend fun <T> Flow<T>.test(
 }
 
 /**
- * Terminal flow operator that collects events from given flow and returns a [FlowTurbine] for
+ * Terminal flow operator that collects events from given flow and returns a [TurbineChannel] for
  * consuming and asserting properties on them in order. If any exception occurs during validation the
  * exception is rethrown from this method.
  *
@@ -116,9 +117,9 @@ public suspend fun <T> Flow<T>.test(
  * ```
  *
  * Unlike [test] which automatically cancels the flow at the end of the lambda, the returned
- * [FlowTurbine] must either consume a terminal event (complete or error) or be explicitly canceled.
+ * [TurbineChannel] must either consume a terminal event (complete or error) or be explicitly canceled.
  */
-public fun <T> Flow<T>.testIn(scope: CoroutineScope): FlowTurbine<T> {
+public fun <T> Flow<T>.testIn(scope: CoroutineScope): TurbineChannel<T> {
   val turbine = collectTurbineIn(scope)
 
   scope.coroutineContext.job.invokeOnCompletion { exception ->
@@ -133,36 +134,10 @@ public fun <T> Flow<T>.testIn(scope: CoroutineScope): FlowTurbine<T> {
   return turbine
 }
 
-private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): ChannelBasedFlowTurbine<T> {
-  val events = Channel<Event<T>>(Channel.UNLIMITED)
+private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): TurbineChannel<T> {
+  val (channel, job) = scope.jobify { collectIntoChannel(this) }
 
-  val collectJob = scope.launch(start = CoroutineStart.UNDISPATCHED, context = Dispatchers.Unconfined) {
-    val terminalEvent = try {
-      if (debug) println("Collect starting!")
-      collect { item ->
-        if (debug) println("Collect got: $item")
-        events.send(Event.Item(item))
-      }
-
-      if (debug) println("Collect complete!")
-      Event.Complete
-    } catch (_: CancellationException) {
-      if (debug) println("Collect canceled!")
-      null
-    } catch (t: Throwable) {
-      if (debug) println("Collect error! $t")
-      Event.Error(t)
-    }
-
-    if (terminalEvent != null) {
-      events.send(terminalEvent)
-
-      if (debug) println("Collect closing event channel")
-      events.close()
-    }
-  }
-
-  return ChannelBasedFlowTurbine(events, collectJob)
+  return TurbineChannelImpl(channel, job)
 }
 
 internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
@@ -187,4 +162,14 @@ internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
       return output.close(cause)
     }
   }
+}
+
+private inline fun <T> CoroutineScope.jobify(crossinline block: CoroutineScope.() -> T) : Pair<T, Job> {
+  var outputBox: List<T>? = null
+
+  val job = launch(start = CoroutineStart.UNDISPATCHED) {
+    outputBox = listOf(block())
+  }
+
+  return outputBox!![0] to job
 }

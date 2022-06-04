@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 
-class FlowTurbineScopeTest {
+class FlowInScopeTest {
   @Test fun multipleFlows() = runTest {
     val turbine1 = flowOf(1).testIn(this)
     val turbine2 = flowOf(2).testIn(this)
