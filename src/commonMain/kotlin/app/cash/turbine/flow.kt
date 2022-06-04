@@ -164,3 +164,27 @@ private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): ChannelBasedFlo
 
   return ChannelBasedFlowTurbine(events, collectJob)
 }
+
+internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
+  val output = Channel<T>(Channel.UNLIMITED)
+  val job = scope.launch(start = CoroutineStart.UNDISPATCHED) {
+    try {
+      collect { output.trySend(it) }
+      output.close()
+    } catch (e: Exception) {
+      output.close(e)
+    }
+  }
+
+  return object : Channel<T> by output {
+    override fun cancel(cause: CancellationException?) {
+      job.cancel()
+      output.close(cause)
+    }
+
+    override fun close(cause: Throwable?): Boolean {
+      job.cancel()
+      return output.close(cause)
+    }
+  }
+}
