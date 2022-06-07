@@ -82,6 +82,7 @@ public suspend fun <T> ReceiveChannel<T>.awaitEvent(): Event<T> =
  * @throws AssertionError if the next event was completion or an error.
  */
 public fun <T> ReceiveChannel<T>.takeEvent(): Event<T> {
+  assertCallingContextIsNotSuspended()
   return takeEventUnsafe()
     ?: unexpectedEvent(null, "an event")
 }

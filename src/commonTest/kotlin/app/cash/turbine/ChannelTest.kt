@@ -15,6 +15,7 @@
  */
 package app.cash.turbine
 
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -243,6 +244,14 @@ class ChannelTest {
     }
     assertEquals("Expected item but found Error(null)", actual.message)
     assertSame(error, actual.cause)
+  }
+
+  @Ignore // Only works for JVM right now
+  @Test fun takeItemSuspendingThrows() = runTest {
+    val actual = assertFailsWith<IllegalStateException> {
+      emptyFlow<Unit>().collectIntoChannel(this).takeItem()
+    }
+    assertEquals("Calling context is suspending; use a suspending method instead", actual.message)
   }
 
   /**
