@@ -17,6 +17,7 @@ package app.cash.turbine
 
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
@@ -179,7 +180,10 @@ class ChannelTest {
       flow<Unit> { throw error }.collectIntoChannel(this)
         .awaitItem()
     }
-    assertEquals("Expected item but found Error(null)", actual.message)
+    assertContains(
+      listOf("Expected item but found Error(null)", "Expected item but found Error(undefined)"),
+      actual.message,
+    )
     assertSame(error, actual.cause)
   }
 
@@ -242,7 +246,10 @@ class ChannelTest {
       flow<Unit> { throw error }.collectIntoChannel(this)
         .takeItem()
     }
-    assertEquals("Expected item but found Error(null)", actual.message)
+    assertContains(
+      listOf("Expected item but found Error(null)", "Expected item but found Error(undefined)"),
+      actual.message,
+    )
     assertSame(error, actual.cause)
   }
 

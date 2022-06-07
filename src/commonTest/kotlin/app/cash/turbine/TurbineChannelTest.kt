@@ -17,10 +17,14 @@ package app.cash.turbine
 
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -187,7 +191,10 @@ class TurbineChannelTest {
       channel.cancel(error)
       channel.awaitItem()
     }
-    assertEquals("Expected item but found Error(null)", actual.message)
+    assertContains(
+      listOf("Expected item but found Error(null)", "Expected item but found Error(undefined)"),
+      actual.message,
+    )
     assertSame(error, actual.cause)
   }
 
@@ -258,7 +265,10 @@ class TurbineChannelTest {
   fun takeItemButWasCloseThrows() = withTestScope {
     val actual = assertFailsWith<AssertionError> {
       val channel = TurbineChannel<Any>()
-      runTest { channel.cancel() }
+      // JS
+      CoroutineScope(Dispatchers.Default).launch(start = CoroutineStart.UNDISPATCHED) {
+        channel.cancel()
+      }
 
       channel.takeItem()
     }
@@ -270,10 +280,16 @@ class TurbineChannelTest {
     val error = object : RuntimeException("hello") {}
     val actual = assertFailsWith<AssertionError> {
       val channel = TurbineChannel<Any>()
-      runTest { channel.cancel(error) }
+      // JS
+      CoroutineScope(Dispatchers.Default).launch(start = CoroutineStart.UNDISPATCHED) {
+        channel.cancel(error)
+      }
       channel.takeItem()
     }
-    assertEquals("Expected item but found Error(null)", actual.message)
+    assertContains(
+      listOf("Expected item but found Error(null)", "Expected item but found Error(undefined)"),
+      actual.message,
+    )
     assertSame(error, actual.cause)
   }
 

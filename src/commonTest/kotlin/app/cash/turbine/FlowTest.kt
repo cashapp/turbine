@@ -16,6 +16,7 @@
 package app.cash.turbine
 
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -310,7 +311,10 @@ class FlowTest {
         awaitItem()
       }
     }
-    assertEquals("Expected item but found Error(null)", actual.message)
+    assertContains(
+      listOf("Expected item but found Error(null)", "Expected item but found Error(undefined)"),
+      actual.message,
+    )
     assertSame(error, actual.cause)
   }
 
