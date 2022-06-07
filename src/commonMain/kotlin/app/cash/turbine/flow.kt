@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 @Suppress("UNUSED_PARAMETER")
 public suspend fun <T> Flow<T>.test(
   timeoutMs: Long,
-  validate: suspend TurbineChannel<T>.() -> Unit
+  validate: suspend TurbineReceiveChannel<T>.() -> Unit
 ) {
   test(validate)
 }
@@ -74,7 +74,7 @@ public suspend fun <T> Flow<T>.test(
 @Suppress("UNUSED_PARAMETER")
 public suspend fun <T> Flow<T>.test(
   timeout: Duration = 1.seconds,
-  validate: suspend TurbineChannel<T>.() -> Unit
+  validate: suspend TurbineReceiveChannel<T>.() -> Unit
 ) {
   test(validate)
 }
@@ -93,7 +93,7 @@ public suspend fun <T> Flow<T>.test(
  * ```
  */
 public suspend fun <T> Flow<T>.test(
-  validate: suspend TurbineChannel<T>.() -> Unit
+  validate: suspend TurbineReceiveChannel<T>.() -> Unit
 ) {
   coroutineScope {
     collectTurbineIn(this).apply {
@@ -105,7 +105,7 @@ public suspend fun <T> Flow<T>.test(
 }
 
 /**
- * Terminal flow operator that collects events from given flow and returns a [TurbineChannel] for
+ * Terminal flow operator that collects events from given flow and returns a [TurbineReceiveChannel] for
  * consuming and asserting properties on them in order. If any exception occurs during validation the
  * exception is rethrown from this method.
  *
@@ -117,9 +117,9 @@ public suspend fun <T> Flow<T>.test(
  * ```
  *
  * Unlike [test] which automatically cancels the flow at the end of the lambda, the returned
- * [TurbineChannel] must either consume a terminal event (complete or error) or be explicitly canceled.
+ * [TurbineReceiveChannel] must either consume a terminal event (complete or error) or be explicitly canceled.
  */
-public fun <T> Flow<T>.testIn(scope: CoroutineScope): TurbineChannel<T> {
+public fun <T> Flow<T>.testIn(scope: CoroutineScope): TurbineReceiveChannel<T> {
   val turbine = collectTurbineIn(scope)
 
   scope.coroutineContext.job.invokeOnCompletion { exception ->

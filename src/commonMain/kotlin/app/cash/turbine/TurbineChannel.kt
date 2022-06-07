@@ -27,93 +27,14 @@ internal const val debug = false
 /**
  * A standalone [TurbineChannel] suitable for usage in fakes or other external test components.
  */
-public interface TurbineChannel<T> {
+public interface TurbineChannel<T>: TurbineReceiveChannel<T>  {
   /**
    * Returns the underlying [Channel].
    */
-  public fun asChannel(): Channel<T>
+  public override fun asChannel(): Channel<T>
 
   public suspend fun cancel(cause: Throwable?)
 
-  /**
-   * Yields true if remaining events for this test channel have been ignored.
-   */
-  public val ignoreRemainingEvents: Boolean
-
-  /**
-   * Cancel the underlying coroutine. Any events which have already been received
-   * will still need consumed using the "await" functions.
-   */
-  public suspend fun cancel()
-
-  /**
-   * Cancel the underlying coroutine and ignore any events which have already
-   * been received. Calling this function will exit the [test] block.
-   */
-  public suspend fun cancelAndIgnoreRemainingEvents()
-
-  /**
-   * Cancel the underlying coroutine. Any events which have already been received
-   * will be returned.
-   */
-  public suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>>
-
-  /**
-   * Assert that there are no unconsumed events which have already been received.
-   *
-   * @throws AssertionError if unconsumed events are found.
-   */
-  public fun expectNoEvents()
-
-  /**
-   * Returns the most recent item that has already been received.
-   * If a complete event has been received with no item being received
-   * previously, this function will throw an [AssertionError]. If an error event
-   * has been received, this function will throw the underlying exception.
-   *
-   * @throws AssertionError if no item was emitted.
-   */
-  public fun expectMostRecentItem(): T
-
-  /**
-   * Assert that an event was received and return it.
-   * This function will suspend if no events have been received.
-   */
-  public suspend fun awaitEvent(): Event<T>
-
-  /**
-   * Assert that the next event received was an item and return it.
-   * This function will suspend if no events have been received.
-   *
-   * @throws AssertionError if the next event was completion or an error.
-   */
-  public suspend fun awaitItem(): T
-
-  /**
-   * Assert that [count] item events were received and ignore them.
-   * This function will suspend if no events have been received.
-   *
-   * @throws AssertionError if one of the events was completion or an error.
-   */
-  public suspend fun skipItems(count: Int)
-
-  /**
-   * Assert that the next event received was the flow completing.
-   * This function will suspend if no events have been received.
-   *
-   * @throws AssertionError if the next event was an item or an error.
-   */
-  public suspend fun awaitComplete()
-
-  /**
-   * Assert that the next event received was an error terminating the flow.
-   * This function will suspend if no events have been received.
-   *
-   * @throws AssertionError if the next event was an item or completion.
-   */
-  public suspend fun awaitError(): Throwable
-
-  public fun ensureAllEventsConsumed()
   /**
    * Add an item to the underlying [Channel] without blocking.
    *
