@@ -204,7 +204,6 @@ val mutableSharedFlow = MutableSharedFlow<Int>(replay = 0)
 mutableSharedFlow.emit(1)
 mutableSharedFlow.test {
   assertEquals(awaitItem(), 1)
-  cancelAndConsumeRemainingEvents()
 }
 ```
 ```
@@ -223,7 +222,6 @@ val mutableSharedFlow = MutableSharedFlow<Int>(replay = 0)
 mutableSharedFlow.test {
   mutableSharedFlow.emit(1)
   assertEquals(awaitItem(), 1)
-  cancelAndConsumeRemainingEvents()
 }
 ```
 
