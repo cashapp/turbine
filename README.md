@@ -112,6 +112,25 @@ flowOf("one", "two", "three")
   }
 ```
 
+Delay between emissions can be asserted with `currentTime` when using `runTest`.
+
+```kotlin
+flowOf("one", "two", "three")
+  .map {
+    delay(100)
+    it
+  }
+  .test {
+    assertEquals("one", awaitItem())
+    assertEquals(100, currentTime)
+    assertEquals("two", awaitItem())
+    assertEquals(200, currentTime)
+    assertEquals("three", awaitItem())
+    awaitComplete()
+    assertEquals(300, currentTime)
+  }
+```
+
 ### Consuming Errors
 
 Unlike `collect`, a flow which causes an exception will still be exposed as an event that you
