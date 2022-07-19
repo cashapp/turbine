@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 202 Square, Inc.
+ * Copyright (C) 2022 Square, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package app.cash.turbine
 
 /**
- * Invoke this method to throw and error when your method is not being called by a suspend fun.
+ * Invoke this method to throw an error when your method is not being called by a suspend fun.
  *
  * This is usually used to prevent the usage of shared memory to communicate with code under
  * test in coroutines tests. [Communicating with shared memory is a bad idea](https://go.dev/blog/codelab-share).
