@@ -25,9 +25,9 @@ import kotlinx.coroutines.channels.ChannelResult
 internal const val debug = false
 
 /**
- * A standalone [TurbineChannel] suitable for usage in fakes or other external test components.
+ * A standalone [Turbine] suitable for usage in fakes or other external test components.
  */
-public interface TurbineChannel<T>: TurbineReceiveChannel<T>  {
+public interface Turbine<T>: ReceiveTurbine<T>  {
   /**
    * Returns the underlying [Channel].
    */
@@ -79,17 +79,17 @@ public interface TurbineChannel<T>: TurbineReceiveChannel<T>  {
   public fun takeError(): Throwable
 }
 
-public operator fun <T> TurbineChannel<T>.plusAssign(value: T) { add(value) }
+public operator fun <T> Turbine<T>.plusAssign(value: T) { add(value) }
 
 /**
- * Construct a standalone [TurbineChannel] with an [UNLIMITED] buffer size.
+ * Construct a standalone [Turbine] with an [UNLIMITED] buffer size.
  */
-public fun <T> TurbineChannel(): TurbineChannel<T> = TurbineChannelImpl()
+public fun <T> Turbine(): Turbine<T> = TurbineImpl()
 
-internal class TurbineChannelImpl<T>(
+internal class TurbineImpl<T>(
   private val channel: Channel<T> = Channel(UNLIMITED),
   private val job: Job? = null,
-) : TurbineChannel<T> {
+) : Turbine<T> {
   override fun asChannel(): Channel<T> = object : Channel<T> by channel {
     override fun tryReceive(): ChannelResult<T> {
       val result = channel.tryReceive()

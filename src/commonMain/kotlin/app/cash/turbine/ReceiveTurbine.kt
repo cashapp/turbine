@@ -17,7 +17,7 @@ package app.cash.turbine
 
 import kotlinx.coroutines.channels.ReceiveChannel
 
-public interface TurbineReceiveChannel<T> {
+public interface ReceiveTurbine<T> {
   /**
    * Returns the underlying [ReceiveChannel].
    */
