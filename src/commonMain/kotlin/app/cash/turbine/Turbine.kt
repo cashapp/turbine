@@ -111,11 +111,11 @@ internal class TurbineImpl<T>(
     if (!asChannel().trySend(item).isSuccess) throw IllegalStateException("Added when closed")
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   override suspend fun cancel() {
     cancel(null)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   override suspend fun cancel(cause: Throwable?) {
     if (!channel.isClosedForSend) _ignoreTerminalEvents = true
     channel.close(cause)
