@@ -33,7 +33,7 @@ public interface Turbine<T> : ReceiveTurbine<T>  {
    */
   public override fun asChannel(): Channel<T>
 
-  public suspend fun cancel(cause: Throwable?)
+  public fun close(cause: Throwable? = null)
 
   /**
    * Add an item to the underlying [Channel] without blocking.
@@ -114,14 +114,16 @@ internal class TurbineImpl<T>(
   }
 
   override suspend fun cancel() {
-    cancel(null)
+    if (!asChannel().isClosedForSend) ignoreTerminalEvents = true
+    asChannel().cancel()
+    job?.cancelAndJoin()
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
-  override suspend fun cancel(cause: Throwable?) {
+  override fun close(cause: Throwable?) {
     if (!asChannel().isClosedForSend) ignoreTerminalEvents = true
     asChannel().close(cause)
-    job?.cancelAndJoin()
+    job?.cancel()
   }
 
   override fun takeEvent(): Event<T> = asChannel().takeEvent()

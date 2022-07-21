@@ -15,7 +15,6 @@
  */
 package app.cash.turbine
 
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -43,7 +42,7 @@ class TurbineTest {
       channel.add(2)
       channel.add(3)
 
-      channel.cancel(expected)
+      channel.close(expected)
 
       channel.expectMostRecentItem()
     }
@@ -111,7 +110,7 @@ class TurbineTest {
   fun expectErrorOnCompletionBeforeAllItemsWereSkipped() = runTest {
     val channel = Turbine<Int>()
     channel.add(1)
-    channel.cancel()
+    channel.close()
     assertFailsWith<AssertionError> {
       channel.skipItems(2)
     }
@@ -122,7 +121,7 @@ class TurbineTest {
     val error = object : RuntimeException("hello") {}
     val channel = Turbine<Int>()
     channel.add(1)
-    channel.cancel(error)
+    channel.close(error)
     val actual = assertFailsWith<AssertionError> {
       channel.skipItems(2)
     }
@@ -146,7 +145,7 @@ class TurbineTest {
   @Test
   fun expectCompleteEvent() = runTest {
     val channel = Turbine<Any>()
-    channel.cancel()
+    channel.close()
     val event = channel.awaitEvent()
     assertEquals(Event.Complete, event)
   }
@@ -155,7 +154,7 @@ class TurbineTest {
   fun expectErrorEvent() = runTest {
     val exception = object : RuntimeException("hello") {}
     val channel = Turbine<Any>()
-    channel.cancel(exception)
+    channel.close(exception)
     val event = channel.awaitEvent()
     assertEquals(Event.Error(exception), event)
   }
@@ -172,7 +171,7 @@ class TurbineTest {
   fun awaitItemButWasCloseThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       val channel = Turbine<Unit>()
-      channel.cancel()
+      channel.close()
       channel.awaitItem()
     }
     assertEquals("Expected item but found Complete", actual.message)
@@ -183,7 +182,7 @@ class TurbineTest {
     val error = object : RuntimeException("hello") {}
     val actual = assertFailsWith<AssertionError> {
       val channel = Turbine<Any>()
-      channel.cancel(error)
+      channel.close(error)
       channel.awaitItem()
     }
     assertContains(
@@ -196,7 +195,7 @@ class TurbineTest {
   @Test
   fun awaitComplete() = runTest {
     val channel = Turbine<Any>()
-    channel.cancel()
+    channel.close()
     channel.awaitComplete()
   }
 
@@ -214,7 +213,7 @@ class TurbineTest {
   fun awaitCompleteButWasErrorThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       val channel = Turbine<Any>()
-      channel.cancel(RuntimeException())
+      channel.close(RuntimeException())
       channel.awaitComplete()
     }
     assertEquals("Expected complete but found Error(RuntimeException)", actual.message)
@@ -224,7 +223,7 @@ class TurbineTest {
   fun awaitError() = runTest {
     val error = object : RuntimeException("hello") { }
     val channel = Turbine<Any>()
-    channel.cancel(error)
+    channel.close(error)
     assertSame(error, channel.awaitError())
   }
 
@@ -242,7 +241,7 @@ class TurbineTest {
   fun awaitErrorButWasCompleteThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       val channel = Turbine<Any>()
-      channel.cancel()
+      channel.close()
       channel.awaitError()
     }
     assertEquals("Expected error but found Complete", actual.message)
@@ -262,7 +261,7 @@ class TurbineTest {
       val channel = Turbine<Any>()
       // JS
       CoroutineScope(Dispatchers.Default).launch(start = CoroutineStart.UNDISPATCHED) {
-        channel.cancel()
+        channel.close()
       }
 
       channel.takeItem()
@@ -277,7 +276,7 @@ class TurbineTest {
       val channel = Turbine<Any>()
       // JS
       CoroutineScope(Dispatchers.Default).launch(start = CoroutineStart.UNDISPATCHED) {
-        channel.cancel(error)
+        channel.close(error)
       }
       channel.takeItem()
     }
