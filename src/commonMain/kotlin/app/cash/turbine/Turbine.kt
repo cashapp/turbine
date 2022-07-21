@@ -87,10 +87,11 @@ public operator fun <T> Turbine<T>.plusAssign(value: T) { add(value) }
 public fun <T> Turbine(): Turbine<T> = TurbineImpl()
 
 internal class TurbineImpl<T>(
-  private val channel: Channel<T> = Channel(UNLIMITED),
+  channel: Channel<T> = Channel(UNLIMITED),
   private val job: Job? = null,
 ) : Turbine<T> {
-  override fun asChannel(): Channel<T> = object : Channel<T> by channel {
+
+  private val wrappedChannel = object : Channel<T> by channel {
     override fun tryReceive(): ChannelResult<T> {
       val result = channel.tryReceive()
       val event = result.toEvent()
@@ -106,6 +107,7 @@ internal class TurbineImpl<T>(
       throw e
     }
   }
+  override fun asChannel(): Channel<T> = wrappedChannel
 
   override fun add(item: T) {
     if (!asChannel().trySend(item).isSuccess) throw IllegalStateException("Added when closed")
@@ -117,8 +119,8 @@ internal class TurbineImpl<T>(
 
   @OptIn(ExperimentalCoroutinesApi::class)
   override suspend fun cancel(cause: Throwable?) {
-    if (!channel.isClosedForSend) _ignoreTerminalEvents = true
-    channel.close(cause)
+    if (!asChannel().isClosedForSend) _ignoreTerminalEvents = true
+    asChannel().close(cause)
     job?.cancelAndJoin()
   }
 
