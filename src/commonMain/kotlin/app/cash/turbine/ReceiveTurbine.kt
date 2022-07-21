@@ -24,7 +24,7 @@ public interface ReceiveTurbine<T> {
   public fun asChannel(): ReceiveChannel<T>
 
   /**
-   * Yields true if remaining events for this test channel have been ignored.
+   * True if remaining events for this test channel have been ignored.
    */
   public val ignoreRemainingEvents: Boolean
 

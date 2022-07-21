@@ -29,7 +29,7 @@ internal const val debug = false
  */
 public interface Turbine<T> : ReceiveTurbine<T>  {
   /**
-   * Returns the underlying [Channel].
+   * Returns the underlying [Channel]. The [Channel] will have a buffer size of [UNLIMITED].
    */
   public override fun asChannel(): Channel<T>
 
@@ -48,7 +48,7 @@ public interface Turbine<T> : ReceiveTurbine<T>  {
 
   /**
    * Assert that the next event received was non-null and return it.
-   * This function will not suspend, and will throw if invoked in a suspending context.
+   * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
    *
    * @throws AssertionError if the next event was completion or an error.
    */
@@ -56,7 +56,7 @@ public interface Turbine<T> : ReceiveTurbine<T>  {
 
   /**
    * Assert that the next event received was an item and return it.
-   * This function will not suspend, and will throw if invoked in a suspending context.
+   * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
    *
    * @throws AssertionError if the next event was completion or an error, or no event.
    */
@@ -64,7 +64,7 @@ public interface Turbine<T> : ReceiveTurbine<T>  {
 
   /**
    * Assert that the next event received is [Event.Complete].
-   * This function will not suspend, and will throw if invoked in a suspending context.
+   * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
    *
    * @throws AssertionError if the next event was completion or an error.
    */
@@ -72,7 +72,7 @@ public interface Turbine<T> : ReceiveTurbine<T>  {
 
   /**
    * Assert that the next event received is [Event.Error], and return the error.
-   * This function will not suspend, and will throw if invoked in a suspending context.
+   * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
    *
    * @throws AssertionError if the next event was completion or an error.
    */
@@ -82,7 +82,7 @@ public interface Turbine<T> : ReceiveTurbine<T>  {
 public operator fun <T> Turbine<T>.plusAssign(value: T) { add(value) }
 
 /**
- * Construct a standalone [Turbine] with an [UNLIMITED] buffer size.
+ * Construct a standalone [Turbine].
  */
 public fun <T> Turbine(): Turbine<T> = TurbineImpl()
 
