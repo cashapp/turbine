@@ -134,9 +134,13 @@ public fun <T> Flow<T>.testIn(scope: CoroutineScope): ReceiveTurbine<T> {
 }
 
 private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): Turbine<T> {
-  val (channel, job) = scope.jobify { collectIntoChannel(this) }
+  var outputBox: List<Channel<T>>? = null
 
-  return TurbineImpl(channel, job)
+  val job = scope.launch(start = CoroutineStart.UNDISPATCHED) {
+    outputBox = listOf(collectIntoChannel(this))
+  }
+
+  return TurbineImpl(outputBox!![0], job)
 }
 
 internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
