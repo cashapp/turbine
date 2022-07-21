@@ -27,7 +27,7 @@ internal const val debug = false
 /**
  * A standalone [Turbine] suitable for usage in fakes or other external test components.
  */
-public interface Turbine<T>: ReceiveTurbine<T>  {
+public interface Turbine<T> : ReceiveTurbine<T>  {
   /**
    * Returns the underlying [Channel].
    */

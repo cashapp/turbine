@@ -288,16 +288,6 @@ class TurbineTest {
     assertSame(error, actual.cause)
   }
 
-  @Ignore // Only works for JVM right now
-  @Test fun takeItemSuspendingThrows() = runTest {
-    val actual = assertFailsWith<IllegalStateException> {
-      val channel = Turbine<Any>()
-      channel.cancel()
-      channel.takeItem()
-    }
-    assertEquals("Calling context is suspending; use a suspending method instead", actual.message)
-  }
-
   /**
    * Used to run test code with a [TestScope], but still outside a suspending context.
    */

@@ -40,7 +40,7 @@ public fun <T> ReceiveChannel<T>.expectMostRecentItem(): T {
     }
   }
 
-  if (prevResult?.isSuccess == true) return prevResult!!.getOrThrow()
+  if (prevResult?.isSuccess == true) return prevResult.getOrThrow()
 
   throw TurbineAssertionError("No item was found", cause = null)
 }

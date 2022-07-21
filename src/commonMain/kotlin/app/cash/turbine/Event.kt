@@ -15,7 +15,6 @@
  */
 package app.cash.turbine
 
-@Suppress("LeakingThis")
 public sealed class Event<out T> {
   public object Complete : Event<Nothing>() {
     override fun toString(): String = "Complete"
@@ -27,5 +26,6 @@ public sealed class Event<out T> {
     override fun toString(): String = "Item($value)"
   }
 
-  public val isTerminal: Boolean = this is Complete || this is Error
+  public val isTerminal: Boolean
+    get() = this is Complete || this is Error
 }

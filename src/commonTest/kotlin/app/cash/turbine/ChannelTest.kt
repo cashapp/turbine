@@ -253,14 +253,6 @@ class ChannelTest {
     assertSame(error, actual.cause)
   }
 
-  @Ignore // Only works for JVM right now
-  @Test fun takeItemSuspendingThrows() = runTest {
-    val actual = assertFailsWith<IllegalStateException> {
-      emptyFlow<Unit>().collectIntoChannel(this).takeItem()
-    }
-    assertEquals("Calling context is suspending; use a suspending method instead", actual.message)
-  }
-
   /**
    * Used to run test code with a [TestScope], but still outside a suspending context.
    */

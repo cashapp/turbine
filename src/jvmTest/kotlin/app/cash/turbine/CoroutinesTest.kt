@@ -21,7 +21,6 @@ import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 
 class CoroutinesTest {
-  @Ignore // Only works in JVM
   @Test
   fun assertCallingContextIsNotSuspendedThrowsOnSuspendCall() = runTest {
     val result = runCatching {
@@ -33,7 +32,6 @@ class CoroutinesTest {
       result.exceptionOrNull()?.message)
   }
 
-  @Ignore // Only works in JVM
   @Test
   fun assertCallingContextIsNotSuspendedDoesNotThrowWhenInvokedDirectlyNonSuspending() {
     val result = runCatching {

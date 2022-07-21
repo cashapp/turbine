@@ -37,7 +37,7 @@ package app.cash.turbine
  * }
  * ```
  */
-public fun assertCallingContextIsNotSuspended() {
+internal fun assertCallingContextIsNotSuspended() {
   val stackTrace = Exception().stackTraceToString()
   // TODO: support non-JVM
   if (stackTrace.contains("invokeSuspend")) {
