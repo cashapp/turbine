@@ -95,7 +95,7 @@ internal class TurbineImpl<T>(
     override fun tryReceive(): ChannelResult<T> {
       val result = channel.tryReceive()
       val event = result.toEvent()
-      if (event is Event.Error || event is Event.Item) _ignoreRemainingEvents = true
+      if (event is Event.Error || event is Event.Item) ignoreRemainingEvents = true
 
       return result
     }
@@ -103,7 +103,7 @@ internal class TurbineImpl<T>(
     override suspend fun receive(): T = try {
       channel.receive()
     } catch (e: Throwable) {
-      _ignoreRemainingEvents = true
+      ignoreRemainingEvents = true
       throw e
     }
   }
@@ -119,7 +119,7 @@ internal class TurbineImpl<T>(
 
   @OptIn(ExperimentalCoroutinesApi::class)
   override suspend fun cancel(cause: Throwable?) {
-    if (!asChannel().isClosedForSend) _ignoreTerminalEvents = true
+    if (!asChannel().isClosedForSend) ignoreTerminalEvents = true
     asChannel().close(cause)
     job?.cancelAndJoin()
   }
@@ -132,15 +132,14 @@ internal class TurbineImpl<T>(
 
   override fun takeError(): Throwable = asChannel().takeError()
 
-  private var _ignoreTerminalEvents = false
-  private var _ignoreRemainingEvents = false
+  private var ignoreTerminalEvents = false
 
-  override val ignoreRemainingEvents: Boolean
-    get() = _ignoreRemainingEvents
+  override var ignoreRemainingEvents: Boolean = false
+    private set
 
   override suspend fun cancelAndIgnoreRemainingEvents() {
     cancel()
-    _ignoreRemainingEvents = true
+    ignoreRemainingEvents = true
   }
 
   override suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>> {
@@ -151,7 +150,7 @@ internal class TurbineImpl<T>(
         if (event is Event.Error || event is Event.Complete) break
       }
     }
-    _ignoreRemainingEvents = true
+    ignoreRemainingEvents = true
     cancel()
 
     return events
@@ -180,7 +179,7 @@ internal class TurbineImpl<T>(
     var cause: Throwable? = null
     while (true) {
       val event = asChannel().takeEventUnsafe() ?: break
-      if (!(_ignoreTerminalEvents && event.isTerminal)) unconsumed += event
+      if (!(ignoreTerminalEvents && event.isTerminal)) unconsumed += event
       if (event is Event.Error) {
         cause = event.throwable
         break
