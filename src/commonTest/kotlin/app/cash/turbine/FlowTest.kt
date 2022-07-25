@@ -16,6 +16,7 @@
 package app.cash.turbine
 
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -40,7 +41,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 
-class FlowTurbineTest {
+class FlowTest {
   @Test fun exceptionsPropagate() = runTest {
     // Use a custom subtype to prevent coroutines from breaking referential equality.
     val expected = object : RuntimeException("hello") {}
@@ -304,13 +305,16 @@ class FlowTurbineTest {
   }
 
   @Test fun expectItemButWasErrorThrows() = runTest {
-    val error = RuntimeException()
+    val error = object : RuntimeException("hi") { }
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw error }.test {
         awaitItem()
       }
     }
-    assertEquals("Expected item but found Error(RuntimeException)", actual.message)
+    assertContains(
+      listOf("Expected item but found Error(null)", "Expected item but found Error(undefined)"),
+      actual.message,
+    )
     assertSame(error, actual.cause)
   }
 
@@ -336,7 +340,7 @@ class FlowTurbineTest {
   }
 
   @Test fun expectError() = runTest {
-    val error = RuntimeException()
+    val error = object : RuntimeException("hi") { }
     flow<Nothing> { throw error }.test {
       assertSame(error, awaitError())
     }
@@ -378,7 +382,7 @@ class FlowTurbineTest {
   }
 
   @Test fun expectErrorEvent() = runTest {
-    val exception = RuntimeException()
+    val exception = object : RuntimeException("hi") { }
     flow<Nothing> { throw exception }.test {
       val event = awaitEvent()
       assertEquals(Event.Error(exception), event)
@@ -491,7 +495,7 @@ class FlowTurbineTest {
   }
 
   @Test fun expectErrorOnErrorReceivedBeforeAllItemsWereSkipped() = runTest {
-    val error = RuntimeException()
+    val error = object : RuntimeException("hi") { }
     flow {
       emit(1)
       throw error

@@ -6,8 +6,10 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletionHandlerException
 import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emitAll
@@ -20,7 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 
-class FlowTurbineScopeTest {
+class FlowInScopeTest {
   @Test fun multipleFlows() = runTest {
     val turbine1 = flowOf(1).testIn(this)
     val turbine2 = flowOf(2).testIn(this)
@@ -28,6 +30,41 @@ class FlowTurbineScopeTest {
     assertEquals(2, turbine2.awaitItem())
     turbine1.awaitComplete()
     turbine2.awaitComplete()
+  }
+
+  @Test
+  fun channelCancellation() = runTest {
+    kotlin.runCatching {
+      coroutineScope {
+        val channel = Channel<Unit>()
+        val job = launch {
+          for (item in channel) {
+            println("got something!")
+          }
+        }
+
+        channel.cancel()
+
+        println("job join result: ${runCatching { job.join() }}")
+        println("job cancelled: ${job.isCancelled}")
+      }
+    }.let { println("result: $it")}
+    kotlin.runCatching {
+      coroutineScope {
+        val channel = Channel<Unit>()
+        val job = launch {
+          for (item in channel) {
+            println("got something!")
+          }
+        }
+
+        channel.close(CancellationException("it's me"))
+
+        println("job join result: ${runCatching { job.join() }}")
+        println("job cancelled: ${job.isCancelled}")
+      }
+    }.let { println("result: $it")}
+
   }
 
   @Test fun cancelMustBeCalled() = runTest {
