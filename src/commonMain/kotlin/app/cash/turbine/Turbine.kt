@@ -91,7 +91,7 @@ internal class TurbineImpl<T>(
   private val job: Job? = null,
 ) : Turbine<T> {
 
-  private val wrappedChannel = object : Channel<T> by channel {
+  private val channel = object : Channel<T> by channel {
     override fun tryReceive(): ChannelResult<T> {
       val result = channel.tryReceive()
       val event = result.toEvent()
@@ -107,32 +107,33 @@ internal class TurbineImpl<T>(
       throw e
     }
   }
-  override fun asChannel(): Channel<T> = wrappedChannel
+  override fun asChannel(): Channel<T> = channel
 
   override fun add(item: T) {
-    if (!asChannel().trySend(item).isSuccess) throw IllegalStateException("Added when closed")
+    if (!channel.trySend(item).isSuccess) throw IllegalStateException("Added when closed")
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   override suspend fun cancel() {
-    if (!asChannel().isClosedForSend) ignoreTerminalEvents = true
-    asChannel().cancel()
+    if (!channel.isClosedForSend) ignoreTerminalEvents = true
+    channel.cancel()
     job?.cancelAndJoin()
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
   override fun close(cause: Throwable?) {
-    if (!asChannel().isClosedForSend) ignoreTerminalEvents = true
-    asChannel().close(cause)
+    if (!channel.isClosedForSend) ignoreTerminalEvents = true
+    channel.close(cause)
     job?.cancel()
   }
 
-  override fun takeEvent(): Event<T> = asChannel().takeEvent()
+  override fun takeEvent(): Event<T> = channel.takeEvent()
 
-  override fun takeItem(): T = asChannel().takeItem()
+  override fun takeItem(): T = channel.takeItem()
 
-  override fun takeComplete() = asChannel().takeComplete()
+  override fun takeComplete() = channel.takeComplete()
 
-  override fun takeError(): Throwable = asChannel().takeError()
+  override fun takeError(): Throwable = channel.takeError()
 
   private var ignoreTerminalEvents = false
 
@@ -147,7 +148,7 @@ internal class TurbineImpl<T>(
   override suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>> {
     val events = buildList {
       while (true) {
-        val event = asChannel().takeEventUnsafe() ?: break
+        val event = channel.takeEventUnsafe() ?: break
         add(event)
         if (event is Event.Error || event is Event.Complete) break
       }
@@ -159,20 +160,20 @@ internal class TurbineImpl<T>(
   }
 
   override fun expectNoEvents() {
-    asChannel().expectNoEvents()
+    channel.expectNoEvents()
   }
 
-  override fun expectMostRecentItem(): T = asChannel().expectMostRecentItem()
+  override fun expectMostRecentItem(): T = channel.expectMostRecentItem()
 
-  override suspend fun awaitEvent(): Event<T> = asChannel().awaitEvent()
+  override suspend fun awaitEvent(): Event<T> = channel.awaitEvent()
 
-  override suspend fun awaitItem(): T = asChannel().awaitItem()
+  override suspend fun awaitItem(): T = channel.awaitItem()
 
-  override suspend fun skipItems(count: Int) = asChannel().skipItems(count)
+  override suspend fun skipItems(count: Int) = channel.skipItems(count)
 
-  override suspend fun awaitComplete() = asChannel().awaitComplete()
+  override suspend fun awaitComplete() = channel.awaitComplete()
 
-  override suspend fun awaitError(): Throwable = asChannel().awaitError()
+  override suspend fun awaitError(): Throwable = channel.awaitError()
 
   override fun ensureAllEventsConsumed() {
     if (ignoreRemainingEvents) return
@@ -180,7 +181,7 @@ internal class TurbineImpl<T>(
     val unconsumed = mutableListOf<Event<T>>()
     var cause: Throwable? = null
     while (true) {
-      val event = asChannel().takeEventUnsafe() ?: break
+      val event = channel.takeEventUnsafe() ?: break
       if (!(ignoreTerminalEvents && event.isTerminal)) unconsumed += event
       if (event is Event.Error) {
         cause = event.throwable

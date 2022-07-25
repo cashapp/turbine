@@ -19,9 +19,9 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.job
@@ -48,7 +48,7 @@ import kotlinx.coroutines.launch
 @Suppress("UNUSED_PARAMETER")
 public suspend fun <T> Flow<T>.test(
   timeoutMs: Long,
-  validate: suspend ReceiveTurbine<T>.() -> Unit
+  validate: suspend ReceiveTurbine<T>.() -> Unit,
 ) {
   test(validate)
 }
@@ -73,7 +73,7 @@ public suspend fun <T> Flow<T>.test(
 @Suppress("UNUSED_PARAMETER")
 public suspend fun <T> Flow<T>.test(
   timeout: Duration = 1.seconds,
-  validate: suspend ReceiveTurbine<T>.() -> Unit
+  validate: suspend ReceiveTurbine<T>.() -> Unit,
 ) {
   test(validate)
 }
@@ -92,7 +92,7 @@ public suspend fun <T> Flow<T>.test(
  * ```
  */
 public suspend fun <T> Flow<T>.test(
-  validate: suspend ReceiveTurbine<T>.() -> Unit
+  validate: suspend ReceiveTurbine<T>.() -> Unit,
 ) {
   coroutineScope {
     collectTurbineIn(this).apply {
@@ -134,18 +134,18 @@ public fun <T> Flow<T>.testIn(scope: CoroutineScope): ReceiveTurbine<T> {
 }
 
 private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): Turbine<T> {
-  var outputBox: List<Channel<T>>? = null
+  lateinit var outputBox: Channel<T>
 
-  val job = scope.launch(start = CoroutineStart.UNDISPATCHED) {
-    outputBox = listOf(collectIntoChannel(this))
+  val job = scope.launch(start = UNDISPATCHED) {
+    outputBox = collectIntoChannel(this)
   }
 
-  return TurbineImpl(outputBox!![0], job)
+  return TurbineImpl(outputBox, job)
 }
 
 internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
-  val output = Channel<T>(Channel.UNLIMITED)
-  val job = scope.launch(start = CoroutineStart.UNDISPATCHED) {
+  val output = Channel<T>(UNLIMITED)
+  val job = scope.launch(start = UNDISPATCHED) {
     try {
       collect { output.trySend(it) }
       output.close()
@@ -165,14 +165,4 @@ internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
       return output.close(cause)
     }
   }
-}
-
-private inline fun <T> CoroutineScope.jobify(crossinline block: CoroutineScope.() -> T) : Pair<T, Job> {
-  var outputBox: List<T>? = null
-
-  val job = launch(start = CoroutineStart.UNDISPATCHED) {
-    outputBox = listOf(block())
-  }
-
-  return outputBox!![0] to job
 }
