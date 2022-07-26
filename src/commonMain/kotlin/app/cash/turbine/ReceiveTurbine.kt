@@ -53,7 +53,8 @@ public interface ReceiveTurbine<T> {
    *
    * If it is backed by an underlying coroutine (e.g. the coroutine run
    * by [test]), that coroutine will also be cancelled. If called within a [test] block, the [test] block
-   * will exit.   */
+   * will exit.
+   */
   public suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>>
 
   /**
