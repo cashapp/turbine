@@ -33,6 +33,10 @@ public interface Turbine<T> : ReceiveTurbine<T>  {
    */
   public override fun asChannel(): Channel<T>
 
+  /**
+   * Closes the underlying [Channel]. After all items have been consumed, this [Turbine] will yield
+   * [Event.Complete] if [cause] is null, and [Event.Error] otherwise.
+   */
   public fun close(cause: Throwable? = null)
 
   /**
