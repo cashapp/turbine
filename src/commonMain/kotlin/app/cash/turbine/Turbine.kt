@@ -110,7 +110,7 @@ internal class TurbineImpl<T>(
     override fun tryReceive(): ChannelResult<T> {
       val result = channel.tryReceive()
       val event = result.toEvent()
-      if (event is Event.Error || event is Event.Item) ignoreRemainingEvents = true
+      if (event is Event.Error || event is Event.Complete) ignoreRemainingEvents = true
 
       return result
     }

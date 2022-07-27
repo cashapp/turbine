@@ -334,8 +334,10 @@ class FlowTest {
   }
 
   @Test fun expectCompleteButWasErrorThrows() = runTest {
-    emptyFlow<Nothing>().test {
-      awaitComplete()
+    assertFailsWith<AssertionError> {
+      flow<Nothing>{ throw RuntimeException() }.test {
+        awaitComplete()
+      }
     }
   }
 
