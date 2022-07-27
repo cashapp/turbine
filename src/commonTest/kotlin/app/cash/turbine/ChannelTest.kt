@@ -19,15 +19,22 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 
 class ChannelTest {
   @Test
@@ -207,6 +214,55 @@ class ChannelTest {
       emptyFlow<Nothing>().collectIntoChannel(this).awaitError()
     }
     assertEquals("Expected error but found Complete", actual.message)
+  }
+
+  @Test fun failsOnDefaultTimeout() = runTest {
+    val message = assertFailsWith<AssertionError> {
+      coroutineScope {
+        neverFlow().collectIntoChannel(this).awaitItem()
+      }
+    }.message
+    assertEquals("No value produced in 1s", message)
+  }
+
+  @Test fun awaitHonorsCoroutineContextTimeoutNoTimeout() = runTest {
+    withTurbineTimeout(1500.milliseconds) {
+      val job = launch {
+        neverFlow().collectIntoChannel(this).awaitItem()
+      }
+
+      withContext(Dispatchers.Default) {
+        delay(1100)
+      }
+      job.cancel()
+    }
+  }
+
+  @Test fun negativeTurbineTimeoutThrows() = runTest {
+    val message = assertFailsWith<IllegalStateException> {
+      withTurbineTimeout((-10).milliseconds) {
+
+      }
+    }.message
+    assertEquals("Turbine timeout must be greater than 0.", message)
+  }
+
+  @Test fun zeroTurbineTimeoutThrows() = runTest {
+    val message = assertFailsWith<IllegalStateException> {
+      withTurbineTimeout(0.milliseconds) {
+
+      }
+    }.message
+    assertEquals("Turbine timeout must be greater than 0.", message)
+  }
+
+  @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTest {
+    val message = assertFailsWith<AssertionError> {
+      withTurbineTimeout(10.milliseconds) {
+        neverFlow().collectIntoChannel(this).awaitItem()
+      }
+    }.message
+    assertEquals("No value produced in 10ms", message)
   }
 
   @Test fun takeItem() = withTestScope {

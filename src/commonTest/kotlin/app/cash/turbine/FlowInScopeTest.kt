@@ -2,10 +2,14 @@ package app.cash.turbine
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletionHandlerException
 import kotlinx.coroutines.Dispatchers.Default
@@ -157,4 +161,18 @@ class FlowInScopeTest {
     )
     assertSame(expected, cause.cause)
   }
+
+  @OptIn(ExperimentalTime::class)
+  @Test fun awaitHonorsCoroutineContextTimeout() = runTest {
+    val took = measureTime {
+      assertFailsWith<AssertionError> {
+        coroutineScope {
+          val turbine = neverFlow().testIn(this, 1.milliseconds)
+          turbine.awaitComplete()
+        }
+      }
+    }
+    assertTrue(took < 100.milliseconds, "$took > 100ms")
+  }
+
 }
