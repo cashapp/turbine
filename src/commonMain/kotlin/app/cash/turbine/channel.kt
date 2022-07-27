@@ -15,10 +15,16 @@
  */
 package app.cash.turbine
 
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.ChannelResult
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.test.TestCoroutineScheduler
 
 /**
  * Returns the most recent item that has already been received.
@@ -64,9 +70,36 @@ public fun <T> ReceiveChannel<T>.expectNoEvents() {
  *
  * This function will always return a terminal event on a closed [ReceiveChannel].
  */
-public suspend fun <T> ReceiveChannel<T>.awaitEvent(): Event<T> =
-  try {
-    Event.Item(receive())
+@OptIn(ExperimentalCoroutinesApi::class)
+public suspend fun <T> ReceiveChannel<T>.awaitEvent(): Event<T> {
+  val timeoutMs = contextTimeout()
+  val testScheduler = coroutineContext[TestCoroutineScheduler]
+  return try {
+    withTimeout(timeoutMs) {
+      val item = if (testScheduler == null) {
+        // With no test scheduler, let receive() expire the timeout. This will use wallclock time.
+        receive()
+      } else {
+        // *With* a test scheduler, we must poll and nudge the clock
+        // until some kind of result is produced.
+        val value: T
+        while (true) {
+          val result = tryReceive()
+          if (result.isFailure && !result.isClosed) {
+            delay(timeoutMs / 10)
+          } else if (result.isFailure && result.isClosed) {
+            throw (result.exceptionOrNull() ?: ClosedReceiveChannelException(null))
+          } else {
+            value = result.getOrThrow()
+            break
+          }
+        }
+        value
+      }
+      Event.Item(item)
+    }
+  } catch (e: TimeoutCancellationException) {
+    throw AssertionError("No value produced in ${timeoutMs}ms")
   } catch (e: CancellationException) {
     throw e
   } catch (e: ClosedReceiveChannelException) {
@@ -74,6 +107,7 @@ public suspend fun <T> ReceiveChannel<T>.awaitEvent(): Event<T> =
   } catch (e: Exception) {
     Event.Error(e)
   }
+}
 
 /**
  * Assert that the next event received was non-null and return it.
@@ -130,11 +164,15 @@ public fun <T> ReceiveChannel<T>.takeError(): Throwable {
  *
  * @throws AssertionError if the next event was completion or an error.
  */
-public suspend fun <T> ReceiveChannel<T>.awaitItem(): T =
+public suspend fun <T> ReceiveChannel<T>.awaitItem(): T = try {
   when (val result = awaitEvent()) {
     is Event.Item -> result.value
     else -> unexpectedEvent(result, "item")
   }
+} catch (e: Exception) {
+  println("Caught it! $e")
+  throw e
+}
 
 /**
  * Assert that [count] item events were received and ignore them.
@@ -149,7 +187,8 @@ public suspend fun <T> ReceiveChannel<T>.skipItems(count: Int) {
         val cause = (event as? Event.Error)?.throwable
         throw TurbineAssertionError("Expected $count items but got $index items and $event", cause)
       }
-      is Event.Item<T> -> { /* Success */ }
+      is Event.Item<T> -> { /* Success */
+      }
     }
   }
 }
@@ -173,7 +212,7 @@ public suspend fun <T> ReceiveChannel<T>.awaitComplete() {
  *
  * @throws AssertionError if the next event was an item or completion.
  */
-public suspend fun  <T> ReceiveChannel<T>.awaitError(): Throwable {
+public suspend fun <T> ReceiveChannel<T>.awaitError(): Throwable {
   val event = awaitEvent()
   return (event as? Event.Error)?.throwable
     ?: unexpectedEvent(event, "error")
@@ -187,6 +226,7 @@ internal fun <T> ChannelResult<T>.toEvent(): Event<T>? {
   else if (isClosed) Event.Complete
   else null
 }
+
 private fun <T> ChannelResult<T>.unexpectedResult(expected: String): Nothing = unexpectedEvent(toEvent(), expected)
 
 private fun unexpectedEvent(event: Event<*>?, expected: String): Nothing {

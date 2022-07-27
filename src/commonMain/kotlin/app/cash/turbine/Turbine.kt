@@ -15,12 +15,15 @@
  */
 package app.cash.turbine
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.ChannelResult
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 
 internal const val debug = false
 
@@ -88,12 +91,20 @@ public operator fun <T> Turbine<T>.plusAssign(value: T) { add(value) }
 /**
  * Construct a standalone [Turbine].
  */
-public fun <T> Turbine(): Turbine<T> = TurbineImpl()
+public fun <T> Turbine(timeoutMs: Long? = null): Turbine<T> = TurbineImpl(timeoutMs = timeoutMs)
 
 internal class TurbineImpl<T>(
   channel: Channel<T> = Channel(UNLIMITED),
   private val job: Job? = null,
+  private val timeoutMs: Long? = null,
 ) : Turbine<T> {
+  private suspend fun <T> withTurbineTimeout(block: suspend CoroutineScope.() -> T): T {
+    return if (timeoutMs != null) {
+      withTurbineTimeout(timeoutMs, block)
+    } else coroutineScope {
+      block()
+    }
+  }
 
   private val channel = object : Channel<T> by channel {
     override fun tryReceive(): ChannelResult<T> {
@@ -169,15 +180,15 @@ internal class TurbineImpl<T>(
 
   override fun expectMostRecentItem(): T = channel.expectMostRecentItem()
 
-  override suspend fun awaitEvent(): Event<T> = channel.awaitEvent()
+  override suspend fun awaitEvent(): Event<T> = withTurbineTimeout { channel.awaitEvent() }
 
-  override suspend fun awaitItem(): T = channel.awaitItem()
+  override suspend fun awaitItem(): T = withTurbineTimeout { channel.awaitItem() }
 
-  override suspend fun skipItems(count: Int) = channel.skipItems(count)
+  override suspend fun skipItems(count: Int) = withTurbineTimeout { channel.skipItems(count) }
 
-  override suspend fun awaitComplete() = channel.awaitComplete()
+  override suspend fun awaitComplete() = withTurbineTimeout { channel.awaitComplete() }
 
-  override suspend fun awaitError(): Throwable = channel.awaitError()
+  override suspend fun awaitError(): Throwable = withTurbineTimeout { channel.awaitError() }
 
   override fun ensureAllEventsConsumed() {
     if (ignoreRemainingEvents) return

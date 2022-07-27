@@ -41,41 +41,11 @@ import kotlinx.coroutines.launch
  * }
  * ```
  */
-@Deprecated("Timeout parameter removed. Use runTest which has a timeout or wrap in withTimeout.",
-  ReplaceWith("this.test(validate)"),
-  DeprecationLevel.ERROR,
-)
-@Suppress("UNUSED_PARAMETER")
 public suspend fun <T> Flow<T>.test(
-  timeoutMs: Long,
+  timeout: Duration,
   validate: suspend ReceiveTurbine<T>.() -> Unit,
 ) {
-  test(validate)
-}
-
-/**
- * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
- * consume and assert properties on them in order. If any exception occurs during validation the
- * exception is rethrown from this method.
- *
- * ```kotlin
- * flowOf("one", "two").test {
- *   assertEquals("one", expectItem())
- *   assertEquals("two", expectItem())
- *   expectComplete()
- * }
- * ```
- */
-@Deprecated("Timeout parameter removed. Use runTest which has a timeout or wrap in withTimeout.",
-  ReplaceWith("this.test(validate)"),
-  DeprecationLevel.ERROR,
-)
-@Suppress("UNUSED_PARAMETER")
-public suspend fun <T> Flow<T>.test(
-  timeout: Duration = 1.seconds,
-  validate: suspend ReceiveTurbine<T>.() -> Unit,
-) {
-  test(validate)
+  test(timeoutMs = timeout.inWholeMilliseconds, validate)
 }
 
 /**
@@ -92,10 +62,11 @@ public suspend fun <T> Flow<T>.test(
  * ```
  */
 public suspend fun <T> Flow<T>.test(
+  timeoutMs: Long? = null,
   validate: suspend ReceiveTurbine<T>.() -> Unit,
 ) {
   coroutineScope {
-    collectTurbineIn(this).apply {
+    collectTurbineIn(this, timeoutMs).apply {
       validate()
       cancel()
       ensureAllEventsConsumed()
@@ -118,8 +89,8 @@ public suspend fun <T> Flow<T>.test(
  * Unlike [test] which automatically cancels the flow at the end of the lambda, the returned
  * [ReceiveTurbine] must either consume a terminal event (complete or error) or be explicitly canceled.
  */
-public fun <T> Flow<T>.testIn(scope: CoroutineScope): ReceiveTurbine<T> {
-  val turbine = collectTurbineIn(scope)
+public fun <T> Flow<T>.testIn(scope: CoroutineScope, timeoutMs: Long? = null): ReceiveTurbine<T> {
+  val turbine = collectTurbineIn(scope, timeoutMs)
 
   scope.coroutineContext.job.invokeOnCompletion { exception ->
     if (debug) println("Scope ending ${exception ?: ""}")
@@ -133,14 +104,22 @@ public fun <T> Flow<T>.testIn(scope: CoroutineScope): ReceiveTurbine<T> {
   return turbine
 }
 
-private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): Turbine<T> {
+private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeoutMs: Long?): Turbine<T> {
   lateinit var outputBox: Channel<T>
 
   val job = scope.launch(start = UNDISPATCHED) {
-    outputBox = collectIntoChannel(this)
+
+    val block: suspend CoroutineScope.() -> Unit = {
+      outputBox = collectIntoChannel(this)
+    }
+    if (timeoutMs != null) {
+      withTurbineTimeout(timeoutMs, block)
+    } else {
+      block()
+    }
   }
 
-  return TurbineImpl(outputBox, job)
+  return TurbineImpl(outputBox, job, timeoutMs = null)
 }
 
 internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {

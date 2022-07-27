@@ -25,10 +25,15 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -42,6 +47,7 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
 
 class ChannelTest {
   @Test
@@ -225,6 +231,37 @@ class ChannelTest {
       emptyFlow<Nothing>().collectIntoChannel(this).awaitError()
     }
     assertEquals("Expected error but found Complete", actual.message)
+  }
+
+  @Test fun failsOnDefaultTimeout() = runTest {
+    assertFailsWith<AssertionError> {
+      coroutineScope {
+        neverFlow().collectIntoChannel(this).awaitItem()
+      }
+    }
+  }
+
+  @Test fun awaitHonorsCoroutineContextTimeoutNoTimeout() = runTest {
+    withTurbineTimeout(5000) {
+      val job = launch {
+        neverFlow().collectIntoChannel(this).awaitItem()
+      }
+
+      delay(3000)
+      job.cancel()
+    }
+  }
+
+  @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTest {
+    assertFailsWith<AssertionError> {
+      withTurbineTimeout(5000) {
+        launch {
+          neverFlow().collectIntoChannel(this).awaitItem()
+        }
+
+        delay(5000)
+      }
+    }
   }
 
   @Test fun takeItem() = withTestScope {
