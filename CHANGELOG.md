@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 
+## [0.9.0]
+- `FlowTurbine` is now called `ReceiveTurbine`. This is the consume-only type with which you assert on events it has seen (historically only from a `Flow`).
+- New public `Turbine` type implements `ReceiveTurbine` but also allows you write events from a data source. Use this to implement fakes or collect events from non-`Flow` streams.
+- Extension functions on `ReceiveChannel` provide `ReceiveTurbine`-like assertion capabilities.
+- Support for legacy JS has been removed. Only JS IR is now supported.
+- Removed some APIs deprecated in 0.8.x.
+
+
 ## [0.8.0]
 ### Added
 - New `testIn` API allows testing multiple flows without nesting lambdas.

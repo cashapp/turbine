@@ -88,9 +88,10 @@ public operator fun <T> Turbine<T>.plusAssign(value: T) { add(value) }
 /**
  * Construct a standalone [Turbine].
  */
-public fun <T> Turbine(): Turbine<T> = TurbineImpl()
+@Suppress("FunctionName") // Interface constructor pattern.
+public fun <T> Turbine(): Turbine<T> = ChannelTurbine()
 
-internal class TurbineImpl<T>(
+internal class ChannelTurbine<T>(
   channel: Channel<T> = Channel(UNLIMITED),
   private val job: Job? = null,
 ) : Turbine<T> {
@@ -111,6 +112,7 @@ internal class TurbineImpl<T>(
       throw e
     }
   }
+
   override fun asChannel(): Channel<T> = channel
 
   override fun add(item: T) {

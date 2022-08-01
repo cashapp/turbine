@@ -27,32 +27,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
-
-/**
- * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
- * consume and assert properties on them in order. If any exception occurs during validation the
- * exception is rethrown from this method.
- *
- * ```kotlin
- * flowOf("one", "two").test {
- *   assertEquals("one", expectItem())
- *   assertEquals("two", expectItem())
- *   expectComplete()
- * }
- * ```
- */
-@Deprecated("Timeout parameter removed. Use runTest which has a timeout or wrap in withTimeout.",
-  ReplaceWith("this.test(validate)"),
-  DeprecationLevel.ERROR,
-)
-@Suppress("UNUSED_PARAMETER")
-public suspend fun <T> Flow<T>.test(
-  timeoutMs: Long,
-  validate: suspend ReceiveTurbine<T>.() -> Unit,
-) {
-  test(validate)
-}
-
 /**
  * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
  * consume and assert properties on them in order. If any exception occurs during validation the
@@ -134,13 +108,13 @@ public fun <T> Flow<T>.testIn(scope: CoroutineScope): ReceiveTurbine<T> {
 }
 
 private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): Turbine<T> {
-  lateinit var outputBox: Channel<T>
+  lateinit var channel: Channel<T>
 
   val job = scope.launch(start = UNDISPATCHED) {
-    outputBox = collectIntoChannel(this)
+    channel = collectIntoChannel(this)
   }
 
-  return TurbineImpl(outputBox, job)
+  return ChannelTurbine(channel, job)
 }
 
 internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {

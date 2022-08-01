@@ -181,12 +181,14 @@ public suspend fun  <T> ReceiveChannel<T>.awaitError(): Throwable {
 
 internal fun <T> ChannelResult<T>.toEvent(): Event<T>? {
   val cause = exceptionOrNull()
-
-  return if (isSuccess) Event.Item(getOrThrow())
-  else if (cause != null) Event.Error(cause)
-  else if (isClosed) Event.Complete
-  else null
+  return when {
+    isSuccess -> Event.Item(getOrThrow())
+    cause != null -> Event.Error(cause)
+    isClosed -> Event.Complete
+    else -> null
+  }
 }
+
 private fun <T> ChannelResult<T>.unexpectedResult(expected: String): Nothing = unexpectedEvent(toEvent(), expected)
 
 private fun unexpectedEvent(event: Event<*>?, expected: String): Nothing {
