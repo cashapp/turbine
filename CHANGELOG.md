@@ -88,7 +88,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.8.0...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/cashapp/turbine/releases/tag/0.9.0
 [0.8.0]: https://github.com/cashapp/turbine/releases/tag/0.8.0
 [0.7.0]: https://github.com/cashapp/turbine/releases/tag/0.7.0
 [0.6.1]: https://github.com/cashapp/turbine/releases/tag/0.6.1
