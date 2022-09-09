@@ -20,6 +20,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
+import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
@@ -110,7 +111,7 @@ public fun <T> Flow<T>.testIn(scope: CoroutineScope): ReceiveTurbine<T> {
 private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): Turbine<T> {
   lateinit var channel: Channel<T>
 
-  val job = scope.launch(start = UNDISPATCHED) {
+  val job = scope.launch(Unconfined, start = UNDISPATCHED) {
     channel = collectIntoChannel(this)
   }
 
