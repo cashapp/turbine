@@ -24,11 +24,6 @@ public interface ReceiveTurbine<T> {
   public fun asChannel(): ReceiveChannel<T>
 
   /**
-   * True if remaining events for this test channel have been ignored.
-   */
-  public val ignoreRemainingEvents: Boolean
-
-  /**
    * Cancel this [ReceiveTurbine].
    *
    * If it is backed by an underlying coroutine (e.g. the coroutine run
