@@ -40,7 +40,6 @@ $dokka.location:app.cash.turbine/ReceiveTurbine/cancelAndIgnoreRemainingEvents/#
 $dokka.location:app.cash.turbine/ReceiveTurbine/ensureAllEventsConsumed/#/PointingToDeclaration/turbine/app.cash.turbine/-receive-turbine/ensure-all-events-consumed.html
 $dokka.location:app.cash.turbine/ReceiveTurbine/expectMostRecentItem/#/PointingToDeclaration/turbine/app.cash.turbine/-receive-turbine/expect-most-recent-item.html
 $dokka.location:app.cash.turbine/ReceiveTurbine/expectNoEvents/#/PointingToDeclaration/turbine/app.cash.turbine/-receive-turbine/expect-no-events.html
-$dokka.location:app.cash.turbine/ReceiveTurbine/ignoreRemainingEvents/#/PointingToDeclaration/turbine/app.cash.turbine/-receive-turbine/ignore-remaining-events.html
 $dokka.location:app.cash.turbine/ReceiveTurbine/skipItems/#kotlin.Int/PointingToDeclaration/turbine/app.cash.turbine/-receive-turbine/skip-items.html
 $dokka.location:app.cash.turbine/Turbine///PointingToDeclaration/turbine/app.cash.turbine/-turbine/index.html
 $dokka.location:app.cash.turbine/Turbine/add/#TypeParam(bounds=[kotlin.Any?])/PointingToDeclaration/turbine/app.cash.turbine/-turbine/add.html
