@@ -36,6 +36,7 @@ import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
@@ -478,6 +479,19 @@ class FlowTest {
         onCompleteContinue.complete(Unit)
         awaitComplete()
       }
+  }
+
+  @Test fun valuesDoNotConflate() = runTest {
+    val flow = MutableStateFlow(0)
+    flow.test {
+      flow.value = 1
+      flow.value = 2
+      flow.value = 3
+      assertEquals(0, awaitItem())
+      assertEquals(1, awaitItem())
+      assertEquals(2, awaitItem())
+      assertEquals(3, awaitItem())
+    }
   }
 
   @Test fun assertNullValuesWithExpectMostRecentItem() = runTest {

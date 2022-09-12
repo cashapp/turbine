@@ -142,9 +142,7 @@ internal class ChannelTurbine<T>(
   override fun takeError(): Throwable = channel.takeError()
 
   private var ignoreTerminalEvents = false
-
-  override var ignoreRemainingEvents: Boolean = false
-    private set
+  private var ignoreRemainingEvents = false
 
   override suspend fun cancelAndIgnoreRemainingEvents() {
     cancel()
