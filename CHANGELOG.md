@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 
+## [0.10.0]
+### Changed
+- Remove `ReceiveTurbine.ignoreRemainingEvents` from public API.
+
+### Fixed
+- Restore usage of `Unconfined` dispatcher preventing value conflation (as much as possible) so that intermediate values can always be observed.
+
+
 ## [0.9.0]
 - `FlowTurbine` is now called `ReceiveTurbine`. This is the consume-only type with which you assert on events it has seen (historically only from a `Flow`).
 - New public `Turbine` type implements `ReceiveTurbine` but also allows you write events from a data source. Use this to implement fakes or collect events from non-`Flow` streams.
@@ -88,7 +96,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.9.0...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.10.0...HEAD
+[0.10.0]: https://github.com/cashapp/turbine/releases/tag/0.10.0
 [0.9.0]: https://github.com/cashapp/turbine/releases/tag/0.9.0
 [0.8.0]: https://github.com/cashapp/turbine/releases/tag/0.8.0
 [0.7.0]: https://github.com/cashapp/turbine/releases/tag/0.7.0
