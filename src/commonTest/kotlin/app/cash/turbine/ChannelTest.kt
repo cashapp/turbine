@@ -217,12 +217,12 @@ class ChannelTest {
   }
 
   @Test fun failsOnDefaultTimeout() = runTest {
-    val message = assertFailsWith<AssertionError> {
+    val actual = assertFailsWith<AssertionError> {
       coroutineScope {
         neverFlow().collectIntoChannel(this).awaitItem()
       }
-    }.message
-    assertEquals("No value produced in 1s", message)
+    }
+    assertEquals("No value produced in 1s", actual.message)
   }
 
   @Test fun awaitHonorsCoroutineContextTimeoutNoTimeout() = runTest {
@@ -238,31 +238,29 @@ class ChannelTest {
     }
   }
 
-  @Test fun negativeTurbineTimeoutThrows() = runTest {
-    val message = assertFailsWith<IllegalStateException> {
-      withTurbineTimeout((-10).milliseconds) {
-
-      }
-    }.message
-    assertEquals("Turbine timeout must be greater than 0.", message)
-  }
-
-  @Test fun zeroTurbineTimeoutThrows() = runTest {
-    val message = assertFailsWith<IllegalStateException> {
-      withTurbineTimeout(0.milliseconds) {
-
-      }
-    }.message
-    assertEquals("Turbine timeout must be greater than 0.", message)
-  }
-
   @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTest {
-    val message = assertFailsWith<AssertionError> {
+    val actual = assertFailsWith<AssertionError> {
       withTurbineTimeout(10.milliseconds) {
         neverFlow().collectIntoChannel(this).awaitItem()
       }
-    }.message
-    assertEquals("No value produced in 10ms", message)
+    }
+    assertEquals("No value produced in 10ms", actual.message)
+  }
+
+  @Test fun negativeTurbineTimeoutThrows() = runTest {
+    val actual = assertFailsWith<IllegalStateException> {
+      withTurbineTimeout((-10).milliseconds) {
+      }
+    }
+    assertEquals("Turbine timeout must be greater than 0: -10ms", actual.message)
+  }
+
+  @Test fun zeroTurbineTimeoutThrows() = runTest {
+    val actual = assertFailsWith<IllegalStateException> {
+      withTurbineTimeout(0.milliseconds) {
+      }
+    }
+    assertEquals("Turbine timeout must be greater than 0: 0s", actual.message)
   }
 
   @Test fun takeItem() = withTestScope {
