@@ -25,6 +25,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
@@ -345,6 +346,26 @@ class FlowTest {
     flow<Nothing> { throw error }.test {
       assertSame(error, awaitError())
     }
+  }
+
+  @Test fun terminalErrorAfterExpectMostRecentItemThrows() = runTest {
+    val error = RuntimeException("hi")
+    val throwBarrier = Job()
+    val message = assertFailsWith<AssertionError> {
+      flow {
+        emit("item!")
+        throwBarrier.join()
+        throw error
+      }.test {
+        expectMostRecentItem()
+        throwBarrier.complete()
+      }
+    }.message
+
+    assertEquals("""
+        |Unconsumed events found:
+        | - Error(RuntimeException)
+        """.trimMargin(), message)
   }
 
   @Test fun expectErrorButWasItemThrows() = runTest {
