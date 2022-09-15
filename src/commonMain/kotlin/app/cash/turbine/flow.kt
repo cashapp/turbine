@@ -21,12 +21,15 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 
 /**
  * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
@@ -108,10 +111,16 @@ public fun <T> Flow<T>.testIn(scope: CoroutineScope): ReceiveTurbine<T> {
   return turbine
 }
 
+@OptIn(ExperimentalCoroutinesApi::class) // New kotlinx.coroutines test APIs are not stable 😬
 private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): Turbine<T> {
   lateinit var channel: Channel<T>
 
-  val job = scope.launch(Unconfined, start = UNDISPATCHED) {
+  // Use test-specific unconfined if test scheduler is in use to inherit its virtual time.
+  val unconfined = scope.coroutineContext[TestCoroutineScheduler]
+    ?.let(::UnconfinedTestDispatcher)
+    ?: Unconfined
+
+  val job = scope.launch(unconfined, start = UNDISPATCHED) {
     channel = collectIntoChannel(this)
   }
 
