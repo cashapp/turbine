@@ -334,9 +334,14 @@ class FlowTest {
   }
 
   @Test fun expectCompleteButWasErrorThrows() = runTest {
-    emptyFlow<Nothing>().test {
-      awaitComplete()
+    val error = CustomRuntimeException("hi")
+    val actual = assertFailsWith<AssertionError> {
+      flow<Nothing> { throw error }.test {
+        awaitComplete()
+      }
     }
+    assertEquals("Expected complete but found Error(CustomRuntimeException)", actual.message)
+    assertSame(error, actual.cause)
   }
 
   @Test fun expectError() = runTest {
