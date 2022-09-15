@@ -22,12 +22,16 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emitAll
@@ -519,5 +523,17 @@ class FlowTest {
       }
       assertSame(error, actual.cause)
     }
+  }
+
+  @OptIn(ExperimentalTime::class)
+  @Test fun turbineSkipsDelaysInRunTest() = runTest {
+    val took = measureTime {
+      flow<Nothing> {
+        delay(5.seconds)
+      }.test {
+        awaitComplete()
+      }
+    }
+    assertTrue(took < 5.seconds, "$took > 5s")
   }
 }
