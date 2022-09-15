@@ -15,6 +15,26 @@
  */
 package app.cash.turbine
 
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.withContext
+
+private val DEFAULT_TIMEOUT: Duration = 1000.milliseconds
+
+/**
+ * Sets a timeout for all [Turbine] instances within this context. If this timeout is not set,
+ * the default value is 1sec.
+ */
+public suspend fun <T> withTurbineTimeout(timeout: Duration, block: suspend CoroutineScope.() -> T): T {
+  check(timeout > Duration.ZERO) { "Turbine timeout must be greater than 0." }
+  return withContext(TurbineTimeoutElement(timeout)) {
+    block()
+  }
+}
+
 /**
  * Invoke this method to throw an error when your method is not being called by a suspend fun.
  *
@@ -43,4 +63,16 @@ internal fun assertCallingContextIsNotSuspended() {
   if (stackTrace.contains("invokeSuspend")) {
     error("Calling context is suspending; use a suspending method instead")
   }
+}
+
+internal class TurbineTimeoutElement(
+  val timeout: Duration,
+) : CoroutineContext.Element {
+  companion object Key : CoroutineContext.Key<TurbineTimeoutElement>
+
+  override val key: CoroutineContext.Key<*> = Key
+}
+
+internal suspend fun contextTimeout(): Duration {
+  return currentCoroutineContext()[TurbineTimeoutElement.Key]?.timeout ?: DEFAULT_TIMEOUT
 }

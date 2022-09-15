@@ -16,7 +16,6 @@
 package app.cash.turbine
 
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
@@ -43,38 +42,23 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
  *   expectComplete()
  * }
  * ```
- */
-@Deprecated("Timeout parameter removed. Use runTest which has a timeout or wrap in withTimeout.",
-  ReplaceWith("this.test(validate)"),
-  DeprecationLevel.ERROR,
-)
-@Suppress("UNUSED_PARAMETER")
-public suspend fun <T> Flow<T>.test(
-  timeout: Duration = 1.seconds,
-  validate: suspend ReceiveTurbine<T>.() -> Unit,
-) {
-  test(validate)
-}
-
-/**
- * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
- * consume and assert properties on them in order. If any exception occurs during validation the
- * exception is rethrown from this method.
  *
- * ```kotlin
- * flowOf("one", "two").test {
- *   assertEquals("one", expectItem())
- *   assertEquals("two", expectItem())
- *   expectComplete()
- * }
- * ```
+ * @param timeout If non-null, overrides the current Turbine timeout inside [validate]. See also:
+ * [withTurbineTimeout].
  */
 public suspend fun <T> Flow<T>.test(
+  timeout: Duration? = null,
   validate: suspend ReceiveTurbine<T>.() -> Unit,
 ) {
   coroutineScope {
-    collectTurbineIn(this).apply {
-      validate()
+    collectTurbineIn(this, null).apply {
+      if (timeout != null) {
+        withTurbineTimeout(timeout) {
+          validate()
+        }
+      } else {
+        validate()
+      }
       cancel()
       ensureAllEventsConsumed()
     }
@@ -95,9 +79,12 @@ public suspend fun <T> Flow<T>.test(
  *
  * Unlike [test] which automatically cancels the flow at the end of the lambda, the returned
  * [ReceiveTurbine] must either consume a terminal event (complete or error) or be explicitly canceled.
+ *
+ * @param timeout If non-null, overrides the current Turbine timeout for this [Turbine]. See also:
+ * [withTurbineTimeout].
  */
-public fun <T> Flow<T>.testIn(scope: CoroutineScope): ReceiveTurbine<T> {
-  val turbine = collectTurbineIn(scope)
+public fun <T> Flow<T>.testIn(scope: CoroutineScope, timeout: Duration? = null): ReceiveTurbine<T> {
+  val turbine = collectTurbineIn(scope, timeout)
 
   scope.coroutineContext.job.invokeOnCompletion { exception ->
     if (debug) println("Scope ending ${exception ?: ""}")
@@ -112,7 +99,7 @@ public fun <T> Flow<T>.testIn(scope: CoroutineScope): ReceiveTurbine<T> {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class) // New kotlinx.coroutines test APIs are not stable 😬
-private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): Turbine<T> {
+private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duration?): Turbine<T> {
   lateinit var channel: Channel<T>
 
   // Use test-specific unconfined if test scheduler is in use to inherit its virtual time.
@@ -124,7 +111,7 @@ private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope): Turbine<T> {
     channel = collectIntoChannel(this)
   }
 
-  return ChannelTurbine(channel, job)
+  return ChannelTurbine(channel, job, timeout = timeout)
 }
 
 internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {

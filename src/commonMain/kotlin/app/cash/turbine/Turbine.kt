@@ -15,12 +15,15 @@
  */
 package app.cash.turbine
 
+import kotlin.time.Duration
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.ChannelResult
+import kotlinx.coroutines.coroutineScope
 
 internal const val debug = false
 
@@ -87,14 +90,25 @@ public operator fun <T> Turbine<T>.plusAssign(value: T) { add(value) }
 
 /**
  * Construct a standalone [Turbine].
+ *
+ * @param timeout If non-null, overrides the current Turbine timeout for this [Turbine]. See also:
+ * [withTurbineTimeout].
  */
 @Suppress("FunctionName") // Interface constructor pattern.
-public fun <T> Turbine(): Turbine<T> = ChannelTurbine()
+public fun <T> Turbine(timeout: Duration? = null): Turbine<T> = ChannelTurbine(timeout = timeout)
 
 internal class ChannelTurbine<T>(
   channel: Channel<T> = Channel(UNLIMITED),
   private val job: Job? = null,
+  private val timeout: Duration?,
 ) : Turbine<T> {
+  private suspend fun <T> withTurbineTimeout(block: suspend () -> T): T {
+    return if (timeout != null) {
+      withTurbineTimeout(timeout) { block() }
+    } else {
+      block()
+    }
+  }
 
   private val channel = object : Channel<T> by channel {
     override fun tryReceive(): ChannelResult<T> {
@@ -169,15 +183,15 @@ internal class ChannelTurbine<T>(
 
   override fun expectMostRecentItem(): T = channel.expectMostRecentItem()
 
-  override suspend fun awaitEvent(): Event<T> = channel.awaitEvent()
+  override suspend fun awaitEvent(): Event<T> = withTurbineTimeout { channel.awaitEvent() }
 
-  override suspend fun awaitItem(): T = channel.awaitItem()
+  override suspend fun awaitItem(): T = withTurbineTimeout { channel.awaitItem() }
 
-  override suspend fun skipItems(count: Int) = channel.skipItems(count)
+  override suspend fun skipItems(count: Int) = withTurbineTimeout { channel.skipItems(count) }
 
-  override suspend fun awaitComplete() = channel.awaitComplete()
+  override suspend fun awaitComplete() = withTurbineTimeout { channel.awaitComplete() }
 
-  override suspend fun awaitError(): Throwable = channel.awaitError()
+  override suspend fun awaitError(): Throwable = withTurbineTimeout { channel.awaitError() }
 
   override fun ensureAllEventsConsumed() {
     if (ignoreRemainingEvents) return

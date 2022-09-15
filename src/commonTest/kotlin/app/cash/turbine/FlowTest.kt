@@ -21,6 +21,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
@@ -555,5 +556,15 @@ class FlowTest {
       }
     }
     assertTrue(took < 5.seconds, "$took > 5s")
+  }
+
+  @OptIn(ExperimentalTime::class)
+  @Test fun awaitHonorsCoroutineContextTimeout() = runTest {
+    val took = measureTime {
+      assertFailsWith<AssertionError> {
+        neverFlow().test(1.milliseconds) { awaitComplete() }
+      }
+    }
+    assertTrue(took < 100.milliseconds, "$took > 100ms")
   }
 }

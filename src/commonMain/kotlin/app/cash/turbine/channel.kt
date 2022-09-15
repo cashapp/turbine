@@ -15,10 +15,24 @@
  */
 package app.cash.turbine
 
+import kotlin.coroutines.coroutineContext
+import kotlin.time.Duration
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.ChannelResult
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.test.TestCoroutineScheduler
 
 /**
  * Returns the most recent item that has already been received.
@@ -64,9 +78,17 @@ public fun <T> ReceiveChannel<T>.expectNoEvents() {
  *
  * This function will always return a terminal event on a closed [ReceiveChannel].
  */
-public suspend fun <T> ReceiveChannel<T>.awaitEvent(): Event<T> =
-  try {
-    Event.Item(receive())
+public suspend fun <T> ReceiveChannel<T>.awaitEvent(): Event<T> {
+  val timeout = contextTimeout()
+  return try {
+    withAppropriateTimeout(timeout) {
+      val item = receive()
+      Event.Item(item)
+    }
+  } catch (e: TimeoutCancellationException) {
+    throw AssertionError("No value produced in ${timeout}")
+  } catch (e: TurbineTimeoutCancellationException) {
+    throw AssertionError("No value produced in ${timeout}")
   } catch (e: CancellationException) {
     throw e
   } catch (e: ClosedReceiveChannelException) {
@@ -74,6 +96,37 @@ public suspend fun <T> ReceiveChannel<T>.awaitEvent(): Event<T> =
   } catch (e: Exception) {
     Event.Error(e)
   }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+private suspend fun <T> withAppropriateTimeout(timeout: Duration, block: suspend CoroutineScope.() -> T): T
+  = if (coroutineContext[TestCoroutineScheduler] != null) {
+  // withTimeout uses virtual time, which will hang.
+  withWallclockTimeout(timeout, block)
+} else {
+  withTimeout(timeout, block)
+}
+
+private suspend fun <T> withWallclockTimeout(timeout: Duration, block: suspend CoroutineScope.() -> T): T
+  = coroutineScope {
+  val blockJob = async(start = CoroutineStart.UNDISPATCHED, block = block)
+  val timeoutJob = launch(Dispatchers.Default) { delay(timeout) }
+
+  select {
+    blockJob.onAwait { result ->
+      timeoutJob.cancel()
+      result
+    }
+    timeoutJob.onJoin {
+      blockJob.cancel()
+      throw TurbineTimeoutCancellationException("Timed out waiting for $timeout")
+    }
+  }
+}
+
+internal class TurbineTimeoutCancellationException internal constructor(
+  message: String,
+) : CancellationException(message)
 
 /**
  * Assert that the next event received was non-null and return it.
@@ -149,7 +202,9 @@ public suspend fun <T> ReceiveChannel<T>.skipItems(count: Int) {
         val cause = (event as? Event.Error)?.throwable
         throw TurbineAssertionError("Expected $count items but got $index items and $event", cause)
       }
-      is Event.Item<T> -> { /* Success */ }
+      is Event.Item<T> -> {
+        // Success
+      }
     }
   }
 }
@@ -173,7 +228,7 @@ public suspend fun <T> ReceiveChannel<T>.awaitComplete() {
  *
  * @throws AssertionError if the next event was an item or completion.
  */
-public suspend fun  <T> ReceiveChannel<T>.awaitError(): Throwable {
+public suspend fun <T> ReceiveChannel<T>.awaitError(): Throwable {
   val event = awaitEvent()
   return (event as? Event.Error)?.throwable
     ?: unexpectedEvent(event, "error")
