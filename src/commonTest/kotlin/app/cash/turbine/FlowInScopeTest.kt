@@ -8,8 +8,6 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
-import kotlin.time.measureTime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletionHandlerException
 import kotlinx.coroutines.Dispatchers.Default
@@ -162,17 +160,44 @@ class FlowInScopeTest {
     assertSame(expected, cause.cause)
   }
 
-  @OptIn(ExperimentalTime::class)
-  @Test fun awaitHonorsCoroutineContextTimeout() = runTest {
-    val took = measureTime {
-      assertFailsWith<AssertionError> {
-        coroutineScope {
-          val turbine = neverFlow().testIn(this, 1.milliseconds)
-          turbine.awaitComplete()
-        }
-      }
+  @Test fun failsOnDefaultTimeout() = runTest {
+    val turbine = neverFlow().testIn(this)
+    val actual = assertFailsWith<AssertionError> {
+      turbine.awaitItem()
     }
-    assertTrue(took < 100.milliseconds, "$took > 100ms")
+    assertEquals("No value produced in 1s", actual.message)
+    turbine.cancel()
   }
 
+  @Test fun awaitHonorsTestTimeoutNoTimeout() = runTest {
+    val turbine = flow<Nothing> {
+      withContext(Default) {
+        delay(1100.milliseconds)
+      }
+    }.testIn(this, timeout = 1500.milliseconds)
+    turbine.awaitComplete()
+  }
+
+  @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTest {
+    val turbine = neverFlow().testIn(this, timeout = 10.milliseconds)
+    val actual = assertFailsWith<AssertionError> {
+      turbine.awaitItem()
+    }
+    assertEquals("No value produced in 10ms", actual.message)
+    turbine.cancel()
+  }
+
+  @Test fun negativeTurbineTimeoutThrows() = runTest {
+    val actual = assertFailsWith<IllegalStateException> {
+      neverFlow().testIn(this, timeout = (-10).milliseconds)
+    }
+    assertEquals("Turbine timeout must be greater than 0: -10ms", actual.message)
+  }
+
+  @Test fun zeroTurbineTimeoutThrows() = runTest {
+    val actual = assertFailsWith<IllegalStateException> {
+      neverFlow().testIn(this, timeout = 0.milliseconds)
+    }
+    assertEquals("Turbine timeout must be greater than 0: 0s", actual.message)
+  }
 }

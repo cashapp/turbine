@@ -24,12 +24,16 @@ import kotlinx.coroutines.withContext
 
 private val DEFAULT_TIMEOUT: Duration = 1000.milliseconds
 
+internal fun checkTimeout(timeout: Duration) {
+  check(timeout.isPositive()) { "Turbine timeout must be greater than 0: $timeout" }
+}
+
 /**
  * Sets a timeout for all [Turbine] instances within this context. If this timeout is not set,
  * the default value is 1sec.
  */
 public suspend fun <T> withTurbineTimeout(timeout: Duration, block: suspend CoroutineScope.() -> T): T {
-  check(timeout > Duration.ZERO) { "Turbine timeout must be greater than 0." }
+  checkTimeout(timeout)
   return withContext(TurbineTimeoutElement(timeout)) {
     block()
   }

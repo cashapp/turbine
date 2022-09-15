@@ -84,6 +84,11 @@ public suspend fun <T> Flow<T>.test(
  * [withTurbineTimeout].
  */
 public fun <T> Flow<T>.testIn(scope: CoroutineScope, timeout: Duration? = null): ReceiveTurbine<T> {
+  if (timeout != null) {
+    // Eager check to throw early rather than in a subsequent 'await' call.
+    checkTimeout(timeout)
+  }
+
   val turbine = collectTurbineIn(scope, timeout)
 
   scope.coroutineContext.job.invokeOnCompletion { exception ->

@@ -16,14 +16,12 @@
 package app.cash.turbine
 
 import kotlin.time.Duration
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.ChannelResult
-import kotlinx.coroutines.coroutineScope
 
 internal const val debug = false
 

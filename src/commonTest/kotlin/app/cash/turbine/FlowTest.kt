@@ -27,6 +27,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
+import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -558,13 +559,47 @@ class FlowTest {
     assertTrue(took < 5.seconds, "$took > 5s")
   }
 
-  @OptIn(ExperimentalTime::class)
-  @Test fun awaitHonorsCoroutineContextTimeout() = runTest {
-    val took = measureTime {
-      assertFailsWith<AssertionError> {
-        neverFlow().test(1.milliseconds) { awaitComplete() }
+  @Test fun failsOnDefaultTimeout() = runTest {
+    neverFlow().test {
+      val actual = assertFailsWith<AssertionError> {
+        awaitItem()
+      }
+      assertEquals("No value produced in 1s", actual.message)
+    }
+  }
+
+  @Test fun awaitHonorsTestTimeoutNoTimeout() = runTest {
+    flow<Nothing> {
+      withContext(Default) {
+        delay(1100.milliseconds)
+      }
+    }.test(timeout = 1500.milliseconds) {
+      awaitComplete()
+    }
+  }
+
+  @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTest {
+    neverFlow().test(timeout = 10.milliseconds) {
+      val actual = assertFailsWith<AssertionError> {
+        awaitItem()
+      }
+      assertEquals("No value produced in 10ms", actual.message)
+    }
+  }
+
+  @Test fun negativeTurbineTimeoutThrows() = runTest {
+    val actual = assertFailsWith<IllegalStateException> {
+      neverFlow().test(timeout = (-10).milliseconds) {
       }
     }
-    assertTrue(took < 100.milliseconds, "$took > 100ms")
+    assertEquals("Turbine timeout must be greater than 0: -10ms", actual.message)
+  }
+
+  @Test fun zeroTurbineTimeoutThrows() = runTest {
+    val actual = assertFailsWith<IllegalStateException> {
+      neverFlow().test(timeout = 0.milliseconds) {
+      }
+    }
+    assertEquals("Turbine timeout must be greater than 0: 0s", actual.message)
   }
 }
