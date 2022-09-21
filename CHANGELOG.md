@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 
+## [0.11.0]
+### Added
+- Restore timeout support. By default a 1-second timeout will be enforced when awaiting an event. This can be customized by supplying a `timeout` argument or by using the `withTurbineTimeout` wrapper function. Timeouts will always use wall clock time even when using a virtual time dispatcher.
+
+### Changed
+- When `runTest` (or any `TestCoroutineScheduler`) is in use, switch to the `UnconfinedTestScheduler` internally to ensure virtual time remains working.
+
+
 ## [0.10.0]
 ### Changed
 - Remove `ReceiveTurbine.ignoreRemainingEvents` from public API.
@@ -96,7 +104,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/cashapp/turbine/releases/tag/0.11.0
 [0.10.0]: https://github.com/cashapp/turbine/releases/tag/0.10.0
 [0.9.0]: https://github.com/cashapp/turbine/releases/tag/0.9.0
 [0.8.0]: https://github.com/cashapp/turbine/releases/tag/0.8.0
