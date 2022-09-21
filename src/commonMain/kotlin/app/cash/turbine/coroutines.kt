@@ -34,9 +34,7 @@ internal fun checkTimeout(timeout: Duration) {
  */
 public suspend fun <T> withTurbineTimeout(timeout: Duration, block: suspend CoroutineScope.() -> T): T {
   checkTimeout(timeout)
-  return withContext(TurbineTimeoutElement(timeout)) {
-    block()
-  }
+  return withContext(TurbineTimeoutElement(timeout), block)
 }
 
 /**
@@ -64,7 +62,7 @@ public suspend fun <T> withTurbineTimeout(timeout: Duration, block: suspend Coro
 internal fun assertCallingContextIsNotSuspended() {
   val stackTrace = Exception().stackTraceToString()
   // TODO: support non-JVM
-  if (stackTrace.contains("invokeSuspend")) {
+  if ("invokeSuspend" in stackTrace) {
     error("Calling context is suspending; use a suspending method instead")
   }
 }

@@ -31,8 +31,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.withTimeout
 
 /**
  * Returns the most recent item that has already been received.
@@ -43,20 +43,19 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
  * @throws AssertionError if no item was emitted.
  */
 public fun <T> ReceiveChannel<T>.expectMostRecentItem(): T {
-  var result: ChannelResult<T>? = null
-  var prevResult: ChannelResult<T>?
+  var previous: ChannelResult<T>? = null
   while (true) {
-    prevResult = result
-    result = tryReceive()
-    result.exceptionOrNull()?.let { throw it }
-    if (!result.isSuccess) {
+    val current = tryReceive()
+    current.exceptionOrNull()?.let { throw it }
+    if (current.isFailure) {
       break
     }
+    previous = current
   }
 
-  if (prevResult?.isSuccess == true) return prevResult.getOrThrow()
+  if (previous?.isSuccess == true) return previous.getOrThrow()
 
-  throw TurbineAssertionError("No item was found", cause = null)
+  throw AssertionError("No item was found")
 }
 
 /**
@@ -69,7 +68,7 @@ public fun <T> ReceiveChannel<T>.expectMostRecentItem(): T {
  */
 public fun <T> ReceiveChannel<T>.expectNoEvents() {
   val result = tryReceive()
-  if (result.isSuccess || result.isClosed) result.unexpectedResult("no events")
+  if (!result.isFailure) result.unexpectedResult("no events")
 }
 
 /**
@@ -86,9 +85,9 @@ public suspend fun <T> ReceiveChannel<T>.awaitEvent(): Event<T> {
       Event.Item(item)
     }
   } catch (e: TimeoutCancellationException) {
-    throw AssertionError("No value produced in ${timeout}")
+    throw AssertionError("No value produced in $timeout")
   } catch (e: TurbineTimeoutCancellationException) {
-    throw AssertionError("No value produced in ${timeout}")
+    throw AssertionError("No value produced in $timeout")
   } catch (e: CancellationException) {
     throw e
   } catch (e: ClosedReceiveChannelException) {
@@ -99,26 +98,32 @@ public suspend fun <T> ReceiveChannel<T>.awaitEvent(): Event<T> {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-private suspend fun <T> withAppropriateTimeout(timeout: Duration, block: suspend CoroutineScope.() -> T): T
-  = if (coroutineContext[TestCoroutineScheduler] != null) {
-  // withTimeout uses virtual time, which will hang.
-  withWallclockTimeout(timeout, block)
-} else {
-  withTimeout(timeout, block)
+private suspend fun <T> withAppropriateTimeout(
+  timeout: Duration,
+  block: suspend CoroutineScope.() -> T,
+): T {
+  return if (coroutineContext[TestCoroutineScheduler] != null) {
+    // withTimeout uses virtual time, which will hang.
+    withWallclockTimeout(timeout, block)
+  } else {
+    withTimeout(timeout, block)
+  }
 }
 
-private suspend fun <T> withWallclockTimeout(timeout: Duration, block: suspend CoroutineScope.() -> T): T
-  = coroutineScope {
-  val blockJob = async(start = CoroutineStart.UNDISPATCHED, block = block)
+private suspend fun <T> withWallclockTimeout(
+  timeout: Duration,
+  block: suspend CoroutineScope.() -> T,
+): T = coroutineScope {
+  val blockDeferred = async(start = CoroutineStart.UNDISPATCHED, block = block)
   val timeoutJob = launch(Dispatchers.Default) { delay(timeout) }
 
   select {
-    blockJob.onAwait { result ->
+    blockDeferred.onAwait { result ->
       timeoutJob.cancel()
       result
     }
     timeoutJob.onJoin {
-      blockJob.cancel()
+      blockDeferred.cancel()
       throw TurbineTimeoutCancellationException("Timed out waiting for $timeout")
     }
   }

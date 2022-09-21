@@ -116,7 +116,7 @@ private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duratio
     channel = collectIntoChannel(this)
   }
 
-  return ChannelTurbine(channel, job, timeout = timeout)
+  return ChannelTurbine(channel, job, timeout)
 }
 
 internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
