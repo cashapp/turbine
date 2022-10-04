@@ -1,5 +1,6 @@
 package app.cash.turbine
 
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -199,5 +200,47 @@ class FlowInScopeTest {
       neverFlow().testIn(this, timeout = 0.milliseconds)
     }
     assertEquals("Turbine timeout must be greater than 0: 0s", actual.message)
+  }
+
+  @Test fun expectItemButWasErrorThrowsWithName() = runTest {
+    val error = CustomRuntimeException("hi")
+    val actual = assertFailsWith<AssertionError> {
+      flow<Unit> { throw error }.testIn(this, name = "unit flow")
+        .awaitItem()
+    }
+    assertEquals("Expected item for unit flow but found Error(CustomRuntimeException)", actual.message)
+    assertSame(error, actual.cause)
+  }
+
+  @Test fun timeoutThrowsWithName() = runTest {
+    val turbine = neverFlow().testIn(this, timeout = 10.milliseconds, name = "never flow")
+    val actual = assertFailsWith<AssertionError> {
+      turbine.awaitItem()
+    }
+    assertEquals("No value produced for never flow in 10ms", actual.message)
+    turbine.cancel()
+  }
+
+  @Test fun unconsumedItemThrowsWithName() = runTest {
+    // We have to use an exception handler rather than assertFailsWith because runTest also uses
+    // one which defers throwing until its block completes.
+    val exceptionHandler = RecordingExceptionHandler()
+    withContext(exceptionHandler) {
+      flow {
+        emit("item!")
+        emitAll(neverFlow()) // Avoid emitting complete
+      }.testIn(this, name = "item flow").cancel()
+    }
+    val exception = exceptionHandler.exceptions.removeFirst()
+    assertTrue(exception is CompletionHandlerException)
+    val cause = exception.cause
+    assertTrue(cause is AssertionError)
+    assertEquals(
+      """
+      |Unconsumed events found for item flow:
+      | - Item(item!)
+      """.trimMargin(),
+      cause.message,
+    )
   }
 }

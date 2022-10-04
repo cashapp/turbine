@@ -91,14 +91,19 @@ public operator fun <T> Turbine<T>.plusAssign(value: T) { add(value) }
  *
  * @param timeout If non-null, overrides the current Turbine timeout for this [Turbine]. See also:
  * [withTurbineTimeout].
+ * @param name If non-null, name is added to any exceptions thrown to help identify which [Turbine] failed.
  */
 @Suppress("FunctionName") // Interface constructor pattern.
-public fun <T> Turbine(timeout: Duration? = null): Turbine<T> = ChannelTurbine(timeout = timeout)
+public fun <T> Turbine(
+  timeout: Duration? = null,
+  name: String? = null,
+): Turbine<T> = ChannelTurbine(timeout = timeout, name = name)
 
 internal class ChannelTurbine<T>(
   channel: Channel<T> = Channel(UNLIMITED),
   private val job: Job? = null,
   private val timeout: Duration?,
+  private val name: String?,
 ) : Turbine<T> {
   private suspend fun <T> withTurbineTimeout(block: suspend () -> T): T {
     return if (timeout != null) {
@@ -145,13 +150,13 @@ internal class ChannelTurbine<T>(
     job?.cancel()
   }
 
-  override fun takeEvent(): Event<T> = channel.takeEvent()
+  override fun takeEvent(): Event<T> = channel.takeEvent(name = name)
 
-  override fun takeItem(): T = channel.takeItem()
+  override fun takeItem(): T = channel.takeItem(name = name)
 
-  override fun takeComplete() = channel.takeComplete()
+  override fun takeComplete() = channel.takeComplete(name = name)
 
-  override fun takeError(): Throwable = channel.takeError()
+  override fun takeError(): Throwable = channel.takeError(name = name)
 
   private var ignoreTerminalEvents = false
   private var ignoreRemainingEvents = false
@@ -176,20 +181,20 @@ internal class ChannelTurbine<T>(
   }
 
   override fun expectNoEvents() {
-    channel.expectNoEvents()
+    channel.expectNoEvents(name = name)
   }
 
-  override fun expectMostRecentItem(): T = channel.expectMostRecentItem()
+  override fun expectMostRecentItem(): T = channel.expectMostRecentItem(name = name)
 
-  override suspend fun awaitEvent(): Event<T> = withTurbineTimeout { channel.awaitEvent() }
+  override suspend fun awaitEvent(): Event<T> = withTurbineTimeout { channel.awaitEvent(name = name) }
 
-  override suspend fun awaitItem(): T = withTurbineTimeout { channel.awaitItem() }
+  override suspend fun awaitItem(): T = withTurbineTimeout { channel.awaitItem(name = name) }
 
-  override suspend fun skipItems(count: Int) = withTurbineTimeout { channel.skipItems(count) }
+  override suspend fun skipItems(count: Int) = withTurbineTimeout { channel.skipItems(count, name) }
 
-  override suspend fun awaitComplete() = withTurbineTimeout { channel.awaitComplete() }
+  override suspend fun awaitComplete() = withTurbineTimeout { channel.awaitComplete(name = name) }
 
-  override suspend fun awaitError(): Throwable = withTurbineTimeout { channel.awaitError() }
+  override suspend fun awaitError(): Throwable = withTurbineTimeout { channel.awaitError(name = name) }
 
   override fun ensureAllEventsConsumed() {
     if (ignoreRemainingEvents) return
@@ -209,7 +214,8 @@ internal class ChannelTurbine<T>(
     if (unconsumed.isNotEmpty()) {
       throw TurbineAssertionError(
         buildString {
-          append("Unconsumed events found:")
+          append("Unconsumed events found".qualifiedBy(name))
+          append(":")
           for (event in unconsumed) {
             append("\n - $event")
           }

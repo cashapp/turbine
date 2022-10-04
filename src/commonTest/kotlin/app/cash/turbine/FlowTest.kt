@@ -526,6 +526,15 @@ class FlowTest {
     }
   }
 
+  @Test fun skipItemsThrowsOnComplete() = runTest {
+    flowOf(1, 2).test {
+      val message = assertFailsWith<AssertionError> {
+        skipItems(3)
+      }.message
+      assertEquals("Expected 3 items but got 2 items and Complete", message)
+    }
+  }
+
   @Test fun expectErrorOnCompletionBeforeAllItemsWereSkipped() = runTest {
     flowOf(1).test {
       assertFailsWith<AssertionError> {
@@ -601,5 +610,50 @@ class FlowTest {
       }
     }
     assertEquals("Turbine timeout must be greater than 0: 0s", actual.message)
+  }
+
+  @Test fun expectItemButWasErrorThrowsWithName() = runTest {
+    val error = CustomRuntimeException("hi")
+    val actual = assertFailsWith<AssertionError> {
+      flow<Unit> { throw error }.test(name = "unit flow") {
+        awaitItem()
+      }
+    }
+    assertEquals("Expected item for unit flow but found Error(CustomRuntimeException)", actual.message)
+    assertSame(error, actual.cause)
+  }
+
+  @Test fun timeoutThrowsWithName() = runTest {
+    neverFlow().test(timeout = 10.milliseconds, name = "never flow") {
+      val actual = assertFailsWith<AssertionError> {
+        awaitItem()
+      }
+      assertEquals("No value produced for never flow in 10ms", actual.message)
+    }
+  }
+
+  @Test fun unconsumedItemThrowsWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      flow {
+        emit("item!")
+        emitAll(neverFlow()) // Avoid emitting complete
+      }.test(name = "item flow") { }
+    }
+    assertEquals(
+      """
+      |Unconsumed events found for item flow:
+      | - Item(item!)
+      """.trimMargin(),
+      actual.message
+    )
+  }
+
+  @Test fun skipItemsThrowsOnCompleteWithName() = runTest {
+    flowOf(1, 2).test(name = "two item channel") {
+      val message = assertFailsWith<AssertionError> {
+        skipItems(3)
+      }.message
+      assertEquals("Expected 3 items for two item channel but got 2 items and Complete", message)
+    }
   }
 }
