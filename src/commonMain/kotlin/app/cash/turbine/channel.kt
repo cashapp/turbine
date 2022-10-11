@@ -92,7 +92,7 @@ public suspend fun <T> ReceiveChannel<T>.awaitEvent(name: String? = null): Event
     throw e
   } catch (e: ClosedReceiveChannelException) {
     Event.Complete
-  } catch (e: Exception) {
+  } catch (e: Throwable) {
     Event.Error(e)
   }
 }

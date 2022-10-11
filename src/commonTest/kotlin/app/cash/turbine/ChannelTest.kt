@@ -23,7 +23,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emptyFlow
@@ -39,9 +38,9 @@ import kotlinx.coroutines.withContext
 class ChannelTest {
   @Test
   fun exceptionsPropagateWhenExpectMostRecentItem() = runTest {
-    val expected = CustomRuntimeException("hello")
+    val expected = CustomThrowable("hello")
 
-    val actual = assertFailsWith<RuntimeException> {
+    val actual = assertFailsWith<CustomThrowable> {
       val channel = flow {
         emit(1)
         emit(2)
@@ -124,7 +123,7 @@ class ChannelTest {
   }
 
   @Test fun expectErrorOnErrorReceivedBeforeAllItemsWereSkipped() = runTest {
-    val error = CustomRuntimeException("hello")
+    val error = CustomThrowable("hello")
     val channel = flow {
       emit(1)
       throw error
@@ -155,7 +154,7 @@ class ChannelTest {
   }
 
   @Test fun expectErrorEvent() = runTest {
-    val exception = CustomRuntimeException("hello")
+    val exception = CustomThrowable("hello")
     val channel = flow<Nothing> { throw exception }.collectIntoChannel(this)
     val event = channel.awaitEvent()
     assertEquals(Event.Error(exception), event)
@@ -175,12 +174,12 @@ class ChannelTest {
   }
 
   @Test fun awaitItemButWasErrorThrows() = runTest {
-    val error = CustomRuntimeException("hello")
+    val error = CustomThrowable("hello")
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw error }.collectIntoChannel(this)
         .awaitItem()
     }
-    assertEquals("Expected item but found Error(CustomRuntimeException)", actual.message)
+    assertEquals("Expected item but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 
@@ -205,7 +204,7 @@ class ChannelTest {
   }
 
   @Test fun awaitError() = runTest {
-    val error = CustomRuntimeException("hello")
+    val error = CustomThrowable("hello")
     val channel = flow<Nothing> { throw error }.collectIntoChannel(this)
     assertSame(error, channel.awaitError())
   }
@@ -285,12 +284,12 @@ class ChannelTest {
   }
 
   @Test fun takeItemButWasErrorThrows() = withTestScope {
-    val error = CustomRuntimeException("hello")
+    val error = CustomThrowable("hello")
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw error }.collectIntoChannel(this)
         .takeItem()
     }
-    assertEquals("Expected item but found Error(CustomRuntimeException)", actual.message)
+    assertEquals("Expected item but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 

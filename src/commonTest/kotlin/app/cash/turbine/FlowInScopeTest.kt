@@ -202,12 +202,12 @@ class FlowInScopeTest {
   }
 
   @Test fun expectItemButWasErrorThrowsWithName() = runTest {
-    val error = CustomRuntimeException("hi")
+    val error = CustomThrowable("hi")
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw error }.testIn(this, name = "unit flow")
         .awaitItem()
     }
-    assertEquals("Expected item for unit flow but found Error(CustomRuntimeException)", actual.message)
+    assertEquals("Expected item for unit flow but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 
