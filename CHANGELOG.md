@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 
+## [0.12.0]
+### Added
+- Support specifying a human-readable name for differentiating the failures of multiple Turbines
+
+### Fixed
+- Properly catch all `Throwable` subtypes from failures in flows and channels as events.
+
+
 ## [0.11.0]
 ### Added
 - Restore timeout support. By default a 1-second timeout will be enforced when awaiting an event. This can be customized by supplying a `timeout` argument or by using the `withTurbineTimeout` wrapper function. Timeouts will always use wall clock time even when using a virtual time dispatcher.
@@ -104,7 +112,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/cashapp/turbine/releases/tag/0.12.0
 [0.11.0]: https://github.com/cashapp/turbine/releases/tag/0.11.0
 [0.10.0]: https://github.com/cashapp/turbine/releases/tag/0.10.0
 [0.9.0]: https://github.com/cashapp/turbine/releases/tag/0.9.0
