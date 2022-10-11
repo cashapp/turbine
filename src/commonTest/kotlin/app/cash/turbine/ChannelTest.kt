@@ -108,6 +108,14 @@ class ChannelTest {
     assertEquals(3, channel.awaitItem())
   }
 
+  @Test fun skipItemsThrowsOnComplete() = runTest {
+    val channel = flowOf(1, 2).collectIntoChannel(this)
+    val message = assertFailsWith<AssertionError> {
+      channel.skipItems(3)
+    }.message
+    assertEquals("Expected 3 items but got 2 items and Complete", message)
+  }
+
   @Test fun expectErrorOnCompletionBeforeAllItemsWereSkipped() = runTest {
     val channel = flowOf(1).collectIntoChannel(this)
     assertFailsWith<AssertionError> {
@@ -284,6 +292,61 @@ class ChannelTest {
     }
     assertEquals("Expected item but found Error(CustomRuntimeException)", actual.message)
     assertSame(error, actual.cause)
+  }
+
+  @Test
+  fun expectMostRecentItemButNoItemWasFoundThrowsWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      val channel = emptyFlow<Any>().collectIntoChannel(this)
+      channel.expectMostRecentItem(name = "empty flow")
+    }
+    assertEquals("No item was found for empty flow", actual.message)
+  }
+
+  @Test fun awaitItemButWasCloseThrowsWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      emptyFlow<Unit>().collectIntoChannel(this).awaitItem(name = "closed flow")
+    }
+    assertEquals("Expected item for closed flow but found Complete", actual.message)
+  }
+
+  @Test fun awaitCompleteButWasItemThrowsWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      flowOf("item!").collectIntoChannel(this)
+        .awaitComplete(name = "item flow")
+    }
+    assertEquals("Expected complete for item flow but found Item(item!)", actual.message)
+  }
+
+  @Test fun awaitErrorButWasItemThrowsWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      flowOf("item!").collectIntoChannel(this).awaitError(name = "item flow")
+    }
+    assertEquals("Expected error for item flow but found Item(item!)", actual.message)
+  }
+
+  @Test fun awaitHonorsCoroutineContextTimeoutTimeoutWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      withTurbineTimeout(10.milliseconds) {
+        neverFlow().collectIntoChannel(this).awaitItem(name = "never flow")
+      }
+    }
+    assertEquals("No value produced for never flow in 10ms", actual.message)
+  }
+
+  @Test fun takeItemButWasCloseThrowsWithName() = withTestScope {
+    val actual = assertFailsWith<AssertionError> {
+      emptyFlow<Unit>().collectIntoChannel(this).takeItem(name = "empty flow")
+    }
+    assertEquals("Expected item for empty flow but found Complete", actual.message)
+  }
+
+  @Test fun skipItemsThrowsOnCompleteWithName() = runTest {
+    val channel = flowOf(1, 2).collectIntoChannel(this)
+    val message = assertFailsWith<AssertionError> {
+      channel.skipItems(3, name = "two item channel")
+    }.message
+    assertEquals("Expected 3 items for two item channel but got 2 items and Complete", message)
   }
 
   /**

@@ -48,10 +48,11 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
  */
 public suspend fun <T> Flow<T>.test(
   timeout: Duration? = null,
+  name: String? = null,
   validate: suspend ReceiveTurbine<T>.() -> Unit,
 ) {
   coroutineScope {
-    collectTurbineIn(this, null).apply {
+    collectTurbineIn(this, null, name).apply {
       if (timeout != null) {
         withTurbineTimeout(timeout) {
           validate()
@@ -83,13 +84,17 @@ public suspend fun <T> Flow<T>.test(
  * @param timeout If non-null, overrides the current Turbine timeout for this [Turbine]. See also:
  * [withTurbineTimeout].
  */
-public fun <T> Flow<T>.testIn(scope: CoroutineScope, timeout: Duration? = null): ReceiveTurbine<T> {
+public fun <T> Flow<T>.testIn(
+  scope: CoroutineScope,
+  timeout: Duration? = null,
+  name: String? = null,
+): ReceiveTurbine<T> {
   if (timeout != null) {
     // Eager check to throw early rather than in a subsequent 'await' call.
     checkTimeout(timeout)
   }
 
-  val turbine = collectTurbineIn(scope, timeout)
+  val turbine = collectTurbineIn(scope, timeout, name)
 
   scope.coroutineContext.job.invokeOnCompletion { exception ->
     if (debug) println("Scope ending ${exception ?: ""}")
@@ -104,7 +109,7 @@ public fun <T> Flow<T>.testIn(scope: CoroutineScope, timeout: Duration? = null):
 }
 
 @OptIn(ExperimentalCoroutinesApi::class) // New kotlinx.coroutines test APIs are not stable 😬
-private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duration?): Turbine<T> {
+private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duration?, name: String?): Turbine<T> {
   lateinit var channel: Channel<T>
 
   // Use test-specific unconfined if test scheduler is in use to inherit its virtual time.
@@ -116,7 +121,7 @@ private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duratio
     channel = collectIntoChannel(this)
   }
 
-  return ChannelTurbine(channel, job, timeout)
+  return ChannelTurbine(channel, job, timeout, name)
 }
 
 internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {

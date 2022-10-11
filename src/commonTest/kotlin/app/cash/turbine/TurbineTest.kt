@@ -279,6 +279,70 @@ class TurbineTest {
     assertSame(error, actual.cause)
   }
 
+  @Test
+  fun expectMostRecentItemButNoItemWasFoundThrowsWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      Turbine<Any>(name = "empty turbine").expectMostRecentItem()
+    }
+    assertEquals("No item was found for empty turbine", actual.message)
+  }
+
+  @Test
+  fun awaitItemButWasCloseThrowsWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      val channel = Turbine<Unit>(name = "closed turbine")
+      channel.close()
+      channel.awaitItem()
+    }
+    assertEquals("Expected item for closed turbine but found Complete", actual.message)
+  }
+
+  @Test
+  fun awaitCompleteButWasItemThrowsWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      val channel = Turbine<String>(name = "item turbine")
+      channel.add("item!")
+      channel.awaitComplete()
+    }
+    assertEquals("Expected complete for item turbine but found Item(item!)", actual.message)
+  }
+
+  @Test
+  fun awaitErrorButWasItemThrowsWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      val channel = Turbine<String>(name = "item turbine")
+      channel.add("item!")
+      channel.awaitError()
+    }
+    assertEquals("Expected error for item turbine but found Item(item!)", actual.message)
+  }
+
+  @Test
+  fun takeItemButWasCloseThrowsWithName() = withTestScope {
+    val actual = assertFailsWith<AssertionError> {
+      val channel = Turbine<Any>(name = "closed turbine")
+      // JS
+      CoroutineScope(Dispatchers.Default).launch(start = CoroutineStart.UNDISPATCHED) {
+        channel.close()
+      }
+
+      channel.takeItem()
+    }
+    assertEquals("Expected item for closed turbine but found Complete", actual.message)
+  }
+
+  @Test fun skipItemsThrowsOnCompleteWithName() = runTest {
+    val channel = Turbine<Int>(name = "two item channel")
+    channel.add(1)
+    channel.add(2)
+    channel.close()
+    val message = assertFailsWith<AssertionError> {
+      channel.skipItems(3)
+    }.message
+
+    assertEquals("Expected 3 items for two item channel but got 2 items and Complete", message)
+  }
+
   /**
    * Used to run test code with a [TestScope], but still outside a suspending context.
    */
