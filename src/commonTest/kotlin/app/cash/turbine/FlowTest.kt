@@ -50,9 +50,9 @@ import kotlinx.coroutines.yield
 
 class FlowTest {
   @Test fun exceptionsPropagate() = runTest {
-    val expected = CustomRuntimeException("hello")
+    val expected = CustomThrowable("hello")
 
-    val actual = assertFailsWith<RuntimeException> {
+    val actual = assertFailsWith<CustomThrowable> {
       neverFlow().test {
         throw expected
       }
@@ -311,13 +311,13 @@ class FlowTest {
   }
 
   @Test fun expectItemButWasErrorThrows() = runTest {
-    val error = CustomRuntimeException("hi")
+    val error = CustomThrowable("hi")
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw error }.test {
         awaitItem()
       }
     }
-    assertEquals("Expected item but found Error(CustomRuntimeException)", actual.message)
+    assertEquals("Expected item but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 
@@ -337,18 +337,18 @@ class FlowTest {
   }
 
   @Test fun expectCompleteButWasErrorThrows() = runTest {
-    val error = CustomRuntimeException("hi")
+    val error = CustomThrowable("hi")
     val actual = assertFailsWith<AssertionError> {
       flow<Nothing> { throw error }.test {
         awaitComplete()
       }
     }
-    assertEquals("Expected complete but found Error(CustomRuntimeException)", actual.message)
+    assertEquals("Expected complete but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 
   @Test fun expectError() = runTest {
-    val error = CustomRuntimeException("hi")
+    val error = CustomThrowable("hi")
     flow<Nothing> { throw error }.test {
       assertSame(error, awaitError())
     }
@@ -410,7 +410,7 @@ class FlowTest {
   }
 
   @Test fun expectErrorEvent() = runTest {
-    val exception = CustomRuntimeException("hi")
+    val exception = CustomThrowable("hi")
     flow<Nothing> { throw exception }.test {
       val event = awaitEvent()
       assertEquals(Event.Error(exception), event)
@@ -444,9 +444,9 @@ class FlowTest {
   }
 
   @Test fun exceptionsPropagateWhenExpectMostRecentItem() = runTest {
-    val expected = CustomRuntimeException("hello")
+    val expected = CustomThrowable("hello")
 
-    val actual = assertFailsWith<RuntimeException> {
+    val actual = assertFailsWith<CustomThrowable> {
       flow {
         emit(1)
         emit(2)
@@ -544,7 +544,7 @@ class FlowTest {
   }
 
   @Test fun expectErrorOnErrorReceivedBeforeAllItemsWereSkipped() = runTest {
-    val error = CustomRuntimeException("hi")
+    val error = CustomThrowable("hi")
     flow {
       emit(1)
       throw error
@@ -613,13 +613,13 @@ class FlowTest {
   }
 
   @Test fun expectItemButWasErrorThrowsWithName() = runTest {
-    val error = CustomRuntimeException("hi")
+    val error = CustomThrowable("hi")
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw error }.test(name = "unit flow") {
         awaitItem()
       }
     }
-    assertEquals("Expected item for unit flow but found Error(CustomRuntimeException)", actual.message)
+    assertEquals("Expected item for unit flow but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 

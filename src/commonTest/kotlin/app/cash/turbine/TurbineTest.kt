@@ -31,9 +31,9 @@ import kotlinx.coroutines.test.runTest
 class TurbineTest {
   @Test
   fun exceptionsPropagateWhenExpectMostRecentItem() = runTest {
-    val expected = CustomRuntimeException("hello")
+    val expected = CustomThrowable("hello")
 
-    val actual = assertFailsWith<RuntimeException> {
+    val actual = assertFailsWith<CustomThrowable> {
       val channel = Turbine<Int>()
 
       channel.add(1)
@@ -116,7 +116,7 @@ class TurbineTest {
 
   @Test
   fun expectErrorOnErrorReceivedBeforeAllItemsWereSkipped() = runTest {
-    val error = CustomRuntimeException("hello")
+    val error = CustomThrowable("hello")
     val channel = Turbine<Int>()
     channel.add(1)
     channel.close(error)
@@ -150,7 +150,7 @@ class TurbineTest {
 
   @Test
   fun expectErrorEvent() = runTest {
-    val exception = CustomRuntimeException("hello")
+    val exception = CustomThrowable("hello")
     val channel = Turbine<Any>()
     channel.close(exception)
     val event = channel.awaitEvent()
@@ -177,13 +177,13 @@ class TurbineTest {
 
   @Test
   fun awaitItemButWasErrorThrows() = runTest {
-    val error = CustomRuntimeException("hello")
+    val error = CustomThrowable("hello")
     val actual = assertFailsWith<AssertionError> {
       val channel = Turbine<Any>()
       channel.close(error)
       channel.awaitItem()
     }
-    assertEquals("Expected item but found Error(CustomRuntimeException)", actual.message)
+    assertEquals("Expected item but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 
@@ -216,7 +216,7 @@ class TurbineTest {
 
   @Test
   fun awaitError() = runTest {
-    val error = CustomRuntimeException("hello")
+    val error = CustomThrowable("hello")
     val channel = Turbine<Any>()
     channel.close(error)
     assertSame(error, channel.awaitError())
@@ -266,7 +266,7 @@ class TurbineTest {
 
   @Test
   fun takeItemButWasErrorThrows() = withTestScope {
-    val error = CustomRuntimeException("hello")
+    val error = CustomThrowable("hello")
     val actual = assertFailsWith<AssertionError> {
       val channel = Turbine<Any>()
       // JS
@@ -275,7 +275,7 @@ class TurbineTest {
       }
       channel.takeItem()
     }
-    assertEquals("Expected item but found Error(CustomRuntimeException)", actual.message)
+    assertEquals("Expected item but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 

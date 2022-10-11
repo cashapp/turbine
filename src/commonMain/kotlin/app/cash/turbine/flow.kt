@@ -130,7 +130,7 @@ internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
     try {
       collect { output.trySend(it) }
       output.close()
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       output.close(e)
     }
   }

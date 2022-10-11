@@ -19,7 +19,7 @@ package app.cash.turbine
  * This type prevents coroutines from breaking referential equality by
  * reflectively creating new instances.
  */
-internal class CustomRuntimeException(
+internal class CustomThrowable(
   message: String?,
   override val cause: Throwable? = null,
-) : RuntimeException(message)
+) : Throwable(message)
