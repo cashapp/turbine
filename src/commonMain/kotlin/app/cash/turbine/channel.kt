@@ -156,8 +156,10 @@ internal fun <T> ReceiveChannel<T>.takeEventUnsafe(): Event<T>? {
  * @throws AssertionError if the next event was completion or an error, or no event.
  */
 public fun <T> ReceiveChannel<T>.takeItem(name: String? = null): T {
-  val event = takeEvent()
-  return (event as? Event.Item)?.value ?: unexpectedEvent(name, event, "item")
+  return when (val event = takeEvent()) {
+    is Event.Item -> event.value
+    else -> unexpectedEvent(name, event, "item")
+  }
 }
 
 /**
