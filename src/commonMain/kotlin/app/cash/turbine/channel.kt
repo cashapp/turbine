@@ -20,8 +20,10 @@ import kotlin.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.ChannelResult
@@ -115,7 +117,11 @@ private suspend fun <T> withWallclockTimeout(
   block: suspend CoroutineScope.() -> T,
 ): T = coroutineScope {
   val blockDeferred = async(start = CoroutineStart.UNDISPATCHED, block = block)
-  val timeoutJob = launch(Dispatchers.Default) { delay(timeout) }
+
+  // Run the timeout on a scope separate from the caller. This ensures that the use of the
+  // Default dispatcher does not affect the use of a TestScheduler and its fake time.
+  @OptIn(DelicateCoroutinesApi::class)
+  val timeoutJob = GlobalScope.launch(Dispatchers.Default) { delay(timeout) }
 
   select {
     blockDeferred.onAwait { result ->
