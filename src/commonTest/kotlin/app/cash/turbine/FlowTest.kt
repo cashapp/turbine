@@ -44,6 +44,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
@@ -654,6 +656,32 @@ class FlowTest {
         skipItems(3)
       }.message
       assertEquals("Expected 3 items for two item channel but got 2 items and Complete", message)
+    }
+  }
+
+  @Test
+  fun virtualTimeCanBeControlled() = runTest {
+    flow {
+      delay(5000)
+      emit("1")
+      delay(5000)
+      emit("2")
+    }.test {
+      expectNoEvents()
+
+      advanceTimeBy(5000)
+      expectNoEvents()
+
+      runCurrent()
+      assertEquals("1", awaitItem())
+
+      advanceTimeBy(5000)
+      expectNoEvents()
+
+      runCurrent()
+      assertEquals("2", awaitItem())
+
+      awaitComplete()
     }
   }
 }
