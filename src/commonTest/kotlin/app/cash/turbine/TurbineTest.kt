@@ -18,6 +18,7 @@ package app.cash.turbine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -160,9 +161,11 @@ class TurbineTest {
   @Test
   fun awaitItem() = runTest {
     val item = Any()
-    val channel = Turbine<Any>()
+    val channel = Turbine<Any?>()
     channel.add(item)
+    channel.add(null)
     assertSame(item, channel.awaitItem())
+    assertNull(channel.awaitItem())
   }
 
   @Test
@@ -245,9 +248,11 @@ class TurbineTest {
   @Test
   fun takeItem() = withTestScope {
     val item = Any()
-    val channel = Turbine<Any>()
+    val channel = Turbine<Any?>()
     channel.add(item)
+    channel.add(null)
     assertSame(item, channel.takeItem())
+    assertNull(channel.takeItem())
   }
 
   @Test
