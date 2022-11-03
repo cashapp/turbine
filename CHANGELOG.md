@@ -3,6 +3,15 @@
 ## [Unreleased]
 
 
+## [0.12.1]
+### Changed
+- Build with Kotlin 1.7.20
+
+### Fixed
+- `takeItem()` no longer throws an exception when returning a `null` value.
+- `await`-prefixed methods no longer interfere with virtual time control from a `TestScheduler` (such as inside `runTest`).
+
+
 ## [0.12.0]
 ### Added
 - Support specifying a human-readable name for differentiating the failures of multiple Turbines
@@ -112,7 +121,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.12.1...HEAD
+[0.12.1]: https://github.com/cashapp/turbine/releases/tag/0.12.1
 [0.12.0]: https://github.com/cashapp/turbine/releases/tag/0.12.0
 [0.11.0]: https://github.com/cashapp/turbine/releases/tag/0.11.0
 [0.10.0]: https://github.com/cashapp/turbine/releases/tag/0.10.0
