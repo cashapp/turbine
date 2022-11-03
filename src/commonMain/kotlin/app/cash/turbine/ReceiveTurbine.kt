@@ -73,7 +73,7 @@ public interface ReceiveTurbine<T> {
    * Assert that an event was received and return it.
    * This function will suspend if no events have been received.
    *
-   * When this [ReceiveTurbine] is in a terminal state ([Event.Complete] or [Event.Error], this method
+   * When this [ReceiveTurbine] is in a terminal state ([Event.Complete] or [Event.Error]), this method
    * will yield the same result every time it is called.
    */
   public suspend fun awaitEvent(): Event<T>
@@ -82,7 +82,7 @@ public interface ReceiveTurbine<T> {
    * Assert that the next event received was an item and return it.
    * This function will suspend if no events have been received.
    *
-   * When this [ReceiveTurbine] is in a terminal state ([Event.Complete] or [Event.Error], this method
+   * When this [ReceiveTurbine] is in a terminal state ([Event.Complete] or [Event.Error]), this method
    * will yield the same result every time it is called.
    *
    * @throws AssertionError if the next event was completion or an error.
@@ -101,7 +101,7 @@ public interface ReceiveTurbine<T> {
    * Assert that the next event received was the flow completing.
    * This function will suspend if no events have been received.
    *
-   * When this [ReceiveTurbine] is in a terminal state ([Event.Complete] or [Event.Error], this method
+   * When this [ReceiveTurbine] is in a terminal state ([Event.Complete] or [Event.Error]), this method
    * will yield the same result every time it is called.
    *
    * @throws AssertionError if the next event was an item or an error.
@@ -112,7 +112,7 @@ public interface ReceiveTurbine<T> {
    * Assert that the next event received was an error terminating the flow.
    * This function will suspend if no events have been received.
    *
-   * When this [ReceiveTurbine] is in a terminal state ([Event.Complete] or [Event.Error], this method
+   * When this [ReceiveTurbine] is in a terminal state ([Event.Complete] or [Event.Error]), this method
    * will yield the same result every time it is called.
    *
    * @throws AssertionError if the next event was an item or completion.
