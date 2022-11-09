@@ -39,7 +39,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
  * flowOf("one", "two").test {
  *   assertEquals("one", expectItem())
  *   assertEquals("two", expectItem())
- *   expectComplete()
+ *   awaitComplete()
  * }
  * ```
  *
@@ -75,7 +75,7 @@ public suspend fun <T> Flow<T>.test(
  * val turbine = flowOf("one", "two").testIn(this)
  * assertEquals("one", turbine.expectItem())
  * assertEquals("two", turbine.expectItem())
- * turbine.expectComplete()
+ * turbine.awaitComplete()
  * ```
  *
  * Unlike [test] which automatically cancels the flow at the end of the lambda, the returned
