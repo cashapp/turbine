@@ -198,7 +198,7 @@ class ChannelTest {
   @Test fun awaitCompleteButWasErrorThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw RuntimeException() }.collectIntoChannel(this)
-      .awaitComplete()
+        .awaitComplete()
     }
     assertEquals("Expected complete but found Error(RuntimeException)", actual.message)
   }
@@ -351,7 +351,7 @@ class ChannelTest {
   /**
    * Used to run test code with a [TestScope], but still outside a suspending context.
    */
-  private fun withTestScope(block: TestScope.()->Unit) {
+  private fun withTestScope(block: TestScope.() -> Unit) {
     val job = Job()
 
     TestScope(job).block()

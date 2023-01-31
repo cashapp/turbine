@@ -351,7 +351,7 @@ class TurbineTest {
   /**
    * Used to run test code with a [TestScope], but still outside a suspending context.
    */
-  private fun withTestScope(block: TestScope.()->Unit) {
+  private fun withTestScope(block: TestScope.() -> Unit) {
     val job = Job()
 
     TestScope(job).block()

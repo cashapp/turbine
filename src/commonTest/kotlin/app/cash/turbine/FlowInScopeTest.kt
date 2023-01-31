@@ -50,7 +50,7 @@ class FlowInScopeTest {
         println("job join result: ${runCatching { job.join() }}")
         println("job cancelled: ${job.isCancelled}")
       }
-    }.let { println("result: $it")}
+    }.let { println("result: $it") }
     kotlin.runCatching {
       coroutineScope {
         val channel = Channel<Unit>()
@@ -65,8 +65,7 @@ class FlowInScopeTest {
         println("job join result: ${runCatching { job.join() }}")
         println("job cancelled: ${job.isCancelled}")
       }
-    }.let { println("result: $it")}
-
+    }.let { println("result: $it") }
   }
 
   @Test fun cancelMustBeCalled() = runTest {
@@ -100,10 +99,10 @@ class FlowInScopeTest {
     // one which defers throwing until its block completes.
     val exceptionHandler = RecordingExceptionHandler()
     withContext(exceptionHandler) {
-        flow {
-          emit("item!")
-          emitAll(neverFlow()) // Avoid emitting complete
-        }.testIn(this).cancel()
+      flow {
+        emit("item!")
+        emitAll(neverFlow()) // Avoid emitting complete
+      }.testIn(this).cancel()
     }
     val exception = exceptionHandler.exceptions.removeFirst()
     assertTrue(exception is CompletionHandlerException)
@@ -144,7 +143,7 @@ class FlowInScopeTest {
     // one which defers throwing until its block completes.
     val exceptionHandler = RecordingExceptionHandler()
     withContext(exceptionHandler) {
-        flow<Nothing> { throw expected }.testIn(this)
+      flow<Nothing> { throw expected }.testIn(this)
     }
     val exception = exceptionHandler.exceptions.removeFirst()
     assertTrue(exception is CompletionHandlerException)
