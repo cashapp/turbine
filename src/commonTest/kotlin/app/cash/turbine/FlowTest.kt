@@ -147,7 +147,7 @@ class FlowTest {
       |Unconsumed events found:
       | - Item(item!)
       """.trimMargin(),
-      actual.message
+      actual.message,
     )
   }
 
@@ -160,7 +160,7 @@ class FlowTest {
       |Unconsumed events found:
       | - Complete
       """.trimMargin(),
-      actual.message
+      actual.message,
     )
   }
 
@@ -170,11 +170,11 @@ class FlowTest {
       flow<Nothing> { throw expected }.test { }
     }
     assertEquals(
-        """
+      """
         |Unconsumed events found:
         | - Error(RuntimeException)
-        """.trimMargin(),
-      actual.message
+      """.trimMargin(),
+      actual.message,
     )
     assertSame(expected, actual.cause)
   }
@@ -196,7 +196,7 @@ class FlowTest {
       |Unconsumed events found:
       | - Item(two)
       """.trimMargin(),
-      actual.message
+      actual.message,
     )
   }
 
@@ -213,7 +213,7 @@ class FlowTest {
       |Unconsumed events found:
       | - Complete
       """.trimMargin(),
-      actual.message
+      actual.message,
     )
   }
 
@@ -234,7 +234,7 @@ class FlowTest {
       |Unconsumed events found:
       | - Error(RuntimeException)
       """.trimMargin(),
-      actual.message
+      actual.message,
     )
     assertSame(expected, actual.cause)
   }
@@ -370,10 +370,13 @@ class FlowTest {
       }
     }.message
 
-    assertEquals("""
+    assertEquals(
+      """
         |Unconsumed events found:
         | - Error(RuntimeException)
-        """.trimMargin(), message)
+      """.trimMargin(),
+      message,
+    )
   }
 
   @Test fun expectErrorButWasItemThrows() = runTest {
@@ -559,7 +562,8 @@ class FlowTest {
   }
 
   @OptIn(ExperimentalTime::class)
-  @Test fun turbineSkipsDelaysInRunTest() = runTest {
+  @Test
+  fun turbineSkipsDelaysInRunTest() = runTest {
     val took = measureTime {
       flow<Nothing> {
         delay(5.seconds)
@@ -646,7 +650,7 @@ class FlowTest {
       |Unconsumed events found for item flow:
       | - Item(item!)
       """.trimMargin(),
-      actual.message
+      actual.message,
     )
   }
 

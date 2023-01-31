@@ -24,5 +24,5 @@ package app.cash.turbine
  */
 internal class TurbineAssertionError(
   message: String,
-  override val cause: Throwable?
+  override val cause: Throwable?,
 ) : AssertionError(message)

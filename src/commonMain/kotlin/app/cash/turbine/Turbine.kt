@@ -28,7 +28,7 @@ internal const val debug = false
 /**
  * A standalone [Turbine] suitable for usage in fakes or other external test components.
  */
-public interface Turbine<T> : ReceiveTurbine<T>  {
+public interface Turbine<T> : ReceiveTurbine<T> {
   /**
    * Returns the underlying [Channel]. The [Channel] will have a buffer size of [UNLIMITED].
    */
@@ -220,7 +220,7 @@ internal class ChannelTurbine<T>(
             append("\n - $event")
           }
         },
-        cause
+        cause,
       )
     }
   }

@@ -1,7 +1,7 @@
 buildscript {
   dependencies {
     classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0'
-    classpath 'com.diffplug.spotless:spotless-plugin-gradle:6.13.0'
+    classpath 'com.diffplug.spotless:spotless-plugin-gradle:6.14.0'
     classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
     classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.7.20'
   }
@@ -80,10 +80,9 @@ kotlin {
 apply plugin: 'com.diffplug.spotless'
 spotless {
   kotlin {
-    ktlint('0.37.2').userData([
-      // TODO this should all come from editorconfig https://github.com/diffplug/spotless/issues/142
-      'indent_size': '2',
-      'kotlin_imports_layout': 'ascii',
+    target("src/**/*.kt")
+    ktlint('0.48.2').editorConfigOverride([
+      'ktlint_standard_filename': 'disabled',
     ])
   }
 }
