@@ -87,9 +87,9 @@ public suspend fun <T> ReceiveChannel<T>.awaitEvent(name: String? = null): Event
       Event.Item(item)
     }
   } catch (e: TimeoutCancellationException) {
-    throw AssertionError("No ${"value produced".qualifiedBy(name)} in $timeout")
+    throw TurbineAssertionError("No ${"value produced".qualifiedBy(name)} in $timeout", e)
   } catch (e: TurbineTimeoutCancellationException) {
-    throw AssertionError("No ${"value produced".qualifiedBy(name)} in $timeout")
+    throw TurbineAssertionError("No ${"value produced".qualifiedBy(name)} in $timeout", e)
   } catch (e: CancellationException) {
     throw e
   } catch (e: ClosedReceiveChannelException) {

@@ -21,3 +21,15 @@ import kotlinx.coroutines.flow.flow
 
 /** A flow that never emits anything. */
 fun neverFlow(): Flow<Nothing> = flow { awaitCancellation() }
+
+/**
+ * Given a library entry point, ensure that the preceding stack frame is
+ * the expected call site.
+ *
+ * Only works on the JVM.
+ */
+expect fun assertCallSitePresentInStackTraceOnJvm(
+  throwable: Throwable,
+  entryPoint: String,
+  callSite: String,
+)

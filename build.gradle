@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+
 buildscript {
   dependencies {
     classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0'
@@ -50,6 +52,9 @@ kotlin {
         implementation 'org.jetbrains.kotlin:kotlin-test'
       }
     }
+    nonJvmTest {
+      dependsOn(commonTest)
+    }
   }
 
   sourceSets.matching { it.name.endsWith("Test") }.all {
@@ -57,6 +62,13 @@ kotlin {
       optIn('kotlinx.coroutines.DelicateCoroutinesApi')
       optIn('kotlinx.coroutines.InternalCoroutinesApi')
       optIn('kotlinx.coroutines.ExperimentalCoroutinesApi')
+    }
+  }
+
+  targets.each { target ->
+    if (target.platformType == KotlinPlatformType.common) return
+    if (target.platformType != KotlinPlatformType.jvm) {
+      target.compilations.test.defaultSourceSet.dependsOn(sourceSets.nonJvmTest)
     }
   }
 

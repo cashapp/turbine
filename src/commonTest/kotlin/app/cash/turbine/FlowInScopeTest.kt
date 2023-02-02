@@ -165,6 +165,11 @@ class FlowInScopeTest {
       turbine.awaitItem()
     }
     assertEquals("No value produced in 1s", actual.message)
+    assertCallSitePresentInStackTraceOnJvm(
+      throwable = actual,
+      entryPoint = "ChannelTurbine\$awaitItem",
+      callSite = "FlowInScopeTest\$failsOnDefaultTimeout",
+    )
     turbine.cancel()
   }
 
