@@ -579,7 +579,7 @@ class FlowTest {
       val actual = assertFailsWith<AssertionError> {
         awaitItem()
       }
-      assertEquals("No value produced in 1s", actual.message)
+      assertEquals("No value produced in 3s", actual.message)
       assertCallSitePresentInStackTraceOnJvm(
         throwable = actual,
         entryPoint = "ChannelTurbine\$awaitItem",

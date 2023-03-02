@@ -23,7 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.withContext
 
-private val DEFAULT_TIMEOUT: Duration = 1000.milliseconds
+private val DEFAULT_TIMEOUT: Duration = 3000.milliseconds
 
 internal fun checkTimeout(timeout: Duration) {
   check(timeout.isPositive()) { "Turbine timeout must be greater than 0: $timeout" }

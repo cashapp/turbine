@@ -18,7 +18,13 @@ kotlin {
   explicitApi()
 
   js {
-    nodejs()
+    nodejs {
+      testTask {
+        useMocha {
+          timeout = "5s"
+        }
+      }
+    }
   }
 
   jvm()
