@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 buildscript {
   dependencies {
     classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10'
-    classpath 'com.diffplug.spotless:spotless-plugin-gradle:6.16.0'
+    classpath 'com.diffplug.spotless:spotless-plugin-gradle:6.17.0'
     classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
     classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.8.10'
   }
