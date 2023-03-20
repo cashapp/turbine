@@ -151,6 +151,40 @@ class FlowTest {
     )
   }
 
+  @Test
+  fun expectNoEventsFailsOnException() = runTest {
+    val expected = RuntimeException()
+    val actual = assertFailsWith<AssertionError> {
+      flow<Nothing> {
+        throw expected
+      }.test {
+        expectNoEvents()
+      }
+    }
+    assertEquals(
+      """
+        |Expected no events but found Error(RuntimeException)
+      """.trimMargin(),
+      actual.message,
+    )
+    assertSame(expected, actual.cause)
+  }
+
+  @Test
+  fun expectNoEventsFailsOnCompletion() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      emptyFlow<Nothing>().test {
+        expectNoEvents()
+      }
+    }
+    assertEquals(
+      """
+        |Expected no events but found Complete
+      """.trimMargin(),
+      actual.message,
+    )
+  }
+
   @Test fun unconsumedCompleteThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       emptyFlow<Nothing>().test { }
