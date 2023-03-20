@@ -69,8 +69,7 @@ public fun <T> ReceiveChannel<T>.expectMostRecentItem(name: String? = null): T {
  * @throws AssertionError if unconsumed events are found.
  */
 public fun <T> ReceiveChannel<T>.expectNoEvents(name: String? = null) {
-  val result = tryReceive()
-  if (!result.isFailure) result.unexpectedResult(name, "no events")
+  tryReceive().toEvent()?.let { unexpectedEvent(name, it, "no events") }
 }
 
 /**
