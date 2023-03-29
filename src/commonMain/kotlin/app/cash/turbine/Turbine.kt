@@ -128,6 +128,14 @@ internal class ChannelTurbine<T>(
       ignoreRemainingEvents = true
       throw e
     }
+
+    override suspend fun receiveCatching(): ChannelResult<T> {
+      return channel.receiveCatching().also {
+        if (it.toEvent()?.isTerminal == true) {
+          ignoreRemainingEvents = true
+        }
+      }
+    }
   }
 
   override fun asChannel(): Channel<T> = channel

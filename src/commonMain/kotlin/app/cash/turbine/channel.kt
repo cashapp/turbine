@@ -82,19 +82,12 @@ public suspend fun <T> ReceiveChannel<T>.awaitEvent(name: String? = null): Event
   val timeout = contextTimeout()
   return try {
     withAppropriateTimeout(timeout) {
-      val item = receive()
-      Event.Item(item)
+      receiveCatching().toEvent()!!
     }
   } catch (e: TimeoutCancellationException) {
     throw TurbineAssertionError("No ${"value produced".qualifiedBy(name)} in $timeout", e)
   } catch (e: TurbineTimeoutCancellationException) {
     throw TurbineAssertionError("No ${"value produced".qualifiedBy(name)} in $timeout", e)
-  } catch (e: CancellationException) {
-    throw e
-  } catch (e: ClosedReceiveChannelException) {
-    Event.Complete
-  } catch (e: Throwable) {
-    Event.Error(e)
   }
 }
 

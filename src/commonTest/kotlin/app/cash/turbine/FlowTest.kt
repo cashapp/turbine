@@ -15,6 +15,7 @@
  */
 package app.cash.turbine
 
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -31,8 +32,11 @@ import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,10 +48,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 
 class FlowTest {
@@ -725,6 +731,27 @@ class FlowTest {
       assertEquals("2", awaitItem())
 
       awaitComplete()
+    }
+  }
+
+  @Test
+  fun timeoutsAreCaptured() = runTest {
+    flow<Nothing> {
+      withTimeout(500) {
+        delay(2000)
+      }
+    }.test {
+      assertTrue(awaitError() is TimeoutCancellationException)
+    }
+  }
+
+  @Test
+  fun cancellationsAreCaptured() = runTest {
+    flow<Nothing> {
+      currentCoroutineContext()[Job]!!.cancel()
+      suspendCancellableCoroutine { }
+    }.test {
+      assertTrue(awaitError() is CancellationException)
     }
   }
 }
