@@ -23,7 +23,7 @@ jobs:
           distribution: 'zulu'
           java-version: 14
 
-      - run: ./gradlew build
+      - run: ./gradlew build dokkaHtml
 
       - run: ./gradlew publish
         if: ${{ github.ref == 'refs/heads/trunk' && github.repository == 'cashapp/turbine' }}
