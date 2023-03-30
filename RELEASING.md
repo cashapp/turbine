@@ -37,6 +37,4 @@
    ```
 
    This will trigger a GitHub Action workflow which will create a GitHub release and upload the
-   release artifacts to Sonatype Nexus.
-
-9. Visit [Sonatype Nexus](https://oss.sonatype.org/) and promote the artifact.
+   release artifacts to Maven Central.

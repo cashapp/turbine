@@ -106,11 +106,6 @@ spotless {
 }
 
 apply plugin: 'com.vanniktech.maven.publish'
-signing {
-  def signingKey = findProperty('signingKey')
-  def signingPassword = ''
-  useInMemoryPgpKeys(signingKey, signingPassword)
-}
 
 apply plugin: 'org.jetbrains.dokka'
 dokkaHtml {
