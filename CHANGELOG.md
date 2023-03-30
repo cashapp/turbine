@@ -3,6 +3,16 @@
 ## [Unreleased]
 
 
+## [0.12.2]
+### Changed
+- The default wall-clock timeout used to wait for an event has been increased from 1s to 3s.
+
+### Fixed
+- The exception thrown when no events have been received now includes the original timeout exception as its cause. This ensures the stacktrace contains the caller file and line information.
+- Ensure `expectNoEvents()` fails if a completion or exception event occurred.
+- Differentiate timeout and cancellation exceptions thrown from Turbine's own event timeout (which are thrown) from those which occur within the flow under test (which are available via `awaitError()`).
+
+
 ## [0.12.1]
 ### Changed
 - Build with Kotlin 1.7.20
@@ -121,7 +131,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.12.1...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.12.2...HEAD
+[0.12.2]: https://github.com/cashapp/turbine/releases/tag/0.12.2
 [0.12.1]: https://github.com/cashapp/turbine/releases/tag/0.12.1
 [0.12.0]: https://github.com/cashapp/turbine/releases/tag/0.12.0
 [0.11.0]: https://github.com/cashapp/turbine/releases/tag/0.11.0
