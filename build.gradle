@@ -1,4 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
 
 buildscript {
   dependencies {
@@ -27,7 +29,11 @@ kotlin {
     }
   }
 
-  jvm()
+  jvm {
+    compilations.configureEach { KotlinJvmCompilation compilation ->
+      compilation.compilerOptions.options.jvmTarget = JvmTarget.JVM_1_8
+    }
+  }
 
   iosArm32()
   iosArm64()
