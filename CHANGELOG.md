@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 
+## [0.12.3]
+### Fixed
+- Ensure JVM classes target Java 8 rather than implicitly using the build JDK version.
+
+
 ## [0.12.2]
 ### Changed
 - The default wall-clock timeout used to wait for an event has been increased from 1s to 3s.
@@ -131,7 +136,8 @@
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.12.2...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/0.12.3...HEAD
+[0.12.3]: https://github.com/cashapp/turbine/releases/tag/0.12.3
 [0.12.2]: https://github.com/cashapp/turbine/releases/tag/0.12.2
 [0.12.1]: https://github.com/cashapp/turbine/releases/tag/0.12.1
 [0.12.0]: https://github.com/cashapp/turbine/releases/tag/0.12.0
