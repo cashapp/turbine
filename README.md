@@ -89,7 +89,7 @@ Then it calls the validation block, passing in the read-only `ReceiveTurbine` in
 ```kotlin
 flowOf("one").test {
   assertEquals("one", awaitItem())
-  assertComplete()
+  awaitComplete()
 }
 ```
 
