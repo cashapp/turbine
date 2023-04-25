@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
 
 buildscript {
   dependencies {
-    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10'
+    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21'
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:6.18.0'
     classpath 'com.vanniktech:gradle-maven-publish-plugin:0.25.2'
     classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.8.10'
