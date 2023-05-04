@@ -31,7 +31,7 @@ internal fun checkTimeout(timeout: Duration) {
 
 /**
  * Sets a timeout for all [Turbine] instances within this context. If this timeout is not set,
- * the default value is 1sec.
+ * the default value is 3sec.
  */
 public suspend fun <T> withTurbineTimeout(timeout: Duration, block: suspend CoroutineScope.() -> T): T {
   checkTimeout(timeout)
