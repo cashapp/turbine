@@ -16,7 +16,7 @@
 package app.cash.turbine
 
 import kotlin.time.Duration
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
@@ -144,14 +144,14 @@ internal class ChannelTurbine<T>(
     if (!channel.trySend(item).isSuccess) throw IllegalStateException("Added when closed")
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
+  @OptIn(DelicateCoroutinesApi::class)
   override suspend fun cancel() {
     if (!channel.isClosedForSend) ignoreTerminalEvents = true
     channel.cancel()
     job?.cancelAndJoin()
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
+  @OptIn(DelicateCoroutinesApi::class)
   override fun close(cause: Throwable?) {
     if (!channel.isClosedForSend) ignoreTerminalEvents = true
     channel.close(cause)

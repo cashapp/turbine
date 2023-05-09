@@ -108,11 +108,11 @@ public fun <T> Flow<T>.testIn(
   return turbine
 }
 
-@OptIn(ExperimentalCoroutinesApi::class) // New kotlinx.coroutines test APIs are not stable 😬
 private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duration?, name: String?): Turbine<T> {
   lateinit var channel: Channel<T>
 
   // Use test-specific unconfined if test scheduler is in use to inherit its virtual time.
+  @OptIn(ExperimentalCoroutinesApi::class) // UnconfinedTestDispatcher is still experimental.
   val unconfined = scope.coroutineContext[TestCoroutineScheduler]
     ?.let(::UnconfinedTestDispatcher)
     ?: Unconfined
