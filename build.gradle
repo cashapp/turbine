@@ -33,6 +33,7 @@ kotlin {
   iosX64()
   iosSimulatorArm64()
   linuxX64()
+  linuxArm64()
   macosX64()
   macosArm64()
   mingwX64()
@@ -43,6 +44,7 @@ kotlin {
   watchosArm64()
   watchosX86()
   watchosX64()
+  watchosDeviceArm64()
   watchosSimulatorArm64()
 
   sourceSets {
