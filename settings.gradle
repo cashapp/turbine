@@ -1,0 +1,19 @@
+pluginManagement {
+  repositories {
+    mavenCentral()
+    // https://github.com/diffplug/spotless/issues/1153
+    gradlePluginPortal {
+      content {
+        includeModule("com.diffplug.spotless", "com.diffplug.spotless.gradle.plugin")
+      }
+    }
+  }
+}
+
+dependencyResolutionManagement {
+  repositories {
+    mavenCentral()
+  }
+}
+
+rootProject.name = "Turbine"
