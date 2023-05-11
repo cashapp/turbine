@@ -28,6 +28,10 @@ kotlin {
     }
   }
 
+  androidNativeArm32()
+  androidNativeArm64()
+  androidNativeX86()
+  androidNativeX64()
   iosArm32()
   iosArm64()
   iosX64()
