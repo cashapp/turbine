@@ -3,6 +3,20 @@
 ## [Unreleased]
 
 
+## [0.13.0] - 2023-05-11
+### Added
+- New Kotlin/Native targets:
+  - `androidNativeArm32`
+  - `androidNativeArm64`
+  - `androidNativeX86`
+  - `androidNativeX64`
+  - `linuxArm64`
+  - `watchosDeviceArm64`
+
+### Changed
+- Build with Kotlin 1.8.21
+
+
 ## [0.12.3]
 ### Fixed
 - Ensure JVM classes target Java 8 rather than implicitly using the build JDK version.
