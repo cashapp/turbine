@@ -16,6 +16,8 @@
 ### Changed
 - Build with Kotlin 1.8.21
 
+Note: This version has a transitive dependency on kotlinx.coroutines 1.7.0. If you are an Android user, you should be depending on kotlinx.coroutines 1.7.1 which graciously fixes a binary incompatibility with a Compose testing artifact (because they failed to heed its opt-in annotation which indicated that it was not a stable API).
+
 
 ## [0.12.3]
 ### Fixed
