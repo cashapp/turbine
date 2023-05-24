@@ -753,4 +753,51 @@ class FlowTest {
       assertTrue(awaitError() is CancellationException)
     }
   }
+
+  @Test
+  fun outerFailingFlowIsReported() = runTest {
+    val expected = CustomThrowable("hi")
+
+    val actual = assertFailsWith<AssertionError> {
+      flow<Nothing> {
+        throw expected
+      }.test(name = "outer") {
+        Turbine<Unit>(name = "inner").awaitItem()
+      }
+    }
+
+    assertEquals(
+      """
+        |Unconsumed events found for outer:
+        | - Error(CustomThrowable)
+      """.trimMargin(),
+      actual.message,
+    )
+    assertEquals(actual.cause?.message, "No value produced for inner in 3s")
+  }
+
+  @Test
+  fun innerFailingFlowIsReported() = runTest {
+    val expected = CustomThrowable("hi")
+
+    val actual = assertFailsWith<AssertionError> {
+      neverFlow().test(name = "outer") {
+        flow<Nothing> {
+          throw expected
+        }.testIn(backgroundScope, name = "inner failing")
+
+        Turbine<Unit>(name = "inner").awaitItem()
+      }
+    }
+
+    assertEquals(
+      """
+        |No value produced for inner in 3s
+        |
+        |Unconsumed events found for inner failing:
+        | - Error(CustomThrowable)
+      """.trimMargin(),
+      actual.message,
+    )
+  }
 }
