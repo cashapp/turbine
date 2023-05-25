@@ -51,17 +51,40 @@ public suspend fun <T> Flow<T>.test(
   name: String? = null,
   validate: suspend ReceiveTurbine<T>.() -> Unit,
 ) {
-  coroutineScope {
-    collectTurbineIn(this, null, name).apply {
-      if (timeout != null) {
-        withTurbineTimeout(timeout) {
-          validate()
+  val turbineRegistry = mutableListOf<ChannelTurbine<*>>()
+  reportTurbines(turbineRegistry) {
+    coroutineScope {
+      collectTurbineIn(this, null, name).apply {
+        try {
+          if (timeout != null) {
+            withTurbineTimeout(timeout) {
+              validate()
+            }
+          } else {
+            validate()
+          }
+          cancel()
+          ensureAllEventsConsumed()
+        } catch (e: Throwable) {
+          // The exception needs to be reraised. However, if there are any unconsumed events
+          // from other turbines (including this one), those may indicate an underlying problem.
+          // So: create a report with all the registered turbines, and include exception as cause
+          val reports = turbineRegistry.map { it.reportUnconsumedEvents() }
+          val hasUnconsumedEvents = reports.fold(false) { hasUnconsumedEvents, report ->
+            hasUnconsumedEvents || report.unconsumed.isNotEmpty()
+          }
+          if (!hasUnconsumedEvents) {
+            throw e
+          } else {
+            throw TurbineAssertionError(
+              buildString {
+                reports.forEach { it.describe(this@buildString) }
+              },
+              e,
+            )
+          }
         }
-      } else {
-        validate()
       }
-      cancel()
-      ensureAllEventsConsumed()
     }
   }
 }
@@ -121,7 +144,9 @@ private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duratio
     channel = collectIntoChannel(this)
   }
 
-  return ChannelTurbine(channel, job, timeout, name)
+  return ChannelTurbine(channel, job, timeout, name).also {
+    scope.reportTurbine(it)
+  }
 }
 
 internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {

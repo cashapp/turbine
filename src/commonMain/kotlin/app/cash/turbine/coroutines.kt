@@ -68,6 +68,32 @@ internal fun assertCallingContextIsNotSuspended() {
   }
 }
 
+internal class TurbineRegistryElement(val registry: MutableList<ChannelTurbine<*>>) : CoroutineContext.Element {
+  companion object Key : CoroutineContext.Key<TurbineRegistryElement>
+
+  override val key: CoroutineContext.Key<*> = Key
+}
+
+/**
+ * Internal tool to report turbines that have been spun up within a given scope.
+ *
+ * If reportTurbines is nested within another reportTurbines, the outer scope wins:
+ * no turbines will be registered from the inner scope.
+ */
+internal suspend fun <T> reportTurbines(registry: MutableList<ChannelTurbine<*>>, block: suspend () -> T): T {
+  val enclosingRegistryElement = currentCoroutineContext()[TurbineRegistryElement]
+  return if (enclosingRegistryElement != null) {
+    block()
+  } else {
+    withContext(TurbineRegistryElement(registry)) {
+      block()
+    }
+  }
+}
+
+internal fun CoroutineScope.reportTurbine(turbine: ChannelTurbine<*>) =
+  coroutineContext[TurbineRegistryElement]?.registry?.add(turbine)
+
 internal class TurbineTimeoutElement(
   val timeout: Duration,
 ) : CoroutineContext.Element {

@@ -204,8 +204,8 @@ internal class ChannelTurbine<T>(
 
   override suspend fun awaitError(): Throwable = withTurbineTimeout { channel.awaitError(name = name) }
 
-  override fun ensureAllEventsConsumed() {
-    if (ignoreRemainingEvents) return
+  internal fun reportUnconsumedEvents(): UnconsumedEventReport<T> {
+    if (ignoreRemainingEvents) return UnconsumedEventReport(emptyList())
 
     val unconsumed = mutableListOf<Event<T>>()
     var cause: Throwable? = null
@@ -219,17 +219,39 @@ internal class ChannelTurbine<T>(
         break
       }
     }
-    if (unconsumed.isNotEmpty()) {
+
+    return UnconsumedEventReport(
+      name = name,
+      unconsumed = unconsumed,
+      cause = cause,
+    )
+  }
+  override fun ensureAllEventsConsumed() {
+    val report = reportUnconsumedEvents()
+
+    if (report.unconsumed.isNotEmpty()) {
       throw TurbineAssertionError(
         buildString {
-          append("Unconsumed events found".qualifiedBy(name))
-          append(":")
-          for (event in unconsumed) {
-            append("\n - $event")
-          }
+          report.describe(this)
         },
-        cause,
+        report.cause,
       )
+    }
+  }
+}
+
+internal data class UnconsumedEventReport<T>(
+  val unconsumed: List<Event<T>>,
+  val name: String? = null,
+  val cause: Throwable? = null,
+) {
+  fun describe(builder: StringBuilder) {
+    with(builder) {
+      append("Unconsumed events found".qualifiedBy(name))
+      append(":")
+      for (event in unconsumed) {
+        append("\n - $event")
+      }
     }
   }
 }
