@@ -792,12 +792,14 @@ class FlowTest {
 
     assertEquals(
       """
-        |No value produced for inner in 3s
-        |
         |Unconsumed events found for inner failing:
         | - Error(CustomThrowable)
       """.trimMargin(),
       actual.message,
+    )
+    assertEquals(
+      actual.cause?.message,
+      "No value produced for inner in 3s",
     )
   }
 }

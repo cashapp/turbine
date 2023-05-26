@@ -16,6 +16,7 @@
 package app.cash.turbine
 
 import kotlin.time.Duration
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -254,4 +255,12 @@ internal data class UnconsumedEventReport<T>(
       }
     }
   }
+  fun stripCancellations(): UnconsumedEventReport<T> =
+    UnconsumedEventReport(
+      unconsumed = unconsumed.filter {
+        (it as? Event.Error)?.throwable !is CancellationException
+      },
+      name = name,
+      cause = cause?.takeUnless { it is CancellationException },
+    )
 }
