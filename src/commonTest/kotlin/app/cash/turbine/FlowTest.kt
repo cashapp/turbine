@@ -767,11 +767,16 @@ class FlowTest {
     }
 
     assertEquals(
-      """
+      actual.message?.startsWith(
+        """
         |Unconsumed events found for outer:
         | - Error(CustomThrowable)
-      """.trimMargin(),
-      actual.message,
+        |
+        |Stack trace:
+        |app.cash.turbine.CustomThrowable: hi
+        """.trimMargin(),
+      ),
+      true,
     )
     assertEquals(actual.cause?.message, "No value produced for inner in 3s")
   }
@@ -791,11 +796,16 @@ class FlowTest {
     }
 
     assertEquals(
-      """
+      actual.message?.startsWith(
+        """
         |Unconsumed events found for inner failing:
         | - Error(CustomThrowable)
-      """.trimMargin(),
-      actual.message,
+        |
+        |Stack trace:
+        |app.cash.turbine.CustomThrowable: hi
+        """.trimMargin(),
+      ),
+      true,
     )
     assertEquals(
       actual.cause?.message,

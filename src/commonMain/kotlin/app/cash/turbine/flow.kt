@@ -113,7 +113,20 @@ public suspend fun <T> Flow<T>.test(
           } else {
             throw TurbineAssertionError(
               buildString {
-                reportsWithUnconsumedEvents.forEach { it.describe(this@buildString) }
+                reportsWithUnconsumedEvents.forEach {
+                  it.describe(this@buildString)
+                  it.cause?.let { cause ->
+                    appendLine(
+                      """
+                        |
+                        |
+                        |Stack trace:
+                      """.trimMargin(),
+                    )
+                    append(cause.stackTraceToString())
+                    appendLine()
+                  }
+                }
               },
               e,
             )
