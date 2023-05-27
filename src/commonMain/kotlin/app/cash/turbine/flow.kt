@@ -101,31 +101,20 @@ public suspend fun <T> Flow<T>.test(
           // The exception needs to be reraised. However, if there are any unconsumed events
           // from other turbines (including this one), those may indicate an underlying problem.
           // So: create a report with all the registered turbines, and include exception as cause
-          val reportsWithUnconsumedEvents = turbineRegistry.map {
+          val reportsWithExceptions = turbineRegistry.map {
             it.reportUnconsumedEvents()
               // The exception will have cancelled its job hierarchy, producing cancellation exceptions
               // in its wake. These aren't meaningful test feedback
               .stripCancellations()
           }
-            .filter { it.unconsumed.isNotEmpty() }
-          if (reportsWithUnconsumedEvents.isEmpty()) {
+            .filter { it.cause != null }
+          if (reportsWithExceptions.isEmpty()) {
             throw e
           } else {
             throw TurbineAssertionError(
               buildString {
-                reportsWithUnconsumedEvents.forEach {
-                  it.describe(this@buildString)
-                  it.cause?.let { cause ->
-                    appendLine(
-                      """
-                        |
-                        |
-                        |Stack trace:
-                      """.trimMargin(),
-                    )
-                    append(cause.stackTraceToString())
-                    appendLine()
-                  }
+                reportsWithExceptions.forEach {
+                  it.describeException(this@buildString)
                 }
               },
               e,

@@ -255,6 +255,25 @@ internal data class UnconsumedEventReport<T>(
       }
     }
   }
+
+  fun describeException(builder: StringBuilder) {
+    with(builder) {
+      cause?.let { cause ->
+        append("Unconsumed exception found".qualifiedBy(name))
+        append(":")
+        appendLine(
+          """
+            |
+            |
+            |Stack trace:
+          """.trimMargin(),
+        )
+        append(cause.stackTraceToString())
+        appendLine()
+      }
+    }
+  }
+
   fun stripCancellations(): UnconsumedEventReport<T> =
     UnconsumedEventReport(
       unconsumed = unconsumed.filter {

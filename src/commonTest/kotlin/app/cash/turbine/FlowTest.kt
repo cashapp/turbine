@@ -17,6 +17,7 @@ package app.cash.turbine
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -766,17 +767,21 @@ class FlowTest {
       }
     }
 
-    assertEquals(
-      actual.message?.startsWith(
-        """
-        |Unconsumed events found for outer:
-        | - Error(CustomThrowable)
+    val expectedPrefix = """
+        |Unconsumed exception found for outer:
         |
         |Stack trace:
-        |app.cash.turbine.CustomThrowable: hi
-        """.trimMargin(),
+    """.trimMargin()
+    assertEquals(
+      actual.message?.startsWith(
+        expectedPrefix,
       ),
       true,
+      "Expected to start with:\n\n$expectedPrefix\n\nBut was:\n\n${actual.message}",
+    )
+    assertContains(
+      actual.message!!,
+      "CustomThrowable: hi",
     )
     assertEquals(actual.cause?.message, "No value produced for inner in 3s")
   }
@@ -795,17 +800,21 @@ class FlowTest {
       }
     }
 
-    assertEquals(
-      actual.message?.startsWith(
-        """
-        |Unconsumed events found for inner failing:
-        | - Error(CustomThrowable)
+    val expectedPrefix = """
+        |Unconsumed exception found for inner failing:
         |
         |Stack trace:
-        |app.cash.turbine.CustomThrowable: hi
-        """.trimMargin(),
+    """.trimMargin()
+    assertEquals(
+      actual.message?.startsWith(
+        expectedPrefix,
       ),
       true,
+      "Expected to start with:\n\n$expectedPrefix\n\nBut was:\n\n${actual.message}",
+    )
+    assertContains(
+      actual.message!!,
+      "CustomThrowable: hi",
     )
     assertEquals(
       actual.cause?.message,
