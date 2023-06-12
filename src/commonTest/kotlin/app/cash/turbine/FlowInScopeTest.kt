@@ -1,6 +1,7 @@
 package app.cash.turbine
 
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -246,4 +247,41 @@ class FlowInScopeTest {
       cause.message,
     )
   }
+
+  @Test
+  fun innerFailingFlowIsReported() = runTest {
+    val expected = CustomThrowable("hi")
+
+    val actual = assertFailsWith<AssertionError> {
+      turbine {
+        flow<Nothing> {
+          throw expected
+        }.testIn(backgroundScope, name = "inner failing")
+
+        Turbine<Unit>(name = "inner").awaitItem()
+      }
+    }
+
+    val expectedPrefix = """
+        |Unconsumed exception found for inner failing:
+        |
+        |Stack trace:
+    """.trimMargin()
+    assertEquals(
+      actual.message?.startsWith(
+        expectedPrefix,
+      ),
+      true,
+      "Expected to start with:\n\n$expectedPrefix\n\nBut was:\n\n${actual.message}",
+    )
+    assertContains(
+      actual.message!!,
+      "CustomThrowable: hi",
+    )
+    assertEquals(
+      actual.cause?.message,
+      "No value produced for inner in 3s",
+    )
+  }
+
 }
