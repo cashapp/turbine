@@ -227,6 +227,7 @@ internal class ChannelTurbine<T>(
       cause = cause,
     )
   }
+
   override fun ensureAllEventsConsumed() {
     val report = reportUnconsumedEvents()
 
