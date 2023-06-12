@@ -14,7 +14,7 @@ $dokka.location:app.cash.turbine//takeComplete/kotlinx.coroutines.channels.Recei
 $dokka.location:app.cash.turbine//takeError/kotlinx.coroutines.channels.ReceiveChannel[TypeParam(bounds=[kotlin.Any?])]#kotlin.String?/PointingToDeclaration/-turbine/app.cash.turbine/take-error.html
 $dokka.location:app.cash.turbine//takeEvent/kotlinx.coroutines.channels.ReceiveChannel[TypeParam(bounds=[kotlin.Any?])]#kotlin.String?/PointingToDeclaration/-turbine/app.cash.turbine/take-event.html
 $dokka.location:app.cash.turbine//takeItem/kotlinx.coroutines.channels.ReceiveChannel[TypeParam(bounds=[kotlin.Any?])]#kotlin.String?/PointingToDeclaration/-turbine/app.cash.turbine/take-item.html
-$dokka.location:app.cash.turbine//test/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#kotlin.time.Duration?#kotlin.String?#kotlin.coroutines.SuspendFunction1[app.cash.turbine.ReceiveTurbine[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/-turbine/app.cash.turbine/test.html
+$dokka.location:app.cash.turbine//test/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#kotlin.time.Duration?#kotlin.String?#kotlin.coroutines.SuspendFunction1[app.cash.turbine.TurbineTestContext[TypeParam(bounds=[kotlin.Any?])],kotlin.Unit]/PointingToDeclaration/-turbine/app.cash.turbine/test.html
 $dokka.location:app.cash.turbine//testIn/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#kotlinx.coroutines.CoroutineScope#kotlin.time.Duration?#kotlin.String?/PointingToDeclaration/-turbine/app.cash.turbine/test-in.html
 $dokka.location:app.cash.turbine//withTurbineTimeout/#kotlin.time.Duration#kotlin.coroutines.SuspendFunction1[kotlinx.coroutines.CoroutineScope,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/-turbine/app.cash.turbine/with-turbine-timeout.html
 $dokka.location:app.cash.turbine/Event.Complete///PointingToDeclaration/-turbine/app.cash.turbine/-event/-complete/index.html
@@ -50,5 +50,7 @@ $dokka.location:app.cash.turbine/Turbine/takeComplete/#/PointingToDeclaration/-
 $dokka.location:app.cash.turbine/Turbine/takeError/#/PointingToDeclaration/-turbine/app.cash.turbine/-turbine/take-error.html
 $dokka.location:app.cash.turbine/Turbine/takeEvent/#/PointingToDeclaration/-turbine/app.cash.turbine/-turbine/take-event.html
 $dokka.location:app.cash.turbine/Turbine/takeItem/#/PointingToDeclaration/-turbine/app.cash.turbine/-turbine/take-item.html
+$dokka.location:app.cash.turbine/TurbineTestContext///PointingToDeclaration/-turbine/app.cash.turbine/-turbine-test-context/index.html
+$dokka.location:app.cash.turbine/TurbineTestContext/testIn/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#kotlinx.coroutines.CoroutineScope#kotlin.time.Duration?#kotlin.String?/PointingToDeclaration/-turbine/app.cash.turbine/-turbine-test-context/test-in.html
 app.cash.turbine
 
