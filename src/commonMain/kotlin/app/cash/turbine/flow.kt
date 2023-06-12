@@ -184,6 +184,9 @@ private fun <T> testInInternal(flow: Flow<T>, timeout: Duration?, scope: Corouti
     // Eager check to throw early rather than in a subsequent 'await' call.
     checkTimeout(timeout)
   }
+  if (scope.coroutineContext[TurbineRegistryElement] == null) {
+    throw AssertionError("Turbine can only collect flows within a TurbineContext")
+  }
 
   val turbine = flow.collectTurbineIn(scope, timeout, name)
 
