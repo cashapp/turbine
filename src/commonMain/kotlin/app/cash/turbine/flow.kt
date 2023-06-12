@@ -34,18 +34,25 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 
-public interface TurbineTestContext<T> : ReceiveTurbine<T> {
+public interface TurbineContext : CoroutineScope {
   public fun <R> Flow<R>.testIn(
     scope: CoroutineScope,
     timeout: Duration? = null,
     name: String? = null,
   ): ReceiveTurbine<R>
 }
+public interface TurbineTestContext<T> : TurbineContext, ReceiveTurbine<T>
 
 internal class TurbineTestContextImpl<T>(
   turbine: Turbine<T>,
   turbineContext: CoroutineContext,
-) : TurbineTestContext<T>, ReceiveTurbine<T> by turbine {
+) : TurbineContext by TurbineContextImpl(turbineContext), ReceiveTurbine<T> by turbine, TurbineTestContext<T>
+
+internal class TurbineContextImpl(
+  turbineContext: CoroutineContext,
+) : TurbineContext, CoroutineScope {
+  override val coroutineContext: CoroutineContext = turbineContext
+
   private val turbineElements = (turbineContext[TurbineRegistryElement] ?: EmptyCoroutineContext) +
     (turbineContext[TurbineTimeoutElement] ?: EmptyCoroutineContext)
   override fun <R> Flow<R>.testIn(
@@ -59,6 +66,54 @@ internal class TurbineTestContextImpl<T>(
       name = name,
       scope = scope + turbineElements,
     )
+}
+
+/**
+ * Run a validation block that catches and reports all unhandled exceptions in flows run by Turbine.
+ */
+public suspend fun turbine(
+  timeout: Duration? = null,
+  validate: suspend TurbineContext.() -> Unit,
+) {
+  val turbineRegistry = mutableListOf<ChannelTurbine<*>>()
+  reportTurbines(turbineRegistry) {
+    val scopeFn: suspend (suspend CoroutineScope.() -> Unit) -> Unit = { block ->
+      if (timeout == null) {
+        coroutineScope(block)
+      } else {
+        withTurbineTimeout(timeout, block)
+      }
+    }
+    scopeFn {
+      try {
+        val testContext = TurbineContextImpl(currentCoroutineContext())
+        testContext.validate()
+      } catch (e: Throwable) {
+        // The exception needs to be reraised. However, if there are any unconsumed events
+        // from other turbines (including this one), those may indicate an underlying problem.
+        // So: create a report with all the registered turbines, and include exception as cause
+        val reportsWithExceptions = turbineRegistry.map {
+          it.reportUnconsumedEvents()
+            // The exception will have cancelled its job hierarchy, producing cancellation exceptions
+            // in its wake. These aren't meaningful test feedback
+            .stripCancellations()
+        }
+          .filter { it.cause != null }
+        if (reportsWithExceptions.isEmpty()) {
+          throw e
+        } else {
+          throw TurbineAssertionError(
+            buildString {
+              reportsWithExceptions.forEach {
+                it.describeException(this@buildString)
+              }
+            },
+            e,
+          )
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -82,46 +137,18 @@ public suspend fun <T> Flow<T>.test(
   name: String? = null,
   validate: suspend TurbineTestContext<T>.() -> Unit,
 ) {
-  val turbineRegistry = mutableListOf<ChannelTurbine<*>>()
-  reportTurbines(turbineRegistry) {
-    coroutineScope {
-      collectTurbineIn(this, null, name).apply {
-        try {
-          val testContext = TurbineTestContextImpl(this@apply, currentCoroutineContext())
-          if (timeout != null) {
-            withTurbineTimeout(timeout) {
-              testContext.validate()
-            }
-          } else {
-            testContext.validate()
-          }
-          cancel()
-          ensureAllEventsConsumed()
-        } catch (e: Throwable) {
-          // The exception needs to be reraised. However, if there are any unconsumed events
-          // from other turbines (including this one), those may indicate an underlying problem.
-          // So: create a report with all the registered turbines, and include exception as cause
-          val reportsWithExceptions = turbineRegistry.map {
-            it.reportUnconsumedEvents()
-              // The exception will have cancelled its job hierarchy, producing cancellation exceptions
-              // in its wake. These aren't meaningful test feedback
-              .stripCancellations()
-          }
-            .filter { it.cause != null }
-          if (reportsWithExceptions.isEmpty()) {
-            throw e
-          } else {
-            throw TurbineAssertionError(
-              buildString {
-                reportsWithExceptions.forEach {
-                  it.describeException(this@buildString)
-                }
-              },
-              e,
-            )
-          }
+  turbine {
+    collectTurbineIn(this, null, name).apply {
+      val testContext = TurbineTestContextImpl(this@apply, currentCoroutineContext())
+      if (timeout != null) {
+        withTurbineTimeout(timeout) {
+          testContext.validate()
         }
+      } else {
+        testContext.validate()
       }
+      cancel()
+      ensureAllEventsConsumed()
     }
   }
 }
