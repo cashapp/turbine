@@ -17,6 +17,7 @@ package app.cash.turbine
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -752,5 +753,72 @@ class FlowTest {
     }.test {
       assertTrue(awaitError() is CancellationException)
     }
+  }
+
+  @Test
+  fun outerFailingFlowIsReported() = runTest {
+    val expected = CustomThrowable("hi")
+
+    val actual = assertFailsWith<AssertionError> {
+      flow<Nothing> {
+        throw expected
+      }.test(name = "outer") {
+        Turbine<Unit>(name = "inner").awaitItem()
+      }
+    }
+
+    val expectedPrefix = """
+        |Unconsumed exception found for outer:
+        |
+        |Stack trace:
+    """.trimMargin()
+    assertEquals(
+      actual.message?.startsWith(
+        expectedPrefix,
+      ),
+      true,
+      "Expected to start with:\n\n$expectedPrefix\n\nBut was:\n\n${actual.message}",
+    )
+    assertContains(
+      actual.message!!,
+      "CustomThrowable: hi",
+    )
+    assertEquals(actual.cause?.message, "No value produced for inner in 3s")
+  }
+
+  @Test
+  fun innerFailingFlowIsReported() = runTest {
+    val expected = CustomThrowable("hi")
+
+    val actual = assertFailsWith<AssertionError> {
+      neverFlow().test(name = "outer") {
+        flow<Nothing> {
+          throw expected
+        }.testIn(backgroundScope, name = "inner failing")
+
+        Turbine<Unit>(name = "inner").awaitItem()
+      }
+    }
+
+    val expectedPrefix = """
+        |Unconsumed exception found for inner failing:
+        |
+        |Stack trace:
+    """.trimMargin()
+    assertEquals(
+      actual.message?.startsWith(
+        expectedPrefix,
+      ),
+      true,
+      "Expected to start with:\n\n$expectedPrefix\n\nBut was:\n\n${actual.message}",
+    )
+    assertContains(
+      actual.message!!,
+      "CustomThrowable: hi",
+    )
+    assertEquals(
+      actual.cause?.message,
+      "No value produced for inner in 3s",
+    )
   }
 }

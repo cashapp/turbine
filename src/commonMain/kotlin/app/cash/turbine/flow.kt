@@ -15,6 +15,8 @@
  */
 package app.cash.turbine
 
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -24,11 +26,40 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+
+public interface TurbineTestContext<T> : ReceiveTurbine<T> {
+  public fun <R> Flow<R>.testIn(
+    scope: CoroutineScope,
+    timeout: Duration? = null,
+    name: String? = null,
+  ): ReceiveTurbine<R>
+}
+
+internal class TurbineTestContextImpl<T>(
+  turbine: Turbine<T>,
+  turbineContext: CoroutineContext,
+) : TurbineTestContext<T>, ReceiveTurbine<T> by turbine {
+  private val turbineElements = (turbineContext[TurbineRegistryElement] ?: EmptyCoroutineContext) +
+    (turbineContext[TurbineTimeoutElement] ?: EmptyCoroutineContext)
+  override fun <R> Flow<R>.testIn(
+    scope: CoroutineScope,
+    timeout: Duration?,
+    name: String?,
+  ): ReceiveTurbine<R> =
+    testInInternal(
+      this@testIn,
+      timeout = timeout,
+      name = name,
+      scope = scope + turbineElements,
+    )
+}
 
 /**
  * Terminal flow operator that collects events from given flow and allows the [validate] lambda to
@@ -49,19 +80,48 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 public suspend fun <T> Flow<T>.test(
   timeout: Duration? = null,
   name: String? = null,
-  validate: suspend ReceiveTurbine<T>.() -> Unit,
+  validate: suspend TurbineTestContext<T>.() -> Unit,
 ) {
-  coroutineScope {
-    collectTurbineIn(this, null, name).apply {
-      if (timeout != null) {
-        withTurbineTimeout(timeout) {
-          validate()
+  val turbineRegistry = mutableListOf<ChannelTurbine<*>>()
+  reportTurbines(turbineRegistry) {
+    coroutineScope {
+      collectTurbineIn(this, null, name).apply {
+        try {
+          val testContext = TurbineTestContextImpl(this@apply, currentCoroutineContext())
+          if (timeout != null) {
+            withTurbineTimeout(timeout) {
+              testContext.validate()
+            }
+          } else {
+            testContext.validate()
+          }
+          cancel()
+          ensureAllEventsConsumed()
+        } catch (e: Throwable) {
+          // The exception needs to be reraised. However, if there are any unconsumed events
+          // from other turbines (including this one), those may indicate an underlying problem.
+          // So: create a report with all the registered turbines, and include exception as cause
+          val reportsWithExceptions = turbineRegistry.map {
+            it.reportUnconsumedEvents()
+              // The exception will have cancelled its job hierarchy, producing cancellation exceptions
+              // in its wake. These aren't meaningful test feedback
+              .stripCancellations()
+          }
+            .filter { it.cause != null }
+          if (reportsWithExceptions.isEmpty()) {
+            throw e
+          } else {
+            throw TurbineAssertionError(
+              buildString {
+                reportsWithExceptions.forEach {
+                  it.describeException(this@buildString)
+                }
+              },
+              e,
+            )
+          }
         }
-      } else {
-        validate()
       }
-      cancel()
-      ensureAllEventsConsumed()
     }
   }
 }
@@ -89,12 +149,16 @@ public fun <T> Flow<T>.testIn(
   timeout: Duration? = null,
   name: String? = null,
 ): ReceiveTurbine<T> {
+  return testInInternal(this, timeout, scope, name)
+}
+
+private fun <T> testInInternal(flow: Flow<T>, timeout: Duration?, scope: CoroutineScope, name: String?): Turbine<T> {
   if (timeout != null) {
     // Eager check to throw early rather than in a subsequent 'await' call.
     checkTimeout(timeout)
   }
 
-  val turbine = collectTurbineIn(scope, timeout, name)
+  val turbine = flow.collectTurbineIn(scope, timeout, name)
 
   scope.coroutineContext.job.invokeOnCompletion { exception ->
     if (debug) println("Scope ending ${exception ?: ""}")
@@ -121,7 +185,9 @@ private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duratio
     channel = collectIntoChannel(this)
   }
 
-  return ChannelTurbine(channel, job, timeout, name)
+  return ChannelTurbine(channel, job, timeout, name).also {
+    scope.reportTurbine(it)
+  }
 }
 
 internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {

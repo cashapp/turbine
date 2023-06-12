@@ -16,6 +16,7 @@
 package app.cash.turbine
 
 import kotlin.time.Duration
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -204,8 +205,8 @@ internal class ChannelTurbine<T>(
 
   override suspend fun awaitError(): Throwable = withTurbineTimeout { channel.awaitError(name = name) }
 
-  override fun ensureAllEventsConsumed() {
-    if (ignoreRemainingEvents) return
+  internal fun reportUnconsumedEvents(): UnconsumedEventReport<T> {
+    if (ignoreRemainingEvents) return UnconsumedEventReport(emptyList())
 
     val unconsumed = mutableListOf<Event<T>>()
     var cause: Throwable? = null
@@ -219,17 +220,67 @@ internal class ChannelTurbine<T>(
         break
       }
     }
-    if (unconsumed.isNotEmpty()) {
+
+    return UnconsumedEventReport(
+      name = name,
+      unconsumed = unconsumed,
+      cause = cause,
+    )
+  }
+
+  override fun ensureAllEventsConsumed() {
+    val report = reportUnconsumedEvents()
+
+    if (report.unconsumed.isNotEmpty()) {
       throw TurbineAssertionError(
         buildString {
-          append("Unconsumed events found".qualifiedBy(name))
-          append(":")
-          for (event in unconsumed) {
-            append("\n - $event")
-          }
+          report.describe(this)
         },
-        cause,
+        report.cause,
       )
     }
   }
+}
+
+internal data class UnconsumedEventReport<T>(
+  val unconsumed: List<Event<T>>,
+  val name: String? = null,
+  val cause: Throwable? = null,
+) {
+  fun describe(builder: StringBuilder) {
+    with(builder) {
+      append("Unconsumed events found".qualifiedBy(name))
+      append(":")
+      for (event in unconsumed) {
+        append("\n - $event")
+      }
+    }
+  }
+
+  fun describeException(builder: StringBuilder) {
+    with(builder) {
+      cause?.let { cause ->
+        append("Unconsumed exception found".qualifiedBy(name))
+        append(":")
+        appendLine(
+          """
+            |
+            |
+            |Stack trace:
+          """.trimMargin(),
+        )
+        append(cause.stackTraceToString())
+        appendLine()
+      }
+    }
+  }
+
+  fun stripCancellations(): UnconsumedEventReport<T> =
+    UnconsumedEventReport(
+      unconsumed = unconsumed.filter {
+        (it as? Event.Error)?.throwable !is CancellationException
+      },
+      name = name,
+      cause = cause?.takeUnless { it is CancellationException },
+    )
 }
