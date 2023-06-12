@@ -284,4 +284,11 @@ class FlowInScopeTest {
     )
   }
 
+  @Test
+  fun failWithoutTurbineScope() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+        emptyFlow<Nothing>().testIn(backgroundScope, name = "inner failing")
+    }
+    assertEquals("Turbine can only collect flows within a TurbineContext", actual.message)
+  }
 }
