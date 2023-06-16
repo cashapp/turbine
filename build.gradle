@@ -26,6 +26,7 @@ kotlin {
   jvm {
     compilations.configureEach { KotlinJvmCompilation compilation ->
       compilation.compilerOptions.options.jvmTarget = JvmTarget.JVM_1_8
+      compilation.compilerOptions.options.freeCompilerArgs.add("-Xjvm-default=all")
     }
   }
 
