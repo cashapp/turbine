@@ -283,5 +283,4 @@ class FlowInScopeTest {
       "No value produced for inner in 3s",
     )
   }
-
 }
