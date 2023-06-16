@@ -11,6 +11,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletionHandlerException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
@@ -26,7 +27,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 
 class FlowInScopeTest {
-  @Test fun multipleFlows() = runTest {
+  @Test fun multipleFlows() = runTestTurbine {
     val turbine1 = flowOf(1).testIn(this)
     val turbine2 = flowOf(2).testIn(this)
     assertEquals(1, turbine1.awaitItem())
@@ -36,7 +37,7 @@ class FlowInScopeTest {
   }
 
   @Test
-  fun channelCancellation() = runTest {
+  fun channelCancellation() = runTestTurbine {
     kotlin.runCatching {
       coroutineScope {
         val channel = Channel<Unit>()
@@ -69,7 +70,7 @@ class FlowInScopeTest {
     }.let { println("result: $it") }
   }
 
-  @Test fun cancelMustBeCalled() = runTest {
+  @Test fun cancelMustBeCalled() = runTestTurbine {
     val job = launch {
       coroutineScope {
         neverFlow().testIn(this)
@@ -83,7 +84,7 @@ class FlowInScopeTest {
     job.cancel()
   }
 
-  @Test fun cancelStopsFlowCollection() = runTest {
+  @Test fun cancelStopsFlowCollection() = runTestTurbine {
     var collecting = false
     val turbine = neverFlow()
       .onStart { collecting = true }
@@ -95,7 +96,7 @@ class FlowInScopeTest {
     assertFalse(collecting)
   }
 
-  @Test fun unconsumedItemThrows() = runTest {
+  @Test fun unconsumedItemThrows() = runTestTurbine {
     // We have to use an exception handler rather than assertFailsWith because runTest also uses
     // one which defers throwing until its block completes.
     val exceptionHandler = RecordingExceptionHandler()
@@ -118,7 +119,7 @@ class FlowInScopeTest {
     )
   }
 
-  @Test fun unconsumedCompleteThrows() = runTest {
+  @Test fun unconsumedCompleteThrows() = runTestTurbine {
     // We have to use an exception handler rather than assertFailsWith because runTest also uses
     // one which defers throwing until its block completes.
     val exceptionHandler = RecordingExceptionHandler()
@@ -138,7 +139,7 @@ class FlowInScopeTest {
     )
   }
 
-  @Test fun unconsumedErrorThrows() = runTest {
+  @Test fun unconsumedErrorThrows() = runTestTurbine {
     val expected = RuntimeException()
     // We have to use an exception handler rather than assertFailsWith because runTest also uses
     // one which defers throwing until its block completes.
@@ -160,7 +161,7 @@ class FlowInScopeTest {
     assertSame(expected, cause.cause)
   }
 
-  @Test fun failsOnDefaultTimeout() = runTest {
+  @Test fun failsOnDefaultTimeout() = runTestTurbine {
     val turbine = neverFlow().testIn(this)
     val actual = assertFailsWith<AssertionError> {
       turbine.awaitItem()
@@ -174,7 +175,7 @@ class FlowInScopeTest {
     turbine.cancel()
   }
 
-  @Test fun awaitHonorsTestTimeoutNoTimeout() = runTest {
+  @Test fun awaitHonorsTestTimeoutNoTimeout() = runTestTurbine {
     val turbine = flow<Nothing> {
       withContext(Default) {
         delay(1100.milliseconds)
@@ -183,7 +184,7 @@ class FlowInScopeTest {
     turbine.awaitComplete()
   }
 
-  @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTest {
+  @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTestTurbine {
     val turbine = neverFlow().testIn(this, timeout = 10.milliseconds)
     val actual = assertFailsWith<AssertionError> {
       turbine.awaitItem()
@@ -192,21 +193,21 @@ class FlowInScopeTest {
     turbine.cancel()
   }
 
-  @Test fun negativeTurbineTimeoutThrows() = runTest {
+  @Test fun negativeTurbineTimeoutThrows() = runTestTurbine {
     val actual = assertFailsWith<IllegalStateException> {
       neverFlow().testIn(this, timeout = (-10).milliseconds)
     }
     assertEquals("Turbine timeout must be greater than 0: -10ms", actual.message)
   }
 
-  @Test fun zeroTurbineTimeoutThrows() = runTest {
+  @Test fun zeroTurbineTimeoutThrows() = runTestTurbine {
     val actual = assertFailsWith<IllegalStateException> {
       neverFlow().testIn(this, timeout = 0.milliseconds)
     }
     assertEquals("Turbine timeout must be greater than 0: 0s", actual.message)
   }
 
-  @Test fun expectItemButWasErrorThrowsWithName() = runTest {
+  @Test fun expectItemButWasErrorThrowsWithName() = runTestTurbine {
     val error = CustomThrowable("hi")
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw error }.testIn(this, name = "unit flow")
@@ -216,7 +217,7 @@ class FlowInScopeTest {
     assertSame(error, actual.cause)
   }
 
-  @Test fun timeoutThrowsWithName() = runTest {
+  @Test fun timeoutThrowsWithName() = runTestTurbine {
     val turbine = neverFlow().testIn(this, timeout = 10.milliseconds, name = "never flow")
     val actual = assertFailsWith<AssertionError> {
       turbine.awaitItem()
@@ -225,7 +226,7 @@ class FlowInScopeTest {
     turbine.cancel()
   }
 
-  @Test fun unconsumedItemThrowsWithName() = runTest {
+  @Test fun unconsumedItemThrowsWithName() = runTestTurbine {
     // We have to use an exception handler rather than assertFailsWith because runTest also uses
     // one which defers throwing until its block completes.
     val exceptionHandler = RecordingExceptionHandler()
@@ -282,5 +283,27 @@ class FlowInScopeTest {
       actual.cause?.message,
       "No value produced for inner in 3s",
     )
+  }
+
+  @Test
+  fun failWithoutTurbineScope() = runTest {
+    val actual = assertFailsWith<AssertionError> {
+      emptyFlow<Nothing>().testIn(backgroundScope, name = "inner failing")
+    }
+    assertEquals("Turbine can only collect flows within a TurbineContext", actual.message)
+  }
+}
+
+private interface TurbineTestScope : TurbineContext {
+  val backgroundScope: CoroutineScope
+}
+
+private fun runTestTurbine(validate: suspend TurbineTestScope.() -> Unit) = runTest {
+  turbine {
+    val turbineTestScope = object : TurbineTestScope, TurbineContext by this {
+      override val backgroundScope: CoroutineScope = this@runTest.backgroundScope
+    }
+
+    turbineTestScope.validate()
   }
 }
