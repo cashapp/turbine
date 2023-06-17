@@ -1,0 +1,115 @@
+public final class app/cash/turbine/ChannelKt {
+	public static final fun awaitComplete (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun awaitComplete$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun awaitError (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun awaitError$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun awaitEvent (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun awaitEvent$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun awaitItem (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun awaitItem$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun expectMostRecentItem (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;)Ljava/lang/Object;
+	public static synthetic fun expectMostRecentItem$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun expectNoEvents (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;)V
+	public static synthetic fun expectNoEvents$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun skipItems (Lkotlinx/coroutines/channels/ReceiveChannel;ILjava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun skipItems$default (Lkotlinx/coroutines/channels/ReceiveChannel;ILjava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun takeComplete (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;)V
+	public static synthetic fun takeComplete$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun takeError (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;)Ljava/lang/Throwable;
+	public static synthetic fun takeError$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/Throwable;
+	public static final fun takeEvent (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;)Lapp/cash/turbine/Event;
+	public static synthetic fun takeEvent$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/turbine/Event;
+	public static final fun takeItem (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;)Ljava/lang/Object;
+	public static synthetic fun takeItem$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class app/cash/turbine/CoroutinesKt {
+	public static final fun withTurbineTimeout-KLykuaI (JLkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class app/cash/turbine/Event {
+	public final fun isTerminal ()Z
+}
+
+public final class app/cash/turbine/Event$Complete : app/cash/turbine/Event {
+	public static final field INSTANCE Lapp/cash/turbine/Event$Complete;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/turbine/Event$Error : app/cash/turbine/Event {
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lapp/cash/turbine/Event$Error;
+	public static synthetic fun copy$default (Lapp/cash/turbine/Event$Error;Ljava/lang/Throwable;ILjava/lang/Object;)Lapp/cash/turbine/Event$Error;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getThrowable ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/turbine/Event$Item : app/cash/turbine/Event {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lapp/cash/turbine/Event$Item;
+	public static synthetic fun copy$default (Lapp/cash/turbine/Event$Item;Ljava/lang/Object;ILjava/lang/Object;)Lapp/cash/turbine/Event$Item;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/turbine/FlowKt {
+	public static final fun test-C2H2yOE (Lkotlinx/coroutines/flow/Flow;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun test-C2H2yOE$default (Lkotlinx/coroutines/flow/Flow;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun testIn-5_5nbZA (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;)Lapp/cash/turbine/ReceiveTurbine;
+	public static synthetic fun testIn-5_5nbZA$default (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/turbine/ReceiveTurbine;
+	public static final fun turbine-k1IrOU0 (Lkotlin/time/Duration;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun turbine-k1IrOU0$default (Lkotlin/time/Duration;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class app/cash/turbine/ReceiveTurbine {
+	public abstract fun asChannel ()Lkotlinx/coroutines/channels/ReceiveChannel;
+	public abstract fun awaitComplete (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun awaitError (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun awaitEvent (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun awaitItem (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun cancel (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun cancelAndConsumeRemainingEvents (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun cancelAndIgnoreRemainingEvents (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun ensureAllEventsConsumed ()V
+	public abstract fun expectMostRecentItem ()Ljava/lang/Object;
+	public abstract fun expectNoEvents ()V
+	public abstract fun skipItems (ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class app/cash/turbine/Turbine : app/cash/turbine/ReceiveTurbine {
+	public abstract fun add (Ljava/lang/Object;)V
+	public abstract fun asChannel ()Lkotlinx/coroutines/channels/Channel;
+	public abstract fun close (Ljava/lang/Throwable;)V
+	public abstract fun takeComplete ()V
+	public abstract fun takeError ()Ljava/lang/Throwable;
+	public abstract fun takeEvent ()Lapp/cash/turbine/Event;
+	public abstract fun takeItem ()Ljava/lang/Object;
+}
+
+public final class app/cash/turbine/Turbine$DefaultImpls {
+	public static synthetic fun close$default (Lapp/cash/turbine/Turbine;Ljava/lang/Throwable;ILjava/lang/Object;)V
+}
+
+public abstract interface class app/cash/turbine/TurbineContext : kotlinx/coroutines/CoroutineScope {
+	public abstract fun testIn-5_5nbZA (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;)Lapp/cash/turbine/ReceiveTurbine;
+}
+
+public final class app/cash/turbine/TurbineContext$DefaultImpls {
+	public static synthetic fun testIn-5_5nbZA$default (Lapp/cash/turbine/TurbineContext;Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/turbine/ReceiveTurbine;
+}
+
+public final class app/cash/turbine/TurbineKt {
+	public static final fun Turbine-dnQKTGw (Lkotlin/time/Duration;Ljava/lang/String;)Lapp/cash/turbine/Turbine;
+	public static synthetic fun Turbine-dnQKTGw$default (Lkotlin/time/Duration;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/turbine/Turbine;
+	public static final fun plusAssign (Lapp/cash/turbine/Turbine;Ljava/lang/Object;)V
+}
+
+public abstract interface class app/cash/turbine/TurbineTestContext : app/cash/turbine/ReceiveTurbine, app/cash/turbine/TurbineContext {
+}
+

@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
 
 plugins {
   alias(libs.plugins.kotlin)
+  alias(libs.plugins.kotlinApiDump)
   alias(libs.plugins.spotless)
   alias(libs.plugins.publish)
   alias(libs.plugins.dokka)
