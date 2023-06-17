@@ -86,21 +86,15 @@ public abstract interface class app/cash/turbine/Turbine : app/cash/turbine/Rece
 	public abstract fun add (Ljava/lang/Object;)V
 	public abstract fun asChannel ()Lkotlinx/coroutines/channels/Channel;
 	public abstract fun close (Ljava/lang/Throwable;)V
+	public static synthetic fun close$default (Lapp/cash/turbine/Turbine;Ljava/lang/Throwable;ILjava/lang/Object;)V
 	public abstract fun takeComplete ()V
 	public abstract fun takeError ()Ljava/lang/Throwable;
 	public abstract fun takeEvent ()Lapp/cash/turbine/Event;
 	public abstract fun takeItem ()Ljava/lang/Object;
 }
 
-public final class app/cash/turbine/Turbine$DefaultImpls {
-	public static synthetic fun close$default (Lapp/cash/turbine/Turbine;Ljava/lang/Throwable;ILjava/lang/Object;)V
-}
-
 public abstract interface class app/cash/turbine/TurbineContext : kotlinx/coroutines/CoroutineScope {
 	public abstract fun testIn-5_5nbZA (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;)Lapp/cash/turbine/ReceiveTurbine;
-}
-
-public final class app/cash/turbine/TurbineContext$DefaultImpls {
 	public static synthetic fun testIn-5_5nbZA$default (Lapp/cash/turbine/TurbineContext;Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/turbine/ReceiveTurbine;
 }
 
