@@ -27,8 +27,8 @@ public final class app/cash/turbine/CoroutinesKt {
 	public static final fun withTurbineTimeout-KLykuaI (JLkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public abstract class app/cash/turbine/Event {
-	public final fun isTerminal ()Z
+public abstract interface class app/cash/turbine/Event {
+	public fun isTerminal ()Z
 }
 
 public final class app/cash/turbine/Event$Complete : app/cash/turbine/Event {
@@ -38,9 +38,6 @@ public final class app/cash/turbine/Event$Complete : app/cash/turbine/Event {
 
 public final class app/cash/turbine/Event$Error : app/cash/turbine/Event {
 	public fun <init> (Ljava/lang/Throwable;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/Throwable;)Lapp/cash/turbine/Event$Error;
-	public static synthetic fun copy$default (Lapp/cash/turbine/Event$Error;Ljava/lang/Throwable;ILjava/lang/Object;)Lapp/cash/turbine/Event$Error;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getThrowable ()Ljava/lang/Throwable;
 	public fun hashCode ()I
@@ -49,9 +46,6 @@ public final class app/cash/turbine/Event$Error : app/cash/turbine/Event {
 
 public final class app/cash/turbine/Event$Item : app/cash/turbine/Event {
 	public fun <init> (Ljava/lang/Object;)V
-	public final fun component1 ()Ljava/lang/Object;
-	public final fun copy (Ljava/lang/Object;)Lapp/cash/turbine/Event$Item;
-	public static synthetic fun copy$default (Lapp/cash/turbine/Event$Item;Ljava/lang/Object;ILjava/lang/Object;)Lapp/cash/turbine/Event$Item;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I

@@ -242,7 +242,7 @@ internal class ChannelTurbine<T>(
   }
 }
 
-internal data class UnconsumedEventReport<T>(
+internal class UnconsumedEventReport<T>(
   val unconsumed: List<Event<T>>,
   val name: String? = null,
   val cause: Throwable? = null,
