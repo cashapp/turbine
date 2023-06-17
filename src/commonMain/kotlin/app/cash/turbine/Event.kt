@@ -15,14 +15,18 @@
  */
 package app.cash.turbine
 
-public sealed class Event<out T> {
-  public object Complete : Event<Nothing>() {
+public sealed interface Event<out T> {
+  public object Complete : Event<Nothing> {
     override fun toString(): String = "Complete"
   }
-  public data class Error(val throwable: Throwable) : Event<Nothing>() {
+  public class Error(public val throwable: Throwable) : Event<Nothing> {
+    override fun equals(other: Any?): Boolean = other is Error && throwable == other.throwable
+    override fun hashCode(): Int = throwable.hashCode()
     override fun toString(): String = "Error(${throwable::class.simpleName})"
   }
-  public data class Item<T>(val value: T) : Event<T>() {
+  public class Item<T>(public val value: T) : Event<T> {
+    override fun equals(other: Any?): Boolean = other is Item<*> && value == other.value
+    override fun hashCode(): Int = value.hashCode()
     override fun toString(): String = "Item($value)"
   }
 
