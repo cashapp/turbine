@@ -22,10 +22,14 @@ $dokka.location:app.cash.turbine/Event.Complete///PointingToDeclaration/-turbin
 $dokka.location:app.cash.turbine/Event.Complete/toString/#/PointingToDeclaration/-turbine/app.cash.turbine/-event/-complete/to-string.html
 $dokka.location:app.cash.turbine/Event.Error///PointingToDeclaration/-turbine/app.cash.turbine/-event/-error/index.html
 $dokka.location:app.cash.turbine/Event.Error/Error/#kotlin.Throwable/PointingToDeclaration/-turbine/app.cash.turbine/-event/-error/-error.html
+$dokka.location:app.cash.turbine/Event.Error/equals/#kotlin.Any?/PointingToDeclaration/-turbine/app.cash.turbine/-event/-error/equals.html
+$dokka.location:app.cash.turbine/Event.Error/hashCode/#/PointingToDeclaration/-turbine/app.cash.turbine/-event/-error/hash-code.html
 $dokka.location:app.cash.turbine/Event.Error/throwable/#/PointingToDeclaration/-turbine/app.cash.turbine/-event/-error/throwable.html
 $dokka.location:app.cash.turbine/Event.Error/toString/#/PointingToDeclaration/-turbine/app.cash.turbine/-event/-error/to-string.html
 $dokka.location:app.cash.turbine/Event.Item///PointingToDeclaration/-turbine/app.cash.turbine/-event/-item/index.html
 $dokka.location:app.cash.turbine/Event.Item/Item/#TypeParam(bounds=[kotlin.Any?])/PointingToDeclaration/-turbine/app.cash.turbine/-event/-item/-item.html
+$dokka.location:app.cash.turbine/Event.Item/equals/#kotlin.Any?/PointingToDeclaration/-turbine/app.cash.turbine/-event/-item/equals.html
+$dokka.location:app.cash.turbine/Event.Item/hashCode/#/PointingToDeclaration/-turbine/app.cash.turbine/-event/-item/hash-code.html
 $dokka.location:app.cash.turbine/Event.Item/toString/#/PointingToDeclaration/-turbine/app.cash.turbine/-event/-item/to-string.html
 $dokka.location:app.cash.turbine/Event.Item/value/#/PointingToDeclaration/-turbine/app.cash.turbine/-event/-item/value.html
 $dokka.location:app.cash.turbine/Event///PointingToDeclaration/-turbine/app.cash.turbine/-event/index.html
