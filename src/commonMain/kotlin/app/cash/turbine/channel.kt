@@ -247,9 +247,6 @@ internal fun <T> ChannelResult<T>.toEvent(): Event<T>? {
   }
 }
 
-private fun <T> ChannelResult<T>.unexpectedResult(name: String?, expected: String): Nothing =
-  unexpectedEvent(name, toEvent(), expected)
-
 private fun unexpectedEvent(name: String?, event: Event<*>?, expected: String): Nothing {
   val cause = (event as? Event.Error)?.throwable
   val eventAsString = event?.toString() ?: "no items"
