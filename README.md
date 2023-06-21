@@ -22,7 +22,7 @@ repositories {
   mavenCentral()
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:0.13.0'
+  testImplementation 'app.cash.turbine:turbine:1.0.0'
 }
 ```
 
@@ -37,12 +37,18 @@ repositories {
   }
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:0.14.0-SNAPSHOT'
+  testImplementation 'app.cash.turbine:turbine:1.1.0-SNAPSHOT'
 }
 ```
 
 </p>
 </details>
+
+While Turbine's own API is stable, we are currently forced to depend on an unstable API from
+kotlinx.coroutines test artifact: `UnconfinedTestDispatcher`. Without this usage of Turbine with
+`runTest` would break. It's possible for future coroutine library updates to alter the behavior of
+this library as a result. We will make every effort to ensure behavioral stability as well until this
+API dependency is stabilized (tracking [issue #132](https://github.com/cashapp/turbine/issues/132)).
 
 ## Usage
 

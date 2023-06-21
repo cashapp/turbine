@@ -3,6 +3,15 @@
 ## [Unreleased]
 
 
+## [1.0.0] - 2023-05-21
+### Added
+- Add `turbineScope` DSL function which is now required for using `testIn`. This ensures that exceptions which occur within the test are no longer potentially lost.
+
+### Changed
+- Failed `Turbine`s which occur while testing a `Flow` (using `test { }`) will now have their failures eagerly reported.
+- Build with Kotlin 1.8.22 and kotlinx.coroutines 1.7.1. Note: Future releases will not highlight the Kotlin or coroutines version unless important for some other reason.
+
+
 ## [0.13.0] - 2023-05-11
 ### Added
 - New Kotlin/Native targets:
@@ -152,7 +161,9 @@ Note: This version has a transitive dependency on kotlinx.coroutines 1.7.0. If y
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/0.12.3...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/cashapp/turbine/releases/tag/1.0.0
+[0.13.0]: https://github.com/cashapp/turbine/releases/tag/0.13.0
 [0.12.3]: https://github.com/cashapp/turbine/releases/tag/0.12.3
 [0.12.2]: https://github.com/cashapp/turbine/releases/tag/0.12.2
 [0.12.1]: https://github.com/cashapp/turbine/releases/tag/0.12.1

@@ -42,5 +42,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: site
           FOLDER: build/dokka/html
-          TARGET_FOLDER: docs/0.x/
+          TARGET_FOLDER: docs/1.x/
           CLEAN: true
