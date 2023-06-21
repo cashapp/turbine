@@ -254,7 +254,7 @@ class FlowInScopeTest {
     val expected = CustomThrowable("hi")
 
     val actual = assertFailsWith<AssertionError> {
-      turbine {
+      turbineScope {
         flow<Nothing> {
           throw expected
         }.testIn(backgroundScope, name = "inner failing")
@@ -290,7 +290,10 @@ class FlowInScopeTest {
     val actual = assertFailsWith<AssertionError> {
       emptyFlow<Nothing>().testIn(backgroundScope, name = "inner failing")
     }
-    assertEquals("Turbine can only collect flows within a TurbineContext", actual.message)
+    assertEquals(
+      "Turbine can only collect flows within a TurbineContext. Wrap with turbineScope { .. }",
+      actual.message,
+    )
   }
 }
 
@@ -299,7 +302,7 @@ private interface TurbineTestScope : TurbineContext {
 }
 
 private fun runTestTurbine(validate: suspend TurbineTestScope.() -> Unit) = runTest {
-  turbine {
+  turbineScope {
     val turbineTestScope = object : TurbineTestScope, TurbineContext by this {
       override val backgroundScope: CoroutineScope = this@runTest.backgroundScope
     }
