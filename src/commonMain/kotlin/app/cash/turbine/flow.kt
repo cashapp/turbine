@@ -55,6 +55,7 @@ internal class TurbineContextImpl(
 
   private val turbineElements = (turbineContext[TurbineRegistryElement] ?: EmptyCoroutineContext) +
     (turbineContext[TurbineTimeoutElement] ?: EmptyCoroutineContext)
+
   override fun <R> Flow<R>.testIn(
     scope: CoroutineScope,
     timeout: Duration?,
@@ -71,7 +72,7 @@ internal class TurbineContextImpl(
 /**
  * Run a validation block that catches and reports all unhandled exceptions in flows run by Turbine.
  */
-public suspend fun turbine(
+public suspend fun turbineScope(
   timeout: Duration? = null,
   validate: suspend TurbineContext.() -> Unit,
 ) {
@@ -137,7 +138,7 @@ public suspend fun <T> Flow<T>.test(
   name: String? = null,
   validate: suspend TurbineTestContext<T>.() -> Unit,
 ) {
-  turbine {
+  turbineScope {
     collectTurbineIn(this, null, name).apply {
       val testContext = TurbineTestContextImpl(this@apply, currentCoroutineContext())
       if (timeout != null) {
@@ -185,7 +186,7 @@ private fun <T> testInInternal(flow: Flow<T>, timeout: Duration?, scope: Corouti
     checkTimeout(timeout)
   }
   if (scope.coroutineContext[TurbineRegistryElement] == null) {
-    throw AssertionError("Turbine can only collect flows within a TurbineContext")
+    throw AssertionError("Turbine can only collect flows within a TurbineContext. Wrap with turbineScope { .. }")
   }
 
   val turbine = flow.collectTurbineIn(scope, timeout, name)

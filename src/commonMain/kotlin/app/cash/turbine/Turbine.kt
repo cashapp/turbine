@@ -94,7 +94,6 @@ public operator fun <T> Turbine<T>.plusAssign(value: T) { add(value) }
  * [withTurbineTimeout].
  * @param name If non-null, name is added to any exceptions thrown to help identify which [Turbine] failed.
  */
-@Suppress("FunctionName") // Interface constructor pattern.
 public fun <T> Turbine(
   timeout: Duration? = null,
   name: String? = null,
