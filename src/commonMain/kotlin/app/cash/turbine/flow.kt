@@ -195,7 +195,8 @@ private fun <T> testInInternal(flow: Flow<T>, timeout: Duration?, scope: Corouti
     if (debug) println("Scope ending ${exception ?: ""}")
 
     // Only validate events were consumed if the scope is exiting normally.
-    if (exception == null) {
+    // CancellationException also indicates _normal_ cancellation of a coroutine.
+    if (exception == null || exception is CancellationException) {
       turbine.ensureAllEventsConsumed()
     }
   }

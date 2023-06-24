@@ -12,7 +12,9 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletionHandlerException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -94,6 +96,31 @@ class FlowInScopeTest {
     assertTrue(collecting)
     turbine.cancel()
     assertFalse(collecting)
+  }
+
+  @Test fun unconsumedItemThrowsWhenCancelledExternally() = runTestTurbine {
+    // We have to use an exception handler rather than assertFailsWith because runTest also uses
+    // one which defers throwing until its block completes.
+    val exceptionHandler = RecordingExceptionHandler()
+    launch(start = CoroutineStart.UNDISPATCHED) {
+      withContext(exceptionHandler) {
+        flow {
+          emit("item!")
+          emitAll(neverFlow()) // Avoid emitting complete
+        }.testIn(this)
+      }
+    }.cancel()
+    val exception = exceptionHandler.exceptions.removeFirst()
+    assertTrue(exception is CompletionHandlerException)
+    val cause = exception.cause
+    assertTrue(cause is AssertionError)
+    assertEquals(
+      """
+      |Unconsumed events found:
+      | - Item(item!)
+      """.trimMargin(),
+      cause.message,
+    )
   }
 
   @Test fun unconsumedItemThrows() = runTestTurbine {
