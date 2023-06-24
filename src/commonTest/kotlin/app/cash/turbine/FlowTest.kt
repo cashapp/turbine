@@ -335,7 +335,7 @@ class FlowTest {
     }
   }
 
-  @Test fun expectItem() = runTest {
+  @Test fun awaitItem() = runTest {
     val item = Any()
     flowOf(item).test {
       assertSame(item, awaitItem())
@@ -343,7 +343,7 @@ class FlowTest {
     }
   }
 
-  @Test fun expectItemButWasCloseThrows() = runTest {
+  @Test fun awaitItemButWasCloseThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       emptyFlow<Unit>().test {
         awaitItem()
@@ -352,7 +352,7 @@ class FlowTest {
     assertEquals("Expected item but found Complete", actual.message)
   }
 
-  @Test fun expectItemButWasErrorThrows() = runTest {
+  @Test fun awaitItemButWasErrorThrows() = runTest {
     val error = CustomThrowable("hi")
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw error }.test {
@@ -363,13 +363,13 @@ class FlowTest {
     assertSame(error, actual.cause)
   }
 
-  @Test fun expectComplete() = runTest {
+  @Test fun awaitComplete() = runTest {
     emptyFlow<Nothing>().test {
       awaitComplete()
     }
   }
 
-  @Test fun expectCompleteButWasItemThrows() = runTest {
+  @Test fun awaitCompleteButWasItemThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       flowOf("item!").test {
         awaitComplete()
@@ -378,7 +378,7 @@ class FlowTest {
     assertEquals("Expected complete but found Item(item!)", actual.message)
   }
 
-  @Test fun expectCompleteButWasErrorThrows() = runTest {
+  @Test fun awaitCompleteButWasErrorThrows() = runTest {
     val error = CustomThrowable("hi")
     val actual = assertFailsWith<AssertionError> {
       flow<Nothing> { throw error }.test {
@@ -389,7 +389,7 @@ class FlowTest {
     assertSame(error, actual.cause)
   }
 
-  @Test fun expectError() = runTest {
+  @Test fun awaitError() = runTest {
     val error = CustomThrowable("hi")
     flow<Nothing> { throw error }.test {
       assertSame(error, awaitError())
@@ -419,7 +419,7 @@ class FlowTest {
     )
   }
 
-  @Test fun expectErrorButWasItemThrows() = runTest {
+  @Test fun awaitErrorButWasItemThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       flowOf("item!").test {
         awaitError()
@@ -428,7 +428,7 @@ class FlowTest {
     assertEquals("Expected error but found Item(item!)", actual.message)
   }
 
-  @Test fun expectErrorButWasCompleteThrows() = runTest {
+  @Test fun awaitErrorButWasCompleteThrows() = runTest {
     val actual = assertFailsWith<AssertionError> {
       emptyFlow<Nothing>().test {
         awaitError()
@@ -437,7 +437,7 @@ class FlowTest {
     assertEquals("Expected error but found Complete", actual.message)
   }
 
-  @Test fun expectItemEvent() = runTest {
+  @Test fun awaitItemEvent() = runTest {
     val item = Any()
     flowOf(item).test {
       val event = awaitEvent()
@@ -446,7 +446,7 @@ class FlowTest {
     }
   }
 
-  @Test fun expectCompleteEvent() = runTest {
+  @Test fun awaitCompleteEvent() = runTest {
     emptyFlow<Nothing>().test {
       val event = awaitEvent()
       assertEquals(Event.Complete, event)
@@ -454,7 +454,7 @@ class FlowTest {
     }
   }
 
-  @Test fun expectErrorEvent() = runTest {
+  @Test fun awaitErrorEvent() = runTest {
     val exception = CustomThrowable("hi")
     flow<Nothing> { throw exception }.test {
       val event = awaitEvent()
@@ -463,7 +463,7 @@ class FlowTest {
     }
   }
 
-  @Test fun expectWaitsForEvents() = runTest {
+  @Test fun awaitWaitsForEvents() = runTest {
     val flow = MutableSharedFlow<String>()
     val position = Channel<Int>(RENDEZVOUS)
 
@@ -663,7 +663,7 @@ class FlowTest {
     assertEquals("Turbine timeout must be greater than 0: 0s", actual.message)
   }
 
-  @Test fun expectItemButWasErrorThrowsWithName() = runTest {
+  @Test fun awaitItemButWasErrorThrowsWithName() = runTest {
     val error = CustomThrowable("hi")
     val actual = assertFailsWith<AssertionError> {
       flow<Unit> { throw error }.test(name = "unit flow") {
