@@ -124,8 +124,8 @@ public suspend fun turbineScope(
  *
  * ```kotlin
  * flowOf("one", "two").test {
- *   assertEquals("one", expectItem())
- *   assertEquals("two", expectItem())
+ *   assertEquals("one", awaitItem())
+ *   assertEquals("two", awaitItem())
  *   awaitComplete()
  * }
  * ```
@@ -161,8 +161,8 @@ public suspend fun <T> Flow<T>.test(
  *
  * ```kotlin
  * val turbine = flowOf("one", "two").testIn(this)
- * assertEquals("one", turbine.expectItem())
- * assertEquals("two", turbine.expectItem())
+ * assertEquals("one", turbine.awaitItem())
+ * assertEquals("two", turbine.awaitItem())
  * turbine.awaitComplete()
  * ```
  *
