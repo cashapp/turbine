@@ -211,6 +211,7 @@ internal class ChannelTurbine<T>(
     var cause: Throwable? = null
     while (true) {
       val event = channel.takeEventUnsafe() ?: break
+      if (event is Event.Error && event.throwable is CancellationException) break
       if (!(ignoreTerminalEvents && event.isTerminal)) unconsumed += event
       if (event is Event.Error) {
         cause = event.throwable
