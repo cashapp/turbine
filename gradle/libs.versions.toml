@@ -1,5 +1,5 @@
 [versions]
-coroutines = "1.7.1"
+coroutines = "1.7.2"
 
 [libraries]
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
