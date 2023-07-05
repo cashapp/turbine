@@ -107,12 +107,14 @@ To test multiple flows, assign each `Turbine` to a separate `val` by calling `te
 
 ```kotlin
 runTest {
-  val turbine1 = flowOf(1).testIn(backgroundScope)
-  val turbine2 = flowOf(2).testIn(backgroundScope)
-  assertEquals(1, turbine1.awaitItem())
-  assertEquals(2, turbine2.awaitItem())
-  turbine1.awaitComplete()
-  turbine2.awaitComplete()
+  turbineScope {
+    val turbine1 = flowOf(1).testIn(backgroundScope)
+    val turbine2 = flowOf(2).testIn(backgroundScope)
+    assertEquals(1, turbine1.awaitItem())
+    assertEquals(2, turbine2.awaitItem())
+    turbine1.awaitComplete()
+    turbine2.awaitComplete()
+  }
 }
 ```
 
@@ -149,8 +151,10 @@ The same goes for `testIn`, but at the end of the calling coroutine:
 
 ```kotlin
 runTest {
-  val turbine = flowOf("one", "two").testIn(backgroundScope)
-  turbine.assertEquals("one", awaitItem())
+  turbineScope {
+    val turbine = flowOf("one", "two").testIn(backgroundScope)
+    turbine.assertEquals("one", awaitItem())
+  }
 }
 ```
 ```
@@ -333,10 +337,12 @@ Pass in a `name` to `test`, `testIn`, or `Turbine()`, and it will be included in
 
 ```kotlin
 runTest {
-  val turbine1 = flowOf(1).testIn(backgroundScope, name = "turbine 1")
-  val turbine2 = flowOf(2).testIn(backgroundScope, name = "turbine 2")
-  turbine1.awaitComplete()
-  turbine2.awaitComplete()
+  turbineScope {
+    val turbine1 = flowOf(1).testIn(backgroundScope, name = "turbine 1")
+    val turbine2 = flowOf(2).testIn(backgroundScope, name = "turbine 2")
+    turbine1.awaitComplete()
+    turbine2.awaitComplete()
+  }
 }
 ```
 ```
