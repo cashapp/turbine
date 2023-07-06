@@ -16,13 +16,19 @@
 package app.cash.turbine
 
 /**
- * A plain [AssertionError] working around three bugs:
+ * A custom [AssertionError] to work around the fact that exceptions with public constructors
+ * have referential equality broken by coroutines.
  *
- *  1. No two-arg constructor in common (https://youtrack.jetbrains.com/issue/KT-40728).
- *  2. No two-arg constructor in Java 6.
- *  3. Public exceptions with public constructors have referential equality broken by coroutines.
+ * See https://github.com/Kotlin/kotlinx.coroutines/blob/5b64a1fcf36cbea6fbe3cf70966f4907a2a5f92f/docs/topics/debugging.md#stacktrace-recovery-machinery
+ *
+ * TODO Migrate to implementing `CopyThrowable` and returning `null` from `createCopy` once it is stable.
+ *  https://github.com/Kotlin/kotlinx.coroutines/issues/2367
  */
-internal class TurbineAssertionError(
+internal class TurbineAssertionError private constructor(
   message: String,
-  override val cause: Throwable?,
-) : AssertionError(message)
+  cause: Throwable?,
+) : AssertionError(message, cause) {
+  companion object {
+    operator fun invoke(message: String, cause: Throwable?) = TurbineAssertionError(message, cause)
+  }
+}
