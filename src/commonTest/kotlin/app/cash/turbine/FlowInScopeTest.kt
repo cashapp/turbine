@@ -9,24 +9,16 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletionHandlerException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Default
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 
 class FlowInScopeTest {
   @Test fun multipleFlows() = runTestTurbine {
@@ -36,6 +28,27 @@ class FlowInScopeTest {
     assertEquals(2, turbine2.awaitItem())
     turbine1.awaitComplete()
     turbine2.awaitComplete()
+  }
+
+  @Test fun awaitFailsOnVirtualTime() = runTestTurbine {
+    assertFailsWith<AssertionError> {
+      flow<Nothing> {
+        awaitCancellation()
+      }.test {
+        awaitComplete()
+      }
+    }
+  }
+
+  @Test
+  fun awaitFailsOnDelayVirtualTime() = runTestTurbine {
+    assertFailsWith<AssertionError> {
+      flow<Nothing> {
+        delay(1500.milliseconds)
+      }.test(timeout = 1000.milliseconds) {
+        awaitComplete()
+      }
+    }
   }
 
   @Test
