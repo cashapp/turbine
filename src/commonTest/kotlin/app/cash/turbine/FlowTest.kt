@@ -736,6 +736,32 @@ class FlowTest {
   }
 
   @Test
+  fun delaysCanBeTested() = runTest {
+    val took = measureTime {
+      flow {
+        delay(5000)
+        emit("1")
+        delay(5000)
+        emit("2")
+      }.test {
+        expectNoEvents()
+
+        advanceTimeBy(5000)
+        expectNoEvents()
+
+        runCurrent()
+        assertEquals("1", awaitItem())
+
+        val exception = assertFailsWith<AssertionError> {
+          awaitItem()
+        }
+        assertEquals(exception.message, "No value produced in 3s")
+      }
+    }
+    assertTrue(took < 1.seconds, "$took > 1s")
+  }
+
+  @Test
   fun timeoutsAreCaptured() = runTest {
     flow<Nothing> {
       withTimeout(500) {
