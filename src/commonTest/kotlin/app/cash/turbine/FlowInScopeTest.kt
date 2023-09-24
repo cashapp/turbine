@@ -208,7 +208,9 @@ class FlowInScopeTest {
         delay(1100.milliseconds)
       }
     }.testIn(this, timeout = 1500.milliseconds)
-    turbine.awaitComplete()
+    withContext(Default) {
+      turbine.awaitComplete()
+    }
   }
 
   @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTestTurbine {

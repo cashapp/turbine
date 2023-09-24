@@ -238,15 +238,15 @@ class ChannelTest {
   }
 
   @Test fun awaitHonorsCoroutineContextTimeoutNoTimeout() = runTest {
-    withTurbineTimeout(1500.milliseconds) {
-      val job = launch {
-        neverFlow().collectIntoChannel(this).awaitItem()
-      }
+    withContext(Dispatchers.Default) {
+      withTurbineTimeout(1500.milliseconds) {
+        val job = launch {
+          neverFlow().collectIntoChannel(this).awaitItem()
+        }
 
-      withContext(Dispatchers.Default) {
         delay(1100)
+        job.cancel()
       }
-      job.cancel()
     }
   }
 

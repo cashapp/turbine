@@ -608,6 +608,7 @@ class FlowTest {
       flow<Nothing> {
         delay(5.seconds)
       }.test {
+        advanceTimeBy(5.seconds)
         awaitComplete()
       }
     }
@@ -629,13 +630,13 @@ class FlowTest {
   }
 
   @Test fun awaitHonorsTestTimeoutNoTimeout() = runTest {
-    flow<Nothing> {
       withContext(Default) {
-        delay(1100.milliseconds)
+          flow<Nothing> {
+              delay(1100.milliseconds)
+          }.test(timeout = 1500.milliseconds) {
+              awaitComplete()
+          }
       }
-    }.test(timeout = 1500.milliseconds) {
-      awaitComplete()
-    }
   }
 
   @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTest {
