@@ -1,4 +1,4 @@
-name: build
+name: Puncho build
 
 on:
   pull_request: {}
