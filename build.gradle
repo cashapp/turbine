@@ -23,6 +23,8 @@ kotlin {
     }
   }
 
+  wasmJs()
+
   jvm {
     compilations.configureEach { KotlinJvmCompilation compilation ->
       compilation.compilerOptions.options.jvmTarget = JvmTarget.JVM_1_8
