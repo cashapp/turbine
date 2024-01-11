@@ -17,7 +17,7 @@ flowOf("one", "two").test {
 
 ## Download
 
-```groovy
+```kotlin
 repositories {
   mavenCentral()
 }
