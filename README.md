@@ -17,12 +17,12 @@ flowOf("one", "two").test {
 
 ## Download
 
-```groovy
+```kotlin
 repositories {
   mavenCentral()
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:1.0.0'
+  testImplementation("app.cash.turbine:turbine:1.0.0")
 }
 ```
 
@@ -30,14 +30,14 @@ dependencies {
 <summary>Snapshots of the development version are available in Sonatype's snapshots repository.</summary>
 <p>
 
-```groovy
+```kotlin
 repositories {
   maven {
-    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
   }
 }
 dependencies {
-  testImplementation 'app.cash.turbine:turbine:1.1.0-SNAPSHOT'
+  testImplementation("app.cash.turbine:turbine:1.1.0-SNAPSHOT")
 }
 ```
 
