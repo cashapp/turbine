@@ -13,6 +13,15 @@ plugins {
 kotlin {
   explicitApi()
 
+  androidNativeArm32()
+  androidNativeArm64()
+  androidNativeX64()
+  androidNativeX86()
+
+  iosArm64()
+  iosSimulatorArm64()
+  iosX64()
+
   js {
     nodejs {
       testTask {
@@ -23,8 +32,6 @@ kotlin {
     }
   }
 
-  wasmJs()
-
   jvm {
     compilations.configureEach { KotlinJvmCompilation compilation ->
       compilation.compilerOptions.options.jvmTarget = JvmTarget.JVM_1_8
@@ -32,26 +39,25 @@ kotlin {
     }
   }
 
-  androidNativeArm32()
-  androidNativeArm64()
-  androidNativeX86()
-  androidNativeX64()
-  iosArm64()
-  iosX64()
-  iosSimulatorArm64()
-  linuxX64()
   linuxArm64()
-  macosX64()
+  linuxX64()
+
   macosArm64()
+  macosX64()
+
   mingwX64()
+
   tvosArm64()
-  tvosX64()
   tvosSimulatorArm64()
+  tvosX64()
+
+  wasmJs()
+
   watchosArm32()
   watchosArm64()
-  watchosX64()
   watchosDeviceArm64()
   watchosSimulatorArm64()
+  watchosX64()
 
   sourceSets {
     commonMain {
