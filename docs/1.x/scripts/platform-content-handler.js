@@ -1,3 +1,7 @@
+/*
+ * Copyright 2014-2023 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
+ */
+
 filteringContext = {
     dependencies: {},
     restrictedDependencies: [],
@@ -14,8 +18,6 @@ const samplesLightThemeName = 'idea'
 window.addEventListener('load', () => {
     document.querySelectorAll("div[data-platform-hinted]")
         .forEach(elem => elem.addEventListener('click', (event) => togglePlatformDependent(event, elem)))
-    document.querySelectorAll("div[tabs-section]")
-        .forEach(elem => elem.addEventListener('click', (event) => toggleSectionsEventHandler(event)))
     const filterSection = document.getElementById('filter-section')
     if (filterSection) {
         filterSection.addEventListener('click', (event) => filterButtonHandler(event))
@@ -82,7 +84,7 @@ const samplesAreEnabled = () => {
 
 
 const initHidingLeftNavigation = () => {
-    document.getElementById("leftToggler").onclick = function (event) {
+    document.getElementById("menu-toggle").onclick = function (event) {
         //Events need to be prevented from bubbling since they will trigger next handler
         event.preventDefault();
         event.stopPropagation();
@@ -173,19 +175,30 @@ function handleAnchor() {
 }
 
 function initTabs() {
-    document.querySelectorAll("div[tabs-section]")
-        .forEach(element => {
-            showCorrespondingTabBody(element)
-            element.addEventListener('click', (event) => toggleSectionsEventHandler(event))
-        })
-    let cached = localStorage.getItem("active-tab")
-    if (cached) {
-        let parsed = JSON.parse(cached)
-        let tab = document.querySelector('div[tabs-section] > button[data-togglable="' + parsed + '"]')
-        if (tab) {
-            toggleSections(tab)
-        }
-    }
+    // we could have only a single type of data - classlike or package
+    const mainContent = document.querySelector('.main-content');
+    const type = mainContent ? mainContent.getAttribute("data-page-type") : null;
+    const localStorageKey = "active-tab-" + type;
+    document.querySelectorAll('div[tabs-section]').forEach(element => {
+        showCorrespondingTabBody(element);
+        element.addEventListener('click', ({target}) => {
+            const togglable = target ? target.getAttribute("data-togglable") : null;
+            if (!togglable) return;
+
+            localStorage.setItem(localStorageKey, JSON.stringify(togglable));
+            toggleSections(target);
+        });
+    });
+
+    const cached = localStorage.getItem(localStorageKey);
+    if (!cached) return;
+
+    const tab = document.querySelector(
+        'div[tabs-section] > button[data-togglable="' + JSON.parse(cached) + '"]'
+    );
+    if (!tab) return;
+
+    toggleSections(tab);
 }
 
 function showCorrespondingTabBody(element) {
@@ -289,12 +302,6 @@ function toggleSections(target) {
     activateTabsBody("tabs-section-body")
 }
 
-function toggleSectionsEventHandler(evt) {
-    if (!evt.target.getAttribute("data-togglable")) return
-    localStorage.setItem('active-tab', JSON.stringify(evt.target.getAttribute("data-togglable")))
-    toggleSections(evt.target)
-}
-
 function togglePlatformDependent(e, container) {
     let target = e.target
     if (target.tagName != 'BUTTON') return;
@@ -329,6 +336,16 @@ function refreshFiltering() {
     refreshFilterButtons()
     refreshPlatformTabs()
     refreshNoContentNotification()
+    refreshPlaygroundSamples()
+}
+
+function refreshPlaygroundSamples() {
+    document.querySelectorAll('code.runnablesample').forEach(node => {
+        const playground = node.KotlinPlayground;
+        /* Some samples may be hidden by filter, they have 0px height  for visible code area
+         * after rendering. Call this method for re-calculate code area height */
+        playground && playground.view.codemirror.refresh();
+    });
 }
 
 function refreshNoContentNotification() {
