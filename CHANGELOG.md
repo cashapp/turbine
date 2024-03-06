@@ -1,6 +1,21 @@
 # Change Log
 
 ## [Unreleased]
+[Unreleased]: https://github.com/cashapp/turbine/compare/1.1.0...HEAD
+
+### Added
+
+### Changed
+
+### Fixed
+
+
+## [1.1.0] - 2024-03-06
+[1.1.0]: https://github.com/cashapp/turbine/releases/tag/1.1.0
+
+### Changed
+- Add `wasmJs` target, remove `iosArm32` and `watchosX86` targets.
+- Throw unconsumed events if scope is externally canceled.
 
 
 ## [1.0.0] - 2023-05-21
@@ -161,7 +176,6 @@ Note: This version has a transitive dependency on kotlinx.coroutines 1.7.0. If y
 Initial release
 
 
-[Unreleased]: https://github.com/cashapp/turbine/compare/1.0.0...HEAD
 [1.0.0]: https://github.com/cashapp/turbine/releases/tag/1.0.0
 [0.13.0]: https://github.com/cashapp/turbine/releases/tag/0.13.0
 [0.12.3]: https://github.com/cashapp/turbine/releases/tag/0.12.3
