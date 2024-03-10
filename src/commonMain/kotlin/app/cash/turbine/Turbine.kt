@@ -141,7 +141,7 @@ internal class ChannelTurbine<T>(
   override fun asChannel(): Channel<T> = channel
 
   override fun add(item: T) {
-    if (!channel.trySend(item).isSuccess) throw IllegalStateException("Added when closed")
+    if (!channel.trySend(item).isSuccess) throw IllegalStateException("Attempt to add item to a closed Turbine${name?.let { " named $it" } ?: ""}.")
   }
 
   @OptIn(DelicateCoroutinesApi::class)
