@@ -608,6 +608,7 @@ class FlowTest {
       flow<Nothing> {
         delay(5.seconds)
       }.test {
+        advanceTimeBy(5.seconds)
         awaitComplete()
       }
     }
@@ -629,13 +630,13 @@ class FlowTest {
   }
 
   @Test fun awaitHonorsTestTimeoutNoTimeout() = runTest {
-    flow<Nothing> {
       withContext(Default) {
-        delay(1100.milliseconds)
+          flow<Nothing> {
+              delay(1100.milliseconds)
+          }.test(timeout = 1500.milliseconds) {
+              awaitComplete()
+          }
       }
-    }.test(timeout = 1500.milliseconds) {
-      awaitComplete()
-    }
   }
 
   @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTest {
@@ -732,6 +733,32 @@ class FlowTest {
 
       awaitComplete()
     }
+  }
+
+  @Test
+  fun delaysCanBeTested() = runTest {
+    val took = measureTime {
+      flow {
+        delay(5000)
+        emit("1")
+        delay(5000)
+        emit("2")
+      }.test {
+        expectNoEvents()
+
+        advanceTimeBy(5000)
+        expectNoEvents()
+
+        runCurrent()
+        assertEquals("1", awaitItem())
+
+        val exception = assertFailsWith<AssertionError> {
+          awaitItem()
+        }
+        assertEquals(exception.message, "No value produced in 3s")
+      }
+    }
+    assertTrue(took < 1.seconds, "$took > 1s")
   }
 
   @Test

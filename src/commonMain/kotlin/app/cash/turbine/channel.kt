@@ -94,12 +94,7 @@ private suspend fun <T> withAppropriateTimeout(
   timeout: Duration,
   block: suspend CoroutineScope.() -> T,
 ): T {
-  return if (coroutineContext[TestCoroutineScheduler] != null) {
-    // withTimeout uses virtual time, which will hang.
-    withWallclockTimeout(timeout, block)
-  } else {
-    withTimeout(timeout, block)
-  }
+  return withTimeout(timeout, block)
 }
 
 private suspend fun <T> withWallclockTimeout(
