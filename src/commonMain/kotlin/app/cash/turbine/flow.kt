@@ -222,7 +222,7 @@ private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duratio
   }
 }
 
-internal fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
+private fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
   val output = Channel<T>(UNLIMITED)
   val job = scope.launch(start = UNDISPATCHED) {
     try {

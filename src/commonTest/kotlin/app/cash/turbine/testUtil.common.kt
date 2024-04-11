@@ -16,6 +16,9 @@
 package app.cash.turbine
 
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -33,3 +36,15 @@ expect fun assertCallSitePresentInStackTraceOnJvm(
   entryPoint: String,
   callSite: String,
 )
+
+fun <T> channelOf(vararg items: T, closeCause: Throwable? = null): ReceiveChannel<T> {
+  return Channel<T>(UNLIMITED).also { channel ->
+    for (item in items) {
+      channel.trySend(item).getOrThrow()
+    }
+    channel.close(closeCause)
+  }
+}
+
+fun emptyChannel(): ReceiveChannel<Nothing> = channelOf()
+fun neverChannel(): ReceiveChannel<Nothing> = Channel()
