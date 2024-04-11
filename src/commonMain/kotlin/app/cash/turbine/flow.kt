@@ -16,6 +16,7 @@
 package app.cash.turbine
 
 import app.cash.turbine.testIn as testInExtension
+import kotlin.DeprecationLevel.HIDDEN
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration
@@ -40,7 +41,15 @@ public interface TurbineContext : CoroutineScope {
     scope: CoroutineScope,
     timeout: Duration? = null,
     name: String? = null,
+    collectContext: CoroutineContext = EmptyCoroutineContext,
   ): ReceiveTurbine<R>
+
+  @Deprecated("", level = HIDDEN) // For binary compatibility.
+  public fun <R> Flow<R>.testIn(
+    scope: CoroutineScope,
+    timeout: Duration? = null,
+    name: String? = null,
+  ): ReceiveTurbine<R> = testIn(scope, timeout, name)
 }
 public interface TurbineTestContext<T> : TurbineContext, ReceiveTurbine<T>
 
@@ -61,12 +70,8 @@ internal class TurbineContextImpl(
     scope: CoroutineScope,
     timeout: Duration?,
     name: String?,
-  ): ReceiveTurbine<R> =
-    testInExtension(
-      timeout = timeout,
-      name = name,
-      scope = scope + turbineElements,
-    )
+    collectContext: CoroutineContext,
+  ): ReceiveTurbine<R> = testInExtension(scope + turbineElements, timeout, name, collectContext)
 }
 
 /**
@@ -130,16 +135,18 @@ public suspend fun turbineScope(
  * }
  * ```
  *
+ * @param collectContext Additional context for the coroutine which collects items from [this].
  * @param timeout If non-null, overrides the current Turbine timeout inside [validate]. See also:
  * [withTurbineTimeout].
  */
 public suspend fun <T> Flow<T>.test(
   timeout: Duration? = null,
   name: String? = null,
+  collectContext: CoroutineContext = EmptyCoroutineContext,
   validate: suspend TurbineTestContext<T>.() -> Unit,
 ) {
   turbineScope(timeout) {
-    collectTurbineIn(this, null, name).apply {
+    collectTurbineIn(this, null, name, collectContext).apply {
       TurbineTestContextImpl(this, currentCoroutineContext()).validate()
       cancel()
       ensureAllEventsConsumed()
@@ -162,6 +169,7 @@ public suspend fun <T> Flow<T>.test(
  * Unlike [test] which automatically cancels the flow at the end of the lambda, the returned
  * [ReceiveTurbine] must either consume a terminal event (complete or error) or be explicitly canceled.
  *
+ * @param collectContext Additional context for the coroutine which collects items from [this].
  * @param timeout If non-null, overrides the current Turbine timeout for this [Turbine]. See also:
  * [withTurbineTimeout].
  */
@@ -169,6 +177,7 @@ public fun <T> Flow<T>.testIn(
   scope: CoroutineScope,
   timeout: Duration? = null,
   name: String? = null,
+  collectContext: CoroutineContext = EmptyCoroutineContext,
 ): ReceiveTurbine<T> {
   if (timeout != null) {
     // Eager check to throw early rather than in a subsequent 'await' call.
@@ -178,7 +187,7 @@ public fun <T> Flow<T>.testIn(
     throw AssertionError("Turbine can only collect flows within a TurbineContext. Wrap with turbineScope { .. }")
   }
 
-  val turbine = collectTurbineIn(scope, timeout, name)
+  val turbine = collectTurbineIn(scope, timeout, name, collectContext)
 
   scope.coroutineContext.job.invokeOnCompletion { exception ->
     if (debug) println("Scope ending ${exception ?: ""}")
@@ -193,7 +202,12 @@ public fun <T> Flow<T>.testIn(
   return turbine
 }
 
-private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duration?, name: String?): ReceiveTurbine<T> {
+private fun <T> Flow<T>.collectTurbineIn(
+  scope: CoroutineScope,
+  timeout: Duration?,
+  name: String?,
+  collectContext: CoroutineContext,
+): ReceiveTurbine<T> {
   // Use test-specific unconfined if test scheduler is in use to inherit its virtual time.
   @OptIn(ExperimentalCoroutinesApi::class) // UnconfinedTestDispatcher is still experimental.
   val unconfined = scope.coroutineContext[TestCoroutineScheduler]
@@ -201,7 +215,7 @@ private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duratio
     ?: Unconfined
 
   val output = Channel<T>(UNLIMITED)
-  val job = scope.launch(unconfined, start = UNDISPATCHED) {
+  val job = scope.launch(collectContext + unconfined, start = UNDISPATCHED) {
     try {
       collect { output.trySend(it) }
       output.close()
@@ -214,3 +228,17 @@ private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duratio
     scope.reportTurbine(it)
   }
 }
+
+@Deprecated("", level = HIDDEN) // For binary compatibility.
+public suspend fun <T> Flow<T>.test(
+  timeout: Duration? = null,
+  name: String? = null,
+  validate: suspend TurbineTestContext<T>.() -> Unit,
+): Unit = test(timeout, name, validate = validate)
+
+@Deprecated("", level = HIDDEN) // For binary compatibility.
+public fun <T> Flow<T>.testIn(
+  scope: CoroutineScope,
+  timeout: Duration? = null,
+  name: String? = null,
+): ReceiveTurbine<T> = testInExtension(scope, timeout, name)

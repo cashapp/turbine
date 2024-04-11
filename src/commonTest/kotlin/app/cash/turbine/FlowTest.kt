@@ -28,6 +28,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.Unconfined
@@ -820,5 +821,14 @@ class FlowTest {
       actual.cause?.message,
       "No value produced for inner in 3s",
     )
+  }
+
+  @Test fun collectContextPropagated() = runTest {
+    flow {
+      emit(currentCoroutineContext()[CoroutineName]?.name ?: "missing!")
+    }.test(collectContext = CoroutineName("sup")) {
+      assertEquals("sup", awaitItem())
+      awaitComplete()
+    }
   }
 }

@@ -53,10 +53,14 @@ public final class app/cash/turbine/Event$Item : app/cash/turbine/Event {
 }
 
 public final class app/cash/turbine/FlowKt {
-	public static final fun test-C2H2yOE (Lkotlinx/coroutines/flow/Flow;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final synthetic fun test-C2H2yOE (Lkotlinx/coroutines/flow/Flow;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun test-C2H2yOE$default (Lkotlinx/coroutines/flow/Flow;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun testIn-5_5nbZA (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;)Lapp/cash/turbine/ReceiveTurbine;
+	public static final fun test-i8z2VEo (Lkotlinx/coroutines/flow/Flow;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun test-i8z2VEo$default (Lkotlinx/coroutines/flow/Flow;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final synthetic fun testIn-5_5nbZA (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;)Lapp/cash/turbine/ReceiveTurbine;
 	public static synthetic fun testIn-5_5nbZA$default (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/turbine/ReceiveTurbine;
+	public static final fun testIn-BZiP2OM (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/coroutines/CoroutineContext;)Lapp/cash/turbine/ReceiveTurbine;
+	public static synthetic fun testIn-BZiP2OM$default (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/coroutines/CoroutineContext;ILjava/lang/Object;)Lapp/cash/turbine/ReceiveTurbine;
 	public static final fun turbineScope-k1IrOU0 (Lkotlin/time/Duration;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun turbineScope-k1IrOU0$default (Lkotlin/time/Duration;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
@@ -88,8 +92,10 @@ public abstract interface class app/cash/turbine/Turbine : app/cash/turbine/Rece
 }
 
 public abstract interface class app/cash/turbine/TurbineContext : kotlinx/coroutines/CoroutineScope {
-	public abstract fun testIn-5_5nbZA (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;)Lapp/cash/turbine/ReceiveTurbine;
+	public synthetic fun testIn-5_5nbZA (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;)Lapp/cash/turbine/ReceiveTurbine;
 	public static synthetic fun testIn-5_5nbZA$default (Lapp/cash/turbine/TurbineContext;Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/turbine/ReceiveTurbine;
+	public abstract fun testIn-BZiP2OM (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/coroutines/CoroutineContext;)Lapp/cash/turbine/ReceiveTurbine;
+	public static synthetic fun testIn-BZiP2OM$default (Lapp/cash/turbine/TurbineContext;Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/time/Duration;Ljava/lang/String;Lkotlin/coroutines/CoroutineContext;ILjava/lang/Object;)Lapp/cash/turbine/ReceiveTurbine;
 }
 
 public final class app/cash/turbine/TurbineKt {

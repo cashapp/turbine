@@ -1,5 +1,6 @@
 package app.cash.turbine
 
+import app.cash.turbine.testIn as testInExtension
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -11,12 +12,13 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletionHandlerException
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.Default
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
@@ -315,12 +317,32 @@ class FlowInScopeTest {
   @Test
   fun failWithoutTurbineScope() = runTest {
     val actual = assertFailsWith<AssertionError> {
-      emptyFlow<Nothing>().testIn(backgroundScope, name = "inner failing")
+      emptyFlow<Nothing>().testInExtension(backgroundScope, name = "inner failing")
     }
     assertEquals(
       "Turbine can only collect flows within a TurbineContext. Wrap with turbineScope { .. }",
       actual.message,
     )
+  }
+
+  @Test fun collectContextPropagatedInstance() = runTestTurbine {
+    val flow = flow {
+      emit(currentCoroutineContext()[CoroutineName]?.name ?: "missing!")
+    }
+    flow.testIn(this, collectContext = CoroutineName("sup")).apply {
+      assertEquals("sup", awaitItem())
+      awaitComplete()
+    }
+  }
+
+  @Test fun collectContextPropagatedExtension() = runTestTurbine {
+    val flow = flow {
+      emit(currentCoroutineContext()[CoroutineName]?.name ?: "missing!")
+    }
+    flow.testInExtension(this, collectContext = CoroutineName("sup")).apply {
+      assertEquals("sup", awaitItem())
+      awaitComplete()
+    }
   }
 }
 

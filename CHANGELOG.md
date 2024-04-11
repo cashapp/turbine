@@ -4,6 +4,7 @@
 [Unreleased]: https://github.com/cashapp/turbine/compare/1.1.0...HEAD
 
 ### Added
+- `Flow.test` and `Flow.testIn` now accept an additional `CoroutineContext` for use on the coroutine which performs collection.
 
 ### Changed
 
