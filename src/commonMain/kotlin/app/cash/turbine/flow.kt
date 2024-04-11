@@ -44,7 +44,7 @@ public interface TurbineContext : CoroutineScope {
 public interface TurbineTestContext<T> : TurbineContext, ReceiveTurbine<T>
 
 internal class TurbineTestContextImpl<T>(
-  turbine: Turbine<T>,
+  turbine: ReceiveTurbine<T>,
   turbineContext: CoroutineContext,
 ) : TurbineContext by TurbineContextImpl(turbineContext), ReceiveTurbine<T> by turbine, TurbineTestContext<T>
 
@@ -180,7 +180,7 @@ public fun <T> Flow<T>.testIn(
   return testInInternal(this, timeout, scope, name)
 }
 
-private fun <T> testInInternal(flow: Flow<T>, timeout: Duration?, scope: CoroutineScope, name: String?): Turbine<T> {
+private fun <T> testInInternal(flow: Flow<T>, timeout: Duration?, scope: CoroutineScope, name: String?): ReceiveTurbine<T> {
   if (timeout != null) {
     // Eager check to throw early rather than in a subsequent 'await' call.
     checkTimeout(timeout)
@@ -204,27 +204,15 @@ private fun <T> testInInternal(flow: Flow<T>, timeout: Duration?, scope: Corouti
   return turbine
 }
 
-private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duration?, name: String?): Turbine<T> {
-  lateinit var channel: Channel<T>
-
+private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duration?, name: String?): ReceiveTurbine<T> {
   // Use test-specific unconfined if test scheduler is in use to inherit its virtual time.
   @OptIn(ExperimentalCoroutinesApi::class) // UnconfinedTestDispatcher is still experimental.
   val unconfined = scope.coroutineContext[TestCoroutineScheduler]
     ?.let(::UnconfinedTestDispatcher)
     ?: Unconfined
 
-  val job = scope.launch(unconfined, start = UNDISPATCHED) {
-    channel = collectIntoChannel(this)
-  }
-
-  return ChannelTurbine(channel, job, timeout, name).also {
-    scope.reportTurbine(it)
-  }
-}
-
-private fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
   val output = Channel<T>(UNLIMITED)
-  val job = scope.launch(start = UNDISPATCHED) {
+  val job = scope.launch(unconfined, start = UNDISPATCHED) {
     try {
       collect { output.trySend(it) }
       output.close()
@@ -233,15 +221,7 @@ private fun <T> Flow<T>.collectIntoChannel(scope: CoroutineScope): Channel<T> {
     }
   }
 
-  return object : Channel<T> by output {
-    override fun cancel(cause: CancellationException?) {
-      job.cancel()
-      output.close(cause)
-    }
-
-    override fun close(cause: Throwable?): Boolean {
-      job.cancel()
-      return output.close(cause)
-    }
+  return ChannelTurbine(output, job, timeout, name).also {
+    scope.reportTurbine(it)
   }
 }
