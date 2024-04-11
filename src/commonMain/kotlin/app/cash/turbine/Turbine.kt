@@ -97,11 +97,12 @@ public operator fun <T> Turbine<T>.plusAssign(value: T) { add(value) }
 public fun <T> Turbine(
   timeout: Duration? = null,
   name: String? = null,
-): Turbine<T> = ChannelTurbine(timeout = timeout, name = name)
+): Turbine<T> = ChannelTurbine(Channel(UNLIMITED), null, timeout, name)
 
 internal class ChannelTurbine<T>(
-  channel: Channel<T> = Channel(UNLIMITED),
-  private val job: Job? = null,
+  channel: Channel<T>,
+  /** Non-null if [channel] is being populated by an external `Flow` collection. */
+  private val collectJob: Job?,
   private val timeout: Duration?,
   private val name: String?,
 ) : Turbine<T> {
@@ -136,6 +137,16 @@ internal class ChannelTurbine<T>(
         }
       }
     }
+
+    override fun cancel(cause: CancellationException?) {
+      collectJob?.cancel()
+      channel.close(cause)
+    }
+
+    override fun close(cause: Throwable?): Boolean {
+      collectJob?.cancel()
+      return channel.close(cause)
+    }
   }
 
   override fun asChannel(): Channel<T> = channel
@@ -148,14 +159,14 @@ internal class ChannelTurbine<T>(
   override suspend fun cancel() {
     if (!channel.isClosedForSend) ignoreTerminalEvents = true
     channel.cancel()
-    job?.cancelAndJoin()
+    collectJob?.cancelAndJoin()
   }
 
   @OptIn(DelicateCoroutinesApi::class)
   override fun close(cause: Throwable?) {
     if (!channel.isClosedForSend) ignoreTerminalEvents = true
     channel.close(cause)
-    job?.cancel()
+    collectJob?.cancel()
   }
 
   override fun takeEvent(): Event<T> = channel.takeEvent(name = name)
