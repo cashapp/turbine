@@ -15,6 +15,7 @@
  */
 package app.cash.turbine
 
+import app.cash.turbine.testIn as testInExtension
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration
@@ -61,8 +62,7 @@ internal class TurbineContextImpl(
     timeout: Duration?,
     name: String?,
   ): ReceiveTurbine<R> =
-    testInInternal(
-      this@testIn,
+    testInExtension(
       timeout = timeout,
       name = name,
       scope = scope + turbineElements,
@@ -138,16 +138,9 @@ public suspend fun <T> Flow<T>.test(
   name: String? = null,
   validate: suspend TurbineTestContext<T>.() -> Unit,
 ) {
-  turbineScope {
+  turbineScope(timeout) {
     collectTurbineIn(this, null, name).apply {
-      val testContext = TurbineTestContextImpl(this@apply, currentCoroutineContext())
-      if (timeout != null) {
-        withTurbineTimeout(timeout) {
-          testContext.validate()
-        }
-      } else {
-        testContext.validate()
-      }
+      TurbineTestContextImpl(this, currentCoroutineContext()).validate()
       cancel()
       ensureAllEventsConsumed()
     }
@@ -177,10 +170,6 @@ public fun <T> Flow<T>.testIn(
   timeout: Duration? = null,
   name: String? = null,
 ): ReceiveTurbine<T> {
-  return testInInternal(this, timeout, scope, name)
-}
-
-private fun <T> testInInternal(flow: Flow<T>, timeout: Duration?, scope: CoroutineScope, name: String?): ReceiveTurbine<T> {
   if (timeout != null) {
     // Eager check to throw early rather than in a subsequent 'await' call.
     checkTimeout(timeout)
@@ -189,7 +178,7 @@ private fun <T> testInInternal(flow: Flow<T>, timeout: Duration?, scope: Corouti
     throw AssertionError("Turbine can only collect flows within a TurbineContext. Wrap with turbineScope { .. }")
   }
 
-  val turbine = flow.collectTurbineIn(scope, timeout, name)
+  val turbine = collectTurbineIn(scope, timeout, name)
 
   scope.coroutineContext.job.invokeOnCompletion { exception ->
     if (debug) println("Scope ending ${exception ?: ""}")
