@@ -261,7 +261,7 @@ class ChannelTest {
     assertEquals("Expected item but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
-  
+
   @Test fun takeComplete() = withTestScope {
     val channel = channelOf("item!")
     channel.takeItem()
