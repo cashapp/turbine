@@ -400,7 +400,7 @@ The shared flow types Kotlin currently provides are:
 Turbine applies a timeout whenever it waits for an event.
 This is a wall clock time timeout that ignores `runTest`'s virtual clock time.
 
-The default timeout length is one second. This can be overridden by passing a timeout duration to `test`:
+The default timeout length is three seconds. This can be overridden by passing a timeout duration to `test`:
 
 ```kotlin
 flowOf("one", "two").test(timeout = 10.milliseconds) {
