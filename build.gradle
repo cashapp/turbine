@@ -52,6 +52,9 @@ kotlin {
   tvosX64()
 
   wasmJs()
+  wasmWasi {
+    nodejs()
+  }
 
   watchosArm32()
   watchosArm64()

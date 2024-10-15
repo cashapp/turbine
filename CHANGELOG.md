@@ -4,6 +4,7 @@
 [Unreleased]: https://github.com/cashapp/turbine/compare/1.1.0...HEAD
 
 ### Added
+- Add `wasmWasi` target.
 
 ### Changed
 
