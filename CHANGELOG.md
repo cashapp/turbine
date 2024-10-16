@@ -1,14 +1,23 @@
 # Change Log
 
 ## [Unreleased]
-[Unreleased]: https://github.com/cashapp/turbine/compare/1.1.0...HEAD
+[Unreleased]: https://github.com/cashapp/turbine/compare/1.2.0...HEAD
+
+### Added
+- Nothing yet!
+
+### Changed
+- Nothing yet!
+
+### Fixed
+- Nothing yet!
+
+
+## [1.2.0] - 2024-10-16
+[1.2.0]: https://github.com/cashapp/turbine/releases/tag/1.2.0
 
 ### Added
 - Add `wasmWasi` target.
-
-### Changed
-
-### Fixed
 
 
 ## [1.1.0] - 2024-03-06
