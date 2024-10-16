@@ -3,6 +3,9 @@
 build
 /reports
 
+# Kotlin
+.kotlin
+
 # IntelliJ
 /.idea
 *.iml
