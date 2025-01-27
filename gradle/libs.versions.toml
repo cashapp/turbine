@@ -6,7 +6,7 @@ coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", ve
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
 [plugins]
-kotlin = { id = "org.jetbrains.kotlin.multiplatform", version = "2.1.0" }
+kotlin = { id = "org.jetbrains.kotlin.multiplatform", version = "2.1.10" }
 spotless = { id = "com.diffplug.spotless", version = "7.0.2" }
 publish = { id = "com.vanniktech.maven.publish", version = "0.30.0" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
