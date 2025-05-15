@@ -10,7 +10,7 @@
 - Nothing yet!
 
 ### Fixed
-- Nothing yet!
+- Calling `testIn` with a `CoroutineScope` that does not contain a `Job` no longer throws `IllegalStateException`.
 
 
 ## [1.2.0] - 2024-10-16

@@ -24,12 +24,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -180,7 +180,7 @@ public fun <T> Flow<T>.testIn(
 
   val turbine = collectTurbineIn(scope, timeout, name)
 
-  scope.coroutineContext.job.invokeOnCompletion { exception ->
+  scope.coroutineContext[Job]?.invokeOnCompletion { exception ->
     if (debug) println("Scope ending ${exception ?: ""}")
 
     // Only validate events were consumed if the scope is exiting normally.
