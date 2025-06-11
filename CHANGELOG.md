@@ -7,7 +7,7 @@
 - Nothing yet!
 
 ### Changed
-- Nothing yet!
+- In-development snapshots are now published to the Central Portal Snapshots repository at https://central.sonatype.com/repository/maven-snapshots/.
 
 ### Fixed
 - Calling `testIn` with a `CoroutineScope` that does not contain a `Job` no longer throws `IllegalStateException`.
