@@ -7,6 +7,16 @@
 - Nothing yet!
 
 ### Changed
+- Nothing yet!
+
+### Fixed
+- Nothing yet!
+
+
+## [1.2.1] - 2025-06-11
+[1.2.1]: https://github.com/cashapp/turbine/releases/tag/1.2.1
+
+### Changed
 - In-development snapshots are now published to the Central Portal Snapshots repository at https://central.sonatype.com/repository/maven-snapshots/.
 
 ### Fixed
