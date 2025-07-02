@@ -10,4 +10,3 @@ kotlin = { id = "org.jetbrains.kotlin.multiplatform", version = "2.2.0" }
 spotless = { id = "com.diffplug.spotless", version = "7.0.4" }
 publish = { id = "com.vanniktech.maven.publish", version = "0.33.0" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
-kotlinApiDump = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.18.0" }

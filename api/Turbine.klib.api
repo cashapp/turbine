@@ -1,0 +1,87 @@
+// Klib ABI Dump
+// Targets: [androidNativeArm32, androidNativeArm64, androidNativeX64, androidNativeX86, iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64, tvosArm64, tvosSimulatorArm64, tvosX64, wasmJs, wasmWasi, watchosArm32, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64, watchosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <Turbine>
+abstract interface <#A: kotlin/Any?> app.cash.turbine/ReceiveTurbine { // app.cash.turbine/ReceiveTurbine|null[0]
+    abstract fun asChannel(): kotlinx.coroutines.channels/ReceiveChannel<#A> // app.cash.turbine/ReceiveTurbine.asChannel|asChannel(){}[0]
+    abstract fun ensureAllEventsConsumed() // app.cash.turbine/ReceiveTurbine.ensureAllEventsConsumed|ensureAllEventsConsumed(){}[0]
+    abstract fun expectMostRecentItem(): #A // app.cash.turbine/ReceiveTurbine.expectMostRecentItem|expectMostRecentItem(){}[0]
+    abstract fun expectNoEvents() // app.cash.turbine/ReceiveTurbine.expectNoEvents|expectNoEvents(){}[0]
+    abstract suspend fun awaitComplete() // app.cash.turbine/ReceiveTurbine.awaitComplete|awaitComplete(){}[0]
+    abstract suspend fun awaitError(): kotlin/Throwable // app.cash.turbine/ReceiveTurbine.awaitError|awaitError(){}[0]
+    abstract suspend fun awaitEvent(): app.cash.turbine/Event<#A> // app.cash.turbine/ReceiveTurbine.awaitEvent|awaitEvent(){}[0]
+    abstract suspend fun awaitItem(): #A // app.cash.turbine/ReceiveTurbine.awaitItem|awaitItem(){}[0]
+    abstract suspend fun cancel() // app.cash.turbine/ReceiveTurbine.cancel|cancel(){}[0]
+    abstract suspend fun cancelAndConsumeRemainingEvents(): kotlin.collections/List<app.cash.turbine/Event<#A>> // app.cash.turbine/ReceiveTurbine.cancelAndConsumeRemainingEvents|cancelAndConsumeRemainingEvents(){}[0]
+    abstract suspend fun cancelAndIgnoreRemainingEvents() // app.cash.turbine/ReceiveTurbine.cancelAndIgnoreRemainingEvents|cancelAndIgnoreRemainingEvents(){}[0]
+    abstract suspend fun skipItems(kotlin/Int) // app.cash.turbine/ReceiveTurbine.skipItems|skipItems(kotlin.Int){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> app.cash.turbine/Turbine : app.cash.turbine/ReceiveTurbine<#A> { // app.cash.turbine/Turbine|null[0]
+    abstract fun add(#A) // app.cash.turbine/Turbine.add|add(1:0){}[0]
+    abstract fun asChannel(): kotlinx.coroutines.channels/Channel<#A> // app.cash.turbine/Turbine.asChannel|asChannel(){}[0]
+    abstract fun close(kotlin/Throwable? = ...) // app.cash.turbine/Turbine.close|close(kotlin.Throwable?){}[0]
+    abstract fun takeComplete() // app.cash.turbine/Turbine.takeComplete|takeComplete(){}[0]
+    abstract fun takeError(): kotlin/Throwable // app.cash.turbine/Turbine.takeError|takeError(){}[0]
+    abstract fun takeEvent(): app.cash.turbine/Event<#A> // app.cash.turbine/Turbine.takeEvent|takeEvent(){}[0]
+    abstract fun takeItem(): #A // app.cash.turbine/Turbine.takeItem|takeItem(){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> app.cash.turbine/TurbineTestContext : app.cash.turbine/ReceiveTurbine<#A>, app.cash.turbine/TurbineContext // app.cash.turbine/TurbineTestContext|null[0]
+
+abstract interface app.cash.turbine/TurbineContext : kotlinx.coroutines/CoroutineScope { // app.cash.turbine/TurbineContext|null[0]
+    abstract fun <#A1: kotlin/Any?> (kotlinx.coroutines.flow/Flow<#A1>).testIn(kotlinx.coroutines/CoroutineScope, kotlin.time/Duration? = ..., kotlin/String? = ...): app.cash.turbine/ReceiveTurbine<#A1> // app.cash.turbine/TurbineContext.testIn|testIn@kotlinx.coroutines.flow.Flow<0:0>(kotlinx.coroutines.CoroutineScope;kotlin.time.Duration?;kotlin.String?){0§<kotlin.Any?>}[0]
+}
+
+sealed interface <#A: out kotlin/Any?> app.cash.turbine/Event { // app.cash.turbine/Event|null[0]
+    open val isTerminal // app.cash.turbine/Event.isTerminal|{}isTerminal[0]
+        open fun <get-isTerminal>(): kotlin/Boolean // app.cash.turbine/Event.isTerminal.<get-isTerminal>|<get-isTerminal>(){}[0]
+
+    final class <#A1: kotlin/Any?> Item : app.cash.turbine/Event<#A1> { // app.cash.turbine/Event.Item|null[0]
+        constructor <init>(#A1) // app.cash.turbine/Event.Item.<init>|<init>(1:0){}[0]
+
+        final val value // app.cash.turbine/Event.Item.value|{}value[0]
+            final fun <get-value>(): #A1 // app.cash.turbine/Event.Item.value.<get-value>|<get-value>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // app.cash.turbine/Event.Item.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // app.cash.turbine/Event.Item.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // app.cash.turbine/Event.Item.toString|toString(){}[0]
+    }
+
+    final class Error : app.cash.turbine/Event<kotlin/Nothing> { // app.cash.turbine/Event.Error|null[0]
+        constructor <init>(kotlin/Throwable) // app.cash.turbine/Event.Error.<init>|<init>(kotlin.Throwable){}[0]
+
+        final val throwable // app.cash.turbine/Event.Error.throwable|{}throwable[0]
+            final fun <get-throwable>(): kotlin/Throwable // app.cash.turbine/Event.Error.throwable.<get-throwable>|<get-throwable>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // app.cash.turbine/Event.Error.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // app.cash.turbine/Event.Error.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // app.cash.turbine/Event.Error.toString|toString(){}[0]
+    }
+
+    final object Complete : app.cash.turbine/Event<kotlin/Nothing> { // app.cash.turbine/Event.Complete|null[0]
+        final fun toString(): kotlin/String // app.cash.turbine/Event.Complete.toString|toString(){}[0]
+    }
+}
+
+final fun <#A: kotlin/Any?> (app.cash.turbine/Turbine<#A>).app.cash.turbine/plusAssign(#A) // app.cash.turbine/plusAssign|plusAssign@app.cash.turbine.Turbine<0:0>(0:0){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/expectMostRecentItem(kotlin/String? = ...): #A // app.cash.turbine/expectMostRecentItem|expectMostRecentItem@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/expectNoEvents(kotlin/String? = ...) // app.cash.turbine/expectNoEvents|expectNoEvents@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/takeComplete(kotlin/String? = ...) // app.cash.turbine/takeComplete|takeComplete@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/takeError(kotlin/String? = ...): kotlin/Throwable // app.cash.turbine/takeError|takeError@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/takeEvent(kotlin/String? = ...): app.cash.turbine/Event<#A> // app.cash.turbine/takeEvent|takeEvent@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/takeItem(kotlin/String? = ...): #A // app.cash.turbine/takeItem|takeItem@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlinx.coroutines.flow/Flow<#A>).app.cash.turbine/testIn(kotlinx.coroutines/CoroutineScope, kotlin.time/Duration? = ..., kotlin/String? = ...): app.cash.turbine/ReceiveTurbine<#A> // app.cash.turbine/testIn|testIn@kotlinx.coroutines.flow.Flow<0:0>(kotlinx.coroutines.CoroutineScope;kotlin.time.Duration?;kotlin.String?){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> app.cash.turbine/Turbine(kotlin.time/Duration? = ..., kotlin/String? = ...): app.cash.turbine/Turbine<#A> // app.cash.turbine/Turbine|Turbine(kotlin.time.Duration?;kotlin.String?){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/awaitComplete(kotlin/String? = ...) // app.cash.turbine/awaitComplete|awaitComplete@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/awaitError(kotlin/String? = ...): kotlin/Throwable // app.cash.turbine/awaitError|awaitError@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/awaitEvent(kotlin/String? = ...): app.cash.turbine/Event<#A> // app.cash.turbine/awaitEvent|awaitEvent@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/awaitItem(kotlin/String? = ...): #A // app.cash.turbine/awaitItem|awaitItem@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/skipItems(kotlin/Int, kotlin/String? = ...) // app.cash.turbine/skipItems|skipItems@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.Int;kotlin.String?){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (kotlinx.coroutines.flow/Flow<#A>).app.cash.turbine/test(kotlin.time/Duration? = ..., kotlin/String? = ..., kotlin.coroutines/SuspendFunction1<app.cash.turbine/TurbineTestContext<#A>, kotlin/Unit>) // app.cash.turbine/test|test@kotlinx.coroutines.flow.Flow<0:0>(kotlin.time.Duration?;kotlin.String?;kotlin.coroutines.SuspendFunction1<app.cash.turbine.TurbineTestContext<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> app.cash.turbine/withTurbineTimeout(kotlin.time/Duration, kotlin.coroutines/SuspendFunction1<kotlinx.coroutines/CoroutineScope, #A>): #A // app.cash.turbine/withTurbineTimeout|withTurbineTimeout(kotlin.time.Duration;kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope,0:0>){0§<kotlin.Any?>}[0]
+final suspend fun app.cash.turbine/turbineScope(kotlin.time/Duration? = ..., kotlin.coroutines/SuspendFunction1<app.cash.turbine/TurbineContext, kotlin/Unit>) // app.cash.turbine/turbineScope|turbineScope(kotlin.time.Duration?;kotlin.coroutines.SuspendFunction1<app.cash.turbine.TurbineContext,kotlin.Unit>){}[0]
