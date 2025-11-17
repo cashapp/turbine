@@ -26,8 +26,7 @@ import kotlinx.coroutines.flow.flow
 fun neverFlow(): Flow<Nothing> = flow { awaitCancellation() }
 
 /**
- * Given a library entry point, ensure that the preceding stack frame is
- * the expected call site.
+ * Given a library entry point, ensure that the preceding stack frame is the expected call site.
  *
  * Only works on the JVM.
  */
@@ -47,4 +46,5 @@ fun <T> channelOf(vararg items: T, closeCause: Throwable? = null): ReceiveChanne
 }
 
 fun emptyChannel(): ReceiveChannel<Nothing> = channelOf()
+
 fun neverChannel(): ReceiveChannel<Nothing> = Channel()

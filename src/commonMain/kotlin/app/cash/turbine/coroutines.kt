@@ -30,10 +30,13 @@ internal fun checkTimeout(timeout: Duration) {
 }
 
 /**
- * Sets a timeout for all [Turbine] instances within this context. If this timeout is not set,
- * the default value is 3sec.
+ * Sets a timeout for all [Turbine] instances within this context. If this timeout is not set, the
+ * default value is 3sec.
  */
-public suspend fun <T> withTurbineTimeout(timeout: Duration, block: suspend CoroutineScope.() -> T): T {
+public suspend fun <T> withTurbineTimeout(
+  timeout: Duration,
+  block: suspend CoroutineScope.() -> T,
+): T {
   checkTimeout(timeout)
   return withContext(TurbineTimeoutElement(timeout), block)
 }
@@ -41,11 +44,11 @@ public suspend fun <T> withTurbineTimeout(timeout: Duration, block: suspend Coro
 /**
  * Invoke this method to throw an error when your method is not being called by a suspend fun.
  *
- * This is usually used to prevent the usage of shared memory to communicate with code under
- * test in coroutines tests. [Communicating with shared memory is a bad idea](https://go.dev/blog/codelab-share).
+ * This is usually used to prevent the usage of shared memory to communicate with code under test in
+ * coroutines tests.
+ * [Communicating with shared memory is a bad idea](https://go.dev/blog/codelab-share).
  *
  * Concrete example:
- *
  * ```
  * fun takeLastScreen(): Screen {
  *   assertCallingContextIsNotSuspended()
@@ -68,7 +71,8 @@ internal fun assertCallingContextIsNotSuspended() {
   }
 }
 
-internal class TurbineRegistryElement(val registry: MutableList<ChannelTurbine<*>>) : CoroutineContext.Element {
+internal class TurbineRegistryElement(val registry: MutableList<ChannelTurbine<*>>) :
+  CoroutineContext.Element {
   companion object Key : CoroutineContext.Key<TurbineRegistryElement>
 
   override val key: CoroutineContext.Key<*> = Key
@@ -77,26 +81,25 @@ internal class TurbineRegistryElement(val registry: MutableList<ChannelTurbine<*
 /**
  * Internal tool to report turbines that have been spun up within a given scope.
  *
- * If reportTurbines is nested within another reportTurbines, the outer scope wins:
- * no turbines will be registered from the inner scope.
+ * If reportTurbines is nested within another reportTurbines, the outer scope wins: no turbines will
+ * be registered from the inner scope.
  */
-internal suspend fun <T> reportTurbines(registry: MutableList<ChannelTurbine<*>>, block: suspend () -> T): T {
+internal suspend fun <T> reportTurbines(
+  registry: MutableList<ChannelTurbine<*>>,
+  block: suspend () -> T,
+): T {
   val enclosingRegistryElement = currentCoroutineContext()[TurbineRegistryElement]
   return if (enclosingRegistryElement != null) {
     block()
   } else {
-    withContext(TurbineRegistryElement(registry)) {
-      block()
-    }
+    withContext(TurbineRegistryElement(registry)) { block() }
   }
 }
 
 internal fun CoroutineScope.reportTurbine(turbine: ChannelTurbine<*>) =
   coroutineContext[TurbineRegistryElement]?.registry?.add(turbine)
 
-internal class TurbineTimeoutElement(
-  val timeout: Duration,
-) : CoroutineContext.Element {
+internal class TurbineTimeoutElement(val timeout: Duration) : CoroutineContext.Element {
   companion object Key : CoroutineContext.Key<TurbineTimeoutElement>
 
   override val key: CoroutineContext.Key<*> = Key

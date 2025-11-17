@@ -35,19 +35,21 @@ class ChannelTest {
   fun exceptionsPropagateWhenExpectMostRecentItem() = runTest {
     val expected = CustomThrowable("hello")
 
-    val actual = assertFailsWith<CustomThrowable> {
-      val channel = channelOf(1, 2, 3, closeCause = expected)
-      channel.expectMostRecentItem()
-    }
+    val actual =
+      assertFailsWith<CustomThrowable> {
+        val channel = channelOf(1, 2, 3, closeCause = expected)
+        channel.expectMostRecentItem()
+      }
     assertSame(expected, actual)
   }
 
   @Test
   fun expectMostRecentItemButNoItemWasFoundThrows() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      val channel = channelOf<Nothing>()
-      channel.expectMostRecentItem()
-    }
+    val actual =
+      assertFailsWith<AssertionError> {
+        val channel = channelOf<Nothing>()
+        channel.expectMostRecentItem()
+      }
     assertEquals("No item was found", actual.message)
   }
 
@@ -72,128 +74,125 @@ class ChannelTest {
     assertEquals(null, channel.expectMostRecentItem())
   }
 
-  @Test fun awaitItemsAreSkipped() = runTest {
+  @Test
+  fun awaitItemsAreSkipped() = runTest {
     val channel = channelOf(1, 2, 3)
     channel.skipItems(2)
     assertEquals(3, channel.awaitItem())
   }
 
-  @Test fun skipItemsThrowsOnComplete() = runTest {
+  @Test
+  fun skipItemsThrowsOnComplete() = runTest {
     val channel = channelOf(1, 2)
-    val message = assertFailsWith<AssertionError> {
-      channel.skipItems(3)
-    }.message
+    val message = assertFailsWith<AssertionError> { channel.skipItems(3) }.message
     assertEquals("Expected 3 items but got 2 items and Complete", message)
   }
 
-  @Test fun expectErrorOnCompletionBeforeAllItemsWereSkipped() = runTest {
+  @Test
+  fun expectErrorOnCompletionBeforeAllItemsWereSkipped() = runTest {
     val channel = channelOf(1)
-    assertFailsWith<AssertionError> {
-      channel.skipItems(2)
-    }
+    assertFailsWith<AssertionError> { channel.skipItems(2) }
   }
 
-  @Test fun expectErrorOnErrorReceivedBeforeAllItemsWereSkipped() = runTest {
+  @Test
+  fun expectErrorOnErrorReceivedBeforeAllItemsWereSkipped() = runTest {
     val error = CustomThrowable("hello")
     val channel = channelOf(1, closeCause = error)
-    val actual = assertFailsWith<AssertionError> {
-      channel.skipItems(2)
-    }
+    val actual = assertFailsWith<AssertionError> { channel.skipItems(2) }
     assertSame(error, actual.cause)
   }
 
-  @Test fun expectNoEvents() = runTest {
+  @Test
+  fun expectNoEvents() = runTest {
     val channel = neverChannel()
     channel.expectNoEvents()
     channel.cancel()
   }
 
-  @Test fun awaitItemEvent() = runTest {
+  @Test
+  fun awaitItemEvent() = runTest {
     val item = Any()
     val channel = channelOf(item)
     val event = channel.awaitEvent()
     assertEquals(Event.Item(item), event)
   }
 
-  @Test fun expectCompleteEvent() = runTest {
+  @Test
+  fun expectCompleteEvent() = runTest {
     val channel = emptyChannel()
     val event = channel.awaitEvent()
     assertEquals(Event.Complete, event)
   }
 
-  @Test fun expectErrorEvent() = runTest {
+  @Test
+  fun expectErrorEvent() = runTest {
     val exception = CustomThrowable("hello")
     val channel = channelOf<Nothing>(closeCause = exception)
     val event = channel.awaitEvent()
     assertEquals(Event.Error(exception), event)
   }
 
-  @Test fun awaitItem() = runTest {
+  @Test
+  fun awaitItem() = runTest {
     val item = Any()
     val channel = channelOf(item)
     assertSame(item, channel.awaitItem())
   }
 
-  @Test fun awaitItemButWasCloseThrows() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      emptyChannel().awaitItem()
-    }
+  @Test
+  fun awaitItemButWasCloseThrows() = runTest {
+    val actual = assertFailsWith<AssertionError> { emptyChannel().awaitItem() }
     assertEquals("Expected item but found Complete", actual.message)
   }
 
-  @Test fun awaitItemButWasErrorThrows() = runTest {
+  @Test
+  fun awaitItemButWasErrorThrows() = runTest {
     val error = CustomThrowable("hello")
-    val actual = assertFailsWith<AssertionError> {
-      channelOf<Nothing>(closeCause = error).awaitItem()
-    }
+    val actual =
+      assertFailsWith<AssertionError> { channelOf<Nothing>(closeCause = error).awaitItem() }
     assertEquals("Expected item but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 
-  @Test fun awaitComplete() = runTest {
-    emptyChannel().awaitComplete()
-  }
+  @Test fun awaitComplete() = runTest { emptyChannel().awaitComplete() }
 
-  @Test fun awaitCompleteButWasItemThrows() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      channelOf("item!").awaitComplete()
-    }
+  @Test
+  fun awaitCompleteButWasItemThrows() = runTest {
+    val actual = assertFailsWith<AssertionError> { channelOf("item!").awaitComplete() }
     assertEquals("Expected complete but found Item(item!)", actual.message)
   }
 
-  @Test fun awaitCompleteButWasErrorThrows() = runTest {
+  @Test
+  fun awaitCompleteButWasErrorThrows() = runTest {
     val error = CustomThrowable("hello")
-    val actual = assertFailsWith<AssertionError> {
-      channelOf<Nothing>(closeCause = error).awaitComplete()
-    }
+    val actual =
+      assertFailsWith<AssertionError> { channelOf<Nothing>(closeCause = error).awaitComplete() }
     assertEquals("Expected complete but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 
-  @Test fun awaitError() = runTest {
+  @Test
+  fun awaitError() = runTest {
     val error = CustomThrowable("hello")
     val channel = channelOf<Nothing>(closeCause = error)
     assertSame(error, channel.awaitError())
   }
 
-  @Test fun awaitErrorButWasItemThrows() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      channelOf("item!").awaitError()
-    }
+  @Test
+  fun awaitErrorButWasItemThrows() = runTest {
+    val actual = assertFailsWith<AssertionError> { channelOf("item!").awaitError() }
     assertEquals("Expected error but found Item(item!)", actual.message)
   }
 
-  @Test fun awaitErrorButWasCompleteThrows() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      emptyChannel().awaitError()
-    }
+  @Test
+  fun awaitErrorButWasCompleteThrows() = runTest {
+    val actual = assertFailsWith<AssertionError> { emptyChannel().awaitError() }
     assertEquals("Expected error but found Complete", actual.message)
   }
 
-  @Test fun failsOnDefaultTimeout() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      neverChannel().awaitItem()
-    }
+  @Test
+  fun failsOnDefaultTimeout() = runTest {
+    val actual = assertFailsWith<AssertionError> { neverChannel().awaitItem() }
     assertEquals("No value produced in 3s", actual.message)
     assertCallSitePresentInStackTraceOnJvm(
       throwable = actual,
@@ -202,122 +201,111 @@ class ChannelTest {
     )
   }
 
-  @Test fun awaitHonorsCoroutineContextTimeoutNoTimeout() = runTest {
+  @Test
+  fun awaitHonorsCoroutineContextTimeoutNoTimeout() = runTest {
     withTurbineTimeout(1500.milliseconds) {
-      val job = launch {
-        neverChannel().awaitItem()
-      }
+      val job = launch { neverChannel().awaitItem() }
 
-      withContext(Dispatchers.Default) {
-        delay(1100)
-      }
+      withContext(Dispatchers.Default) { delay(1100) }
       job.cancel()
     }
   }
 
-  @Test fun awaitHonorsCoroutineContextTimeoutTimeout() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      withTurbineTimeout(10.milliseconds) {
-        neverChannel().awaitItem()
+  @Test
+  fun awaitHonorsCoroutineContextTimeoutTimeout() = runTest {
+    val actual =
+      assertFailsWith<AssertionError> {
+        withTurbineTimeout(10.milliseconds) { neverChannel().awaitItem() }
       }
-    }
     assertEquals("No value produced in 10ms", actual.message)
   }
 
-  @Test fun negativeTurbineTimeoutThrows() = runTest {
-    val actual = assertFailsWith<IllegalStateException> {
-      withTurbineTimeout((-10).milliseconds) {
-      }
-    }
+  @Test
+  fun negativeTurbineTimeoutThrows() = runTest {
+    val actual =
+      assertFailsWith<IllegalStateException> { withTurbineTimeout((-10).milliseconds) {} }
     assertEquals("Turbine timeout must be greater than 0: -10ms", actual.message)
   }
 
-  @Test fun zeroTurbineTimeoutThrows() = runTest {
-    val actual = assertFailsWith<IllegalStateException> {
-      withTurbineTimeout(0.milliseconds) {
-      }
-    }
+  @Test
+  fun zeroTurbineTimeoutThrows() = runTest {
+    val actual = assertFailsWith<IllegalStateException> { withTurbineTimeout(0.milliseconds) {} }
     assertEquals("Turbine timeout must be greater than 0: 0s", actual.message)
   }
 
-  @Test fun takeItem() = withTestScope {
+  @Test
+  fun takeItem() = withTestScope {
     val item = Any()
     val channel = channelOf(item)
     assertSame(item, channel.takeItem())
   }
 
-  @Test fun takeItemButWasCloseThrows() = withTestScope {
-    val actual = assertFailsWith<AssertionError> {
-      emptyChannel().takeItem()
-    }
+  @Test
+  fun takeItemButWasCloseThrows() = withTestScope {
+    val actual = assertFailsWith<AssertionError> { emptyChannel().takeItem() }
     assertEquals("Expected item but found Complete", actual.message)
   }
 
-  @Test fun takeItemButWasErrorThrows() = withTestScope {
+  @Test
+  fun takeItemButWasErrorThrows() = withTestScope {
     val error = CustomThrowable("hello")
-    val actual = assertFailsWith<AssertionError> {
-      channelOf<Nothing>(closeCause = error).takeItem()
-    }
+    val actual =
+      assertFailsWith<AssertionError> { channelOf<Nothing>(closeCause = error).takeItem() }
     assertEquals("Expected item but found Error(CustomThrowable)", actual.message)
     assertSame(error, actual.cause)
   }
 
   @Test
   fun expectMostRecentItemButNoItemWasFoundThrowsWithName() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      emptyChannel().expectMostRecentItem(name = "empty flow")
-    }
+    val actual =
+      assertFailsWith<AssertionError> { emptyChannel().expectMostRecentItem(name = "empty flow") }
     assertEquals("No item was found for empty flow", actual.message)
   }
 
-  @Test fun awaitItemButWasCloseThrowsWithName() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      emptyChannel().awaitItem(name = "closed flow")
-    }
+  @Test
+  fun awaitItemButWasCloseThrowsWithName() = runTest {
+    val actual = assertFailsWith<AssertionError> { emptyChannel().awaitItem(name = "closed flow") }
     assertEquals("Expected item for closed flow but found Complete", actual.message)
   }
 
-  @Test fun awaitCompleteButWasItemThrowsWithName() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      channelOf("item!").awaitComplete(name = "item flow")
-    }
+  @Test
+  fun awaitCompleteButWasItemThrowsWithName() = runTest {
+    val actual =
+      assertFailsWith<AssertionError> { channelOf("item!").awaitComplete(name = "item flow") }
     assertEquals("Expected complete for item flow but found Item(item!)", actual.message)
   }
 
-  @Test fun awaitErrorButWasItemThrowsWithName() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      channelOf("item!").awaitError(name = "item flow")
-    }
+  @Test
+  fun awaitErrorButWasItemThrowsWithName() = runTest {
+    val actual =
+      assertFailsWith<AssertionError> { channelOf("item!").awaitError(name = "item flow") }
     assertEquals("Expected error for item flow but found Item(item!)", actual.message)
   }
 
-  @Test fun awaitHonorsCoroutineContextTimeoutTimeoutWithName() = runTest {
-    val actual = assertFailsWith<AssertionError> {
-      withTurbineTimeout(10.milliseconds) {
-        neverChannel().awaitItem(name = "never flow")
+  @Test
+  fun awaitHonorsCoroutineContextTimeoutTimeoutWithName() = runTest {
+    val actual =
+      assertFailsWith<AssertionError> {
+        withTurbineTimeout(10.milliseconds) { neverChannel().awaitItem(name = "never flow") }
       }
-    }
     assertEquals("No value produced for never flow in 10ms", actual.message)
   }
 
-  @Test fun takeItemButWasCloseThrowsWithName() = withTestScope {
-    val actual = assertFailsWith<AssertionError> {
-      emptyChannel().takeItem(name = "empty flow")
-    }
+  @Test
+  fun takeItemButWasCloseThrowsWithName() = withTestScope {
+    val actual = assertFailsWith<AssertionError> { emptyChannel().takeItem(name = "empty flow") }
     assertEquals("Expected item for empty flow but found Complete", actual.message)
   }
 
-  @Test fun skipItemsThrowsOnCompleteWithName() = runTest {
+  @Test
+  fun skipItemsThrowsOnCompleteWithName() = runTest {
     val channel = channelOf(1, 2)
-    val message = assertFailsWith<AssertionError> {
-      channel.skipItems(3, name = "two item channel")
-    }.message
+    val message =
+      assertFailsWith<AssertionError> { channel.skipItems(3, name = "two item channel") }.message
     assertEquals("Expected 3 items for two item channel but got 2 items and Complete", message)
   }
 
-  /**
-   * Used to run test code with a [TestScope], but still outside a suspending context.
-   */
+  /** Used to run test code with a [TestScope], but still outside a suspending context. */
   private fun withTestScope(block: TestScope.() -> Unit) {
     val job = Job()
 

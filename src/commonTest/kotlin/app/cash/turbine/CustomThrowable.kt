@@ -16,10 +16,8 @@
 package app.cash.turbine
 
 /**
- * This type prevents coroutines from breaking referential equality by
- * reflectively creating new instances.
+ * This type prevents coroutines from breaking referential equality by reflectively creating new
+ * instances.
  */
-internal class CustomThrowable(
-  message: String?,
-  override val cause: Throwable? = null,
-) : Throwable(message)
+internal class CustomThrowable(message: String?, override val cause: Throwable? = null) :
+  Throwable(message)

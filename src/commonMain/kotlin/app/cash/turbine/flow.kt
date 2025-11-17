@@ -42,31 +42,31 @@ public interface TurbineContext : CoroutineScope {
     name: String? = null,
   ): ReceiveTurbine<R>
 }
+
 public interface TurbineTestContext<T> : TurbineContext, ReceiveTurbine<T>
 
 internal class TurbineTestContextImpl<T>(
   turbine: ReceiveTurbine<T>,
   turbineContext: CoroutineContext,
-) : TurbineContext by TurbineContextImpl(turbineContext), ReceiveTurbine<T> by turbine, TurbineTestContext<T>
+) :
+  TurbineContext by TurbineContextImpl(turbineContext),
+  ReceiveTurbine<T> by turbine,
+  TurbineTestContext<T>
 
-internal class TurbineContextImpl(
-  turbineContext: CoroutineContext,
-) : TurbineContext, CoroutineScope {
+internal class TurbineContextImpl(turbineContext: CoroutineContext) :
+  TurbineContext, CoroutineScope {
   override val coroutineContext: CoroutineContext = turbineContext
 
-  private val turbineElements = (turbineContext[TurbineRegistryElement] ?: EmptyCoroutineContext) +
-    (turbineContext[TurbineTimeoutElement] ?: EmptyCoroutineContext)
+  private val turbineElements =
+    (turbineContext[TurbineRegistryElement] ?: EmptyCoroutineContext) +
+      (turbineContext[TurbineTimeoutElement] ?: EmptyCoroutineContext)
 
   override fun <R> Flow<R>.testIn(
     scope: CoroutineScope,
     timeout: Duration?,
     name: String?,
   ): ReceiveTurbine<R> =
-    testInExtension(
-      timeout = timeout,
-      name = name,
-      scope = scope + turbineElements,
-    )
+    testInExtension(timeout = timeout, name = name, scope = scope + turbineElements)
 }
 
 /**
@@ -93,21 +93,23 @@ public suspend fun turbineScope(
         // The exception needs to be reraised. However, if there are any unconsumed events
         // from other turbines (including this one), those may indicate an underlying problem.
         // So: create a report with all the registered turbines, and include exception as cause
-        val reportsWithExceptions = turbineRegistry.map {
-          it.reportUnconsumedEvents()
-            // The exception will have cancelled its job hierarchy, producing cancellation exceptions
-            // in its wake. These aren't meaningful test feedback
-            .stripCancellations()
-        }
-          .filter { it.cause != null }
+        val reportsWithExceptions =
+          turbineRegistry
+            .map {
+              it
+                .reportUnconsumedEvents()
+                // The exception will have cancelled its job hierarchy, producing cancellation
+                // exceptions
+                // in its wake. These aren't meaningful test feedback
+                .stripCancellations()
+            }
+            .filter { it.cause != null }
         if (reportsWithExceptions.isEmpty()) {
           throw e
         } else {
           throw TurbineAssertionError(
             buildString {
-              reportsWithExceptions.forEach {
-                it.describeException(this@buildString)
-              }
+              reportsWithExceptions.forEach { it.describeException(this@buildString) }
             },
             e,
           )
@@ -131,7 +133,7 @@ public suspend fun turbineScope(
  * ```
  *
  * @param timeout If non-null, overrides the current Turbine timeout inside [validate]. See also:
- * [withTurbineTimeout].
+ *   [withTurbineTimeout].
  */
 public suspend fun <T> Flow<T>.test(
   timeout: Duration? = null,
@@ -149,8 +151,8 @@ public suspend fun <T> Flow<T>.test(
 
 /**
  * Terminal flow operator that collects events from given flow and returns a [ReceiveTurbine] for
- * consuming and asserting properties on them in order. If any exception occurs during validation the
- * exception is rethrown from this method.
+ * consuming and asserting properties on them in order. If any exception occurs during validation
+ * the exception is rethrown from this method.
  *
  * ```kotlin
  * val turbine = flowOf("one", "two").testIn(this)
@@ -160,10 +162,11 @@ public suspend fun <T> Flow<T>.test(
  * ```
  *
  * Unlike [test] which automatically cancels the flow at the end of the lambda, the returned
- * [ReceiveTurbine] must either consume a terminal event (complete or error) or be explicitly canceled.
+ * [ReceiveTurbine] must either consume a terminal event (complete or error) or be explicitly
+ * canceled.
  *
  * @param timeout If non-null, overrides the current Turbine timeout for this [Turbine]. See also:
- * [withTurbineTimeout].
+ *   [withTurbineTimeout].
  */
 public fun <T> Flow<T>.testIn(
   scope: CoroutineScope,
@@ -175,7 +178,9 @@ public fun <T> Flow<T>.testIn(
     checkTimeout(timeout)
   }
   if (scope.coroutineContext[TurbineRegistryElement] == null) {
-    throw AssertionError("Turbine can only collect flows within a TurbineContext. Wrap with turbineScope { .. }")
+    throw AssertionError(
+      "Turbine can only collect flows within a TurbineContext. Wrap with turbineScope { .. }"
+    )
   }
 
   val turbine = collectTurbineIn(scope, timeout, name)
@@ -193,24 +198,26 @@ public fun <T> Flow<T>.testIn(
   return turbine
 }
 
-private fun <T> Flow<T>.collectTurbineIn(scope: CoroutineScope, timeout: Duration?, name: String?): ReceiveTurbine<T> {
+private fun <T> Flow<T>.collectTurbineIn(
+  scope: CoroutineScope,
+  timeout: Duration?,
+  name: String?,
+): ReceiveTurbine<T> {
   // Use test-specific unconfined if test scheduler is in use to inherit its virtual time.
   @OptIn(ExperimentalCoroutinesApi::class) // UnconfinedTestDispatcher is still experimental.
-  val unconfined = scope.coroutineContext[TestCoroutineScheduler]
-    ?.let(::UnconfinedTestDispatcher)
-    ?: Unconfined
+  val unconfined =
+    scope.coroutineContext[TestCoroutineScheduler]?.let(::UnconfinedTestDispatcher) ?: Unconfined
 
   val output = Channel<T>(UNLIMITED)
-  val job = scope.launch(unconfined, start = UNDISPATCHED) {
-    try {
-      collect { output.trySend(it) }
-      output.close()
-    } catch (e: Throwable) {
-      output.close(e)
+  val job =
+    scope.launch(unconfined, start = UNDISPATCHED) {
+      try {
+        collect { output.trySend(it) }
+        output.close()
+      } catch (e: Throwable) {
+        output.close(e)
+      }
     }
-  }
 
-  return ChannelTurbine(output, job, timeout, name).also {
-    scope.reportTurbine(it)
-  }
+  return ChannelTurbine(output, job, timeout, name).also { scope.reportTurbine(it) }
 }
