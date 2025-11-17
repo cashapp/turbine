@@ -104,8 +104,6 @@ kotlin {
 spotless {
   kotlin {
     target("src/**/*.kt")
-    ktlint('0.48.2').editorConfigOverride([
-      'ktlint_standard_filename': 'disabled',
-    ])
+    ktfmt().googleStyle()
   }
 }
