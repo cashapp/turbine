@@ -193,6 +193,22 @@ public suspend fun <T> ReceiveChannel<T>.awaitItem(name: String? = null): T =
   }
 
 /**
+ * Assert that the next event received is an item of type [T] and return it.
+ * This function suspends while waiting for the next event to arrive.
+ *
+ * Like [awaitItem], this will fail with an [AssertionError] if the next event is
+ * a completion signal or an error. The returned value is cast to the expected
+ * type [T], making it convenient when working with merged or heterogeneous flows
+ * where items may need to be asserted with stronger typing.
+ *
+ * @throws AssertionError if the next event was completion or an error.
+ * @throws ClassCastException if the emitted item cannot be cast to [T].
+ */
+public suspend inline fun <reified T> TurbineTestContext<*>.awaitFor(): T {
+  return awaitItem() as T
+}
+
+/**
  * Assert that [count] item events were received and ignore them.
  * This function will suspend if no events have been received.
  *

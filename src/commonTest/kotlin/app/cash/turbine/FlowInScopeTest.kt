@@ -322,6 +322,28 @@ class FlowInScopeTest {
       actual.message,
     )
   }
+
+  @Test
+  fun turbineOfInterleavesTwoFlowsInStrictOrder() = runTest {
+    val flowA = flow {
+      emit("A1")
+      delay(50)
+      emit("A2")
+    }
+
+    val flowB = flow {
+      delay(25)
+      emit(1)
+    }
+
+    turbineOf(flowA, flowB) {
+      assertEquals("A1", awaitFor<String>())
+      assertEquals(1, awaitFor<Int>())
+      assertEquals("A2", awaitFor<String>())
+
+      awaitComplete()
+    }
+  }
 }
 
 private interface TurbineTestScope : TurbineContext {

@@ -30,6 +30,7 @@ import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -67,6 +68,31 @@ internal class TurbineContextImpl(
       name = name,
       scope = scope + turbineElements,
     )
+}
+
+/**
+ * Terminal test operator that merges the given [flows] and exposes all emitted events through a
+ * single Turbine, allowing the [validate] lambda to consume and assert them in strict
+ * emission order.
+ *
+ * The order in which items are observed inside [validate] matches exactly the order in which they
+ * are emitted from the merged flows.
+ *
+ * ```kotlin
+ * turbineOf(flowA, flowB) {
+ *   assertEquals("A1", awaitFor<String>())
+ *   assertEquals(1, awaitFor<Int>)
+ *   assertEquals("A2", awaitFor<String>)
+ * }
+ * ```
+ */
+public suspend fun <T> turbineOf(
+  vararg flows: Flow<T>,
+  timeout: Duration? = null,
+  name: String? = null,
+  validate: suspend TurbineTestContext<T>.() -> Unit,
+) {
+  merge(*flows).test(timeout, name, validate)
 }
 
 /**

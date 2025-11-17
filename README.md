@@ -131,6 +131,36 @@ Otherwise, make sure to call one of the following methods before the end of your
 
 Otherwise, your test will hang.
 
+### Multiple Combined Flows
+
+If you need to test multiple flows together and assert the exact order in which their emissions
+occur, you can merge them into a single Turbine test. This is useful when validating coordinated
+behaviour across multiple streams. Use the `turbineOf`, which merges all provided flows
+and exposes their emissions through a single TurbineTestContext.
+
+```
+runTest {
+  turbineScope {
+  val flowA = flow {
+    emit("A1")
+    delay(50)
+    emit("A2")
+  }
+
+  val flowB = flow {
+    delay(25)
+    emit(1)
+  }
+
+  turbineOf(flowA, flowB) {
+    assertEquals("A1", awaitFor<String>())
+    assertEquals(1, awaitFor<Int>())
+    assertEquals("A2", awaitFor<String>())
+    awaitComplete()
+  }
+}
+```
+
 ### Consuming All Events
 
 Failing to consume all events before the end of a flow-based `Turbine`'s validation block will fail your test:
