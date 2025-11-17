@@ -36,10 +36,9 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.withTimeout
 
 /**
- * Returns the most recent item that has already been received.
- * If channel was closed with no item being received
- * previously, this function will throw an [AssertionError]. If channel
- * was closed with an exception, this function will throw the underlying exception.
+ * Returns the most recent item that has already been received. If channel was closed with no item
+ * being received previously, this function will throw an [AssertionError]. If channel was closed
+ * with an exception, this function will throw the underlying exception.
  *
  * @throws AssertionError if no item was emitted.
  */
@@ -62,8 +61,8 @@ public fun <T> ReceiveChannel<T>.expectMostRecentItem(name: String? = null): T {
 /**
  * Assert that there are no unconsumed events which have already been received.
  *
- * A channel in the closed state will always emit either [Event.Complete] or [Event.Error] when read, so
- * [expectNoEvents] will only succeed on an empty [ReceiveChannel] that is not closed.
+ * A channel in the closed state will always emit either [Event.Complete] or [Event.Error] when
+ * read, so [expectNoEvents] will only succeed on an empty [ReceiveChannel] that is not closed.
  *
  * @throws AssertionError if unconsumed events are found.
  */
@@ -72,17 +71,15 @@ public fun <T> ReceiveChannel<T>.expectNoEvents(name: String? = null) {
 }
 
 /**
- * Assert that an event was received and return it.
- * This function will suspend if no events have been received.
+ * Assert that an event was received and return it. This function will suspend if no events have
+ * been received.
  *
  * This function will always return a terminal event on a closed [ReceiveChannel].
  */
 public suspend fun <T> ReceiveChannel<T>.awaitEvent(name: String? = null): Event<T> {
   val timeout = contextTimeout()
   return try {
-    withAppropriateTimeout(timeout) {
-      receiveCatching().toEvent()!!
-    }
+    withAppropriateTimeout(timeout) { receiveCatching().toEvent()!! }
   } catch (e: TimeoutCancellationException) {
     throw TurbineAssertionError("No ${"value produced".qualifiedBy(name)} in $timeout", e)
   } catch (e: TurbineTimeoutCancellationException) {
@@ -125,20 +122,18 @@ private suspend fun <T> withWallclockTimeout(
   }
 }
 
-internal class TurbineTimeoutCancellationException internal constructor(
-  message: String,
-) : CancellationException(message)
+internal class TurbineTimeoutCancellationException internal constructor(message: String) :
+  CancellationException(message)
 
 /**
- * Assert that the next event received was non-null and return it.
- * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
+ * Assert that the next event received was non-null and return it. This function will not suspend.
+ * On JVM and Android, it will attempt to throw if invoked in a suspending context.
  *
  * @throws AssertionError if the next event was completion or an error.
  */
 public fun <T> ReceiveChannel<T>.takeEvent(name: String? = null): Event<T> {
   assertCallingContextIsNotSuspended()
-  return takeEventUnsafe()
-    ?: unexpectedEvent(name, null, "an event")
+  return takeEventUnsafe() ?: unexpectedEvent(name, null, "an event")
 }
 
 internal fun <T> ReceiveChannel<T>.takeEventUnsafe(): Event<T>? {
@@ -146,8 +141,8 @@ internal fun <T> ReceiveChannel<T>.takeEventUnsafe(): Event<T>? {
 }
 
 /**
- * Assert that the next event received was an item and return it.
- * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
+ * Assert that the next event received was an item and return it. This function will not suspend. On
+ * JVM and Android, it will attempt to throw if invoked in a suspending context.
  *
  * @throws AssertionError if the next event was completion or an error, or no event.
  */
@@ -159,8 +154,8 @@ public fun <T> ReceiveChannel<T>.takeItem(name: String? = null): T {
 }
 
 /**
- * Assert that the next event received is [Event.Complete].
- * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
+ * Assert that the next event received is [Event.Complete]. This function will not suspend. On JVM
+ * and Android, it will attempt to throw if invoked in a suspending context.
  *
  * @throws AssertionError if the next event was completion or an error.
  */
@@ -170,8 +165,8 @@ public fun <T> ReceiveChannel<T>.takeComplete(name: String? = null) {
 }
 
 /**
- * Assert that the next event received is [Event.Error], and return the error.
- * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
+ * Assert that the next event received is [Event.Error], and return the error. This function will
+ * not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
  *
  * @throws AssertionError if the next event was completion or an error.
  */
@@ -181,8 +176,8 @@ public fun <T> ReceiveChannel<T>.takeError(name: String? = null): Throwable {
 }
 
 /**
- * Assert that the next event received was an item and return it.
- * This function will suspend if no events have been received.
+ * Assert that the next event received was an item and return it. This function will suspend if no
+ * events have been received.
  *
  * @throws AssertionError if the next event was completion or an error.
  */
@@ -193,17 +188,21 @@ public suspend fun <T> ReceiveChannel<T>.awaitItem(name: String? = null): T =
   }
 
 /**
- * Assert that [count] item events were received and ignore them.
- * This function will suspend if no events have been received.
+ * Assert that [count] item events were received and ignore them. This function will suspend if no
+ * events have been received.
  *
  * @throws AssertionError if one of the events was completion or an error.
  */
 public suspend fun <T> ReceiveChannel<T>.skipItems(count: Int, name: String? = null) {
   repeat(count) { index ->
     when (val event = awaitEvent()) {
-      Event.Complete, is Event.Error -> {
+      Event.Complete,
+      is Event.Error -> {
         val cause = (event as? Event.Error)?.throwable
-        throw TurbineAssertionError("Expected $count ${"items".qualifiedBy(name)} but got $index items and $event", cause)
+        throw TurbineAssertionError(
+          "Expected $count ${"items".qualifiedBy(name)} but got $index items and $event",
+          cause,
+        )
       }
       is Event.Item<T> -> {
         // Success
@@ -213,8 +212,8 @@ public suspend fun <T> ReceiveChannel<T>.skipItems(count: Int, name: String? = n
 }
 
 /**
- * Assert that attempting to read from the [ReceiveChannel] yields [ClosedReceiveChannelException], indicating
- * that it was closed without an exception.
+ * Assert that attempting to read from the [ReceiveChannel] yields [ClosedReceiveChannelException],
+ * indicating that it was closed without an exception.
  *
  * @throws AssertionError if the next event was an item or an error.
  */
@@ -226,15 +225,14 @@ public suspend fun <T> ReceiveChannel<T>.awaitComplete(name: String? = null) {
 }
 
 /**
- * Assert that attempting to read from the [ReceiveChannel] yields an exception, indicating
- * that it was closed with an exception.
+ * Assert that attempting to read from the [ReceiveChannel] yields an exception, indicating that it
+ * was closed with an exception.
  *
  * @throws AssertionError if the next event was an item or completion.
  */
 public suspend fun <T> ReceiveChannel<T>.awaitError(name: String? = null): Throwable {
   val event = awaitEvent()
-  return (event as? Event.Error)?.throwable
-    ?: unexpectedEvent(name, event, "error")
+  return (event as? Event.Error)?.throwable ?: unexpectedEvent(name, event, "error")
 }
 
 internal fun <T> ChannelResult<T>.toEvent(): Event<T>? {
@@ -250,7 +248,10 @@ internal fun <T> ChannelResult<T>.toEvent(): Event<T>? {
 private fun unexpectedEvent(name: String?, event: Event<*>?, expected: String): Nothing {
   val cause = (event as? Event.Error)?.throwable
   val eventAsString = event?.toString() ?: "no items"
-  throw TurbineAssertionError("Expected ${expected.qualifiedBy(name)} but found $eventAsString", cause)
+  throw TurbineAssertionError(
+    "Expected ${expected.qualifiedBy(name)} but found $eventAsString",
+    cause,
+  )
 }
 
 internal fun String.qualifiedBy(name: String?) =

@@ -14,7 +14,7 @@ actual fun assertCallSitePresentInStackTraceOnJvm(
 
   if (callSite !in lines[awaitItemIndex + 1]) {
     throw AssertionError(
-      "Expected '$callSite' immediately precede '$entryPoint', but it did not\n\n${lines.joinToString("\n")}",
+      "Expected '$callSite' immediately precede '$entryPoint', but it did not\n\n${lines.joinToString("\n")}"
     )
   }
 }

@@ -26,13 +26,9 @@ import kotlinx.coroutines.channels.ChannelResult
 
 internal const val debug = false
 
-/**
- * A standalone [Turbine] suitable for usage in fakes or other external test components.
- */
+/** A standalone [Turbine] suitable for usage in fakes or other external test components. */
 public interface Turbine<T> : ReceiveTurbine<T> {
-  /**
-   * Returns the underlying [Channel]. The [Channel] will have a buffer size of [UNLIMITED].
-   */
+  /** Returns the underlying [Channel]. The [Channel] will have a buffer size of [UNLIMITED]. */
   public override fun asChannel(): Channel<T>
 
   /**
@@ -45,7 +41,6 @@ public interface Turbine<T> : ReceiveTurbine<T> {
    * Add an item to the underlying [Channel] without blocking.
    *
    * This method is equivalent to:
-   *
    * ```
    * if (!asChannel().trySend(item).isSuccess) error()
    * ```
@@ -53,51 +48,52 @@ public interface Turbine<T> : ReceiveTurbine<T> {
   public fun add(item: T)
 
   /**
-   * Assert that the next event received was non-null and return it.
-   * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
+   * Assert that the next event received was non-null and return it. This function will not suspend.
+   * On JVM and Android, it will attempt to throw if invoked in a suspending context.
    *
    * @throws AssertionError if the next event was completion or an error.
    */
   public fun takeEvent(): Event<T>
 
   /**
-   * Assert that the next event received was an item and return it.
-   * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
+   * Assert that the next event received was an item and return it. This function will not suspend.
+   * On JVM and Android, it will attempt to throw if invoked in a suspending context.
    *
    * @throws AssertionError if the next event was completion or an error, or no event.
    */
   public fun takeItem(): T
 
   /**
-   * Assert that the next event received is [Event.Complete].
-   * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
+   * Assert that the next event received is [Event.Complete]. This function will not suspend. On JVM
+   * and Android, it will attempt to throw if invoked in a suspending context.
    *
    * @throws AssertionError if the next event was completion or an error.
    */
   public fun takeComplete()
 
   /**
-   * Assert that the next event received is [Event.Error], and return the error.
-   * This function will not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
+   * Assert that the next event received is [Event.Error], and return the error. This function will
+   * not suspend. On JVM and Android, it will attempt to throw if invoked in a suspending context.
    *
    * @throws AssertionError if the next event was completion or an error.
    */
   public fun takeError(): Throwable
 }
 
-public operator fun <T> Turbine<T>.plusAssign(value: T) { add(value) }
+public operator fun <T> Turbine<T>.plusAssign(value: T) {
+  add(value)
+}
 
 /**
  * Construct a standalone [Turbine].
  *
  * @param timeout If non-null, overrides the current Turbine timeout for this [Turbine]. See also:
- * [withTurbineTimeout].
- * @param name If non-null, name is added to any exceptions thrown to help identify which [Turbine] failed.
+ *   [withTurbineTimeout].
+ * @param name If non-null, name is added to any exceptions thrown to help identify which [Turbine]
+ *   failed.
  */
-public fun <T> Turbine(
-  timeout: Duration? = null,
-  name: String? = null,
-): Turbine<T> = ChannelTurbine(Channel(UNLIMITED), null, timeout, name)
+public fun <T> Turbine(timeout: Duration? = null, name: String? = null): Turbine<T> =
+  ChannelTurbine(Channel(UNLIMITED), null, timeout, name)
 
 internal class ChannelTurbine<T>(
   channel: Channel<T>,
@@ -114,45 +110,50 @@ internal class ChannelTurbine<T>(
     }
   }
 
-  private val channel = object : Channel<T> by channel {
-    override fun tryReceive(): ChannelResult<T> {
-      val result = channel.tryReceive()
-      val event = result.toEvent()
-      if (event is Event.Error || event is Event.Complete) ignoreRemainingEvents = true
+  private val channel =
+    object : Channel<T> by channel {
+      override fun tryReceive(): ChannelResult<T> {
+        val result = channel.tryReceive()
+        val event = result.toEvent()
+        if (event is Event.Error || event is Event.Complete) ignoreRemainingEvents = true
 
-      return result
-    }
+        return result
+      }
 
-    override suspend fun receive(): T = try {
-      channel.receive()
-    } catch (e: Throwable) {
-      ignoreRemainingEvents = true
-      throw e
-    }
-
-    override suspend fun receiveCatching(): ChannelResult<T> {
-      return channel.receiveCatching().also {
-        if (it.toEvent()?.isTerminal == true) {
+      override suspend fun receive(): T =
+        try {
+          channel.receive()
+        } catch (e: Throwable) {
           ignoreRemainingEvents = true
+          throw e
+        }
+
+      override suspend fun receiveCatching(): ChannelResult<T> {
+        return channel.receiveCatching().also {
+          if (it.toEvent()?.isTerminal == true) {
+            ignoreRemainingEvents = true
+          }
         }
       }
-    }
 
-    override fun cancel(cause: CancellationException?) {
-      collectJob?.cancel()
-      channel.close(cause)
-    }
+      override fun cancel(cause: CancellationException?) {
+        collectJob?.cancel()
+        channel.close(cause)
+      }
 
-    override fun close(cause: Throwable?): Boolean {
-      collectJob?.cancel()
-      return channel.close(cause)
+      override fun close(cause: Throwable?): Boolean {
+        collectJob?.cancel()
+        return channel.close(cause)
+      }
     }
-  }
 
   override fun asChannel(): Channel<T> = channel
 
   override fun add(item: T) {
-    if (!channel.trySend(item).isSuccess) throw IllegalStateException("Attempt to add item to a closed Turbine${name?.let { " named $it" } ?: ""}.")
+    if (!channel.trySend(item).isSuccess)
+      throw IllegalStateException(
+        "Attempt to add item to a closed Turbine${name?.let { " named $it" } ?: ""}."
+      )
   }
 
   @OptIn(DelicateCoroutinesApi::class)
@@ -205,7 +206,9 @@ internal class ChannelTurbine<T>(
 
   override fun expectMostRecentItem(): T = channel.expectMostRecentItem(name = name)
 
-  override suspend fun awaitEvent(): Event<T> = withTurbineTimeout { channel.awaitEvent(name = name) }
+  override suspend fun awaitEvent(): Event<T> = withTurbineTimeout {
+    channel.awaitEvent(name = name)
+  }
 
   override suspend fun awaitItem(): T = withTurbineTimeout { channel.awaitItem(name = name) }
 
@@ -213,7 +216,9 @@ internal class ChannelTurbine<T>(
 
   override suspend fun awaitComplete() = withTurbineTimeout { channel.awaitComplete(name = name) }
 
-  override suspend fun awaitError(): Throwable = withTurbineTimeout { channel.awaitError(name = name) }
+  override suspend fun awaitError(): Throwable = withTurbineTimeout {
+    channel.awaitError(name = name)
+  }
 
   internal fun reportUnconsumedEvents(): UnconsumedEventReport<T> {
     if (ignoreRemainingEvents) return UnconsumedEventReport(emptyList())
@@ -232,23 +237,14 @@ internal class ChannelTurbine<T>(
       }
     }
 
-    return UnconsumedEventReport(
-      name = name,
-      unconsumed = unconsumed,
-      cause = cause,
-    )
+    return UnconsumedEventReport(name = name, unconsumed = unconsumed, cause = cause)
   }
 
   override fun ensureAllEventsConsumed() {
     val report = reportUnconsumedEvents()
 
     if (report.unconsumed.isNotEmpty()) {
-      throw TurbineAssertionError(
-        buildString {
-          report.describe(this)
-        },
-        report.cause,
-      )
+      throw TurbineAssertionError(buildString { report.describe(this) }, report.cause)
     }
   }
 }
@@ -275,10 +271,10 @@ internal class UnconsumedEventReport<T>(
         append(":")
         appendLine(
           """
-            |
-            |
-            |Stack trace:
-          """.trimMargin(),
+          |
+          |
+          |Stack trace:"""
+            .trimMargin()
         )
         append(cause.stackTraceToString())
         appendLine()
@@ -288,9 +284,7 @@ internal class UnconsumedEventReport<T>(
 
   fun stripCancellations(): UnconsumedEventReport<T> =
     UnconsumedEventReport(
-      unconsumed = unconsumed.filter {
-        (it as? Event.Error)?.throwable !is CancellationException
-      },
+      unconsumed = unconsumed.filter { (it as? Event.Error)?.throwable !is CancellationException },
       name = name,
       cause = cause?.takeUnless { it is CancellationException },
     )
