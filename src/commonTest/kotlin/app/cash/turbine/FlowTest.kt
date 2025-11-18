@@ -155,7 +155,8 @@ class FlowTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Item(item!)"""
+      | - Item(item!)
+      """
         .trimMargin(),
       actual.message,
     )
@@ -168,7 +169,8 @@ class FlowTest {
       assertFailsWith<AssertionError> { flow<Nothing> { throw expected }.test { expectNoEvents() } }
     assertEquals(
       """
-      |Expected no events but found Error(RuntimeException)"""
+      |Expected no events but found Error(RuntimeException)
+      """
         .trimMargin(),
       actual.message,
     )
@@ -180,7 +182,8 @@ class FlowTest {
     val actual = assertFailsWith<AssertionError> { emptyFlow<Nothing>().test { expectNoEvents() } }
     assertEquals(
       """
-      |Expected no events but found Complete"""
+      |Expected no events but found Complete
+      """
         .trimMargin(),
       actual.message,
     )
@@ -192,7 +195,8 @@ class FlowTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Complete"""
+      | - Complete
+      """
         .trimMargin(),
       actual.message,
     )
@@ -205,7 +209,8 @@ class FlowTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Error(RuntimeException)"""
+      | - Error(RuntimeException)
+      """
         .trimMargin(),
       actual.message,
     )
@@ -230,7 +235,8 @@ class FlowTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Item(two)"""
+      | - Item(two)
+      """
         .trimMargin(),
       actual.message,
     )
@@ -249,7 +255,8 @@ class FlowTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Complete"""
+      | - Complete
+      """
         .trimMargin(),
       actual.message,
     )
@@ -273,7 +280,8 @@ class FlowTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Error(RuntimeException)"""
+      | - Error(RuntimeException)
+      """
         .trimMargin(),
       actual.message,
     )
@@ -405,7 +413,8 @@ class FlowTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Error(RuntimeException)"""
+      | - Error(RuntimeException)
+      """
         .trimMargin(),
       message,
     )
@@ -671,7 +680,8 @@ class FlowTest {
     assertEquals(
       """
       |Unconsumed events found for item flow:
-      | - Item(item!)"""
+      | - Item(item!)
+      """
         .trimMargin(),
       actual.message,
     )
@@ -741,7 +751,8 @@ class FlowTest {
       """
       |Unconsumed exception found for outer:
       |
-      |Stack trace:"""
+      |Stack trace:
+      """
         .trimMargin()
     assertEquals(
       actual.message?.startsWith(expectedPrefix),
@@ -769,7 +780,8 @@ class FlowTest {
       """
       |Unconsumed exception found for inner failing:
       |
-      |Stack trace:"""
+      |Stack trace:
+      """
         .trimMargin()
     assertEquals(
       actual.message?.startsWith(expectedPrefix),

@@ -119,7 +119,8 @@ class FlowInScopeTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Item(item!)"""
+      | - Item(item!)
+      """
         .trimMargin(),
       cause.message,
     )
@@ -145,7 +146,8 @@ class FlowInScopeTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Item(item!)"""
+      | - Item(item!)
+      """
         .trimMargin(),
       cause.message,
     )
@@ -164,7 +166,8 @@ class FlowInScopeTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Complete"""
+      | - Complete
+      """
         .trimMargin(),
       cause.message,
     )
@@ -184,7 +187,8 @@ class FlowInScopeTest {
     assertEquals(
       """
       |Unconsumed events found:
-      | - Error(RuntimeException)"""
+      | - Error(RuntimeException)
+      """
         .trimMargin(),
       cause.message,
     )
@@ -275,7 +279,8 @@ class FlowInScopeTest {
     assertEquals(
       """
       |Unconsumed events found for item flow:
-      | - Item(item!)"""
+      | - Item(item!)
+      """
         .trimMargin(),
       cause.message,
     )
@@ -298,7 +303,8 @@ class FlowInScopeTest {
       """
       |Unconsumed exception found for inner failing:
       |
-      |Stack trace:"""
+      |Stack trace:
+      """
         .trimMargin()
     assertEquals(
       actual.message?.startsWith(expectedPrefix),

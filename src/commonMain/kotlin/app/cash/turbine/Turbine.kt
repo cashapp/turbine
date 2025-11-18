@@ -273,7 +273,8 @@ internal class UnconsumedEventReport<T>(
           """
           |
           |
-          |Stack trace:"""
+          |Stack trace:
+          """
             .trimMargin()
         )
         append(cause.stackTraceToString())
