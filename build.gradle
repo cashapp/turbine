@@ -104,6 +104,6 @@ kotlin {
 spotless {
   kotlin {
     target("src/**/*.kt")
-    ktfmt().googleStyle()
+    ktfmt(libs.ktfmt.get().version).googleStyle()
   }
 }

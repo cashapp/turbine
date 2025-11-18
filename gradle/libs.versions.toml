@@ -4,6 +4,7 @@ coroutines = "1.10.2"
 [libraries]
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+ktfmt = "com.facebook:ktfmt:0.59"
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.multiplatform", version = "2.2.21" }
