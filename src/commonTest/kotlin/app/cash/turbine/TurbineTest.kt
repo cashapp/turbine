@@ -96,6 +96,44 @@ class TurbineTest {
   }
 
   @Test
+  fun awaitUntilItemFound() = runTest {
+    val channel = Turbine<Int>()
+    listOf(1, 2, 3).forEach { channel.add(it) }
+
+    val item = channel.awaitUntil { it == 2 }
+    assertEquals(2, item)
+  }
+
+  @Test
+  fun awaitUntilMoreThanOneItemFound() = runTest {
+    val channel = Turbine<Int>()
+    listOf(1, 2, 3).forEach { channel.add(it) }
+
+    val item1 = channel.awaitUntil { it == 1 }
+    val item2 = channel.awaitUntil { it == 2 }
+    assertEquals(1, item1)
+    assertEquals(2, item2)
+  }
+
+  @Test
+  fun awaitUntilExpectErrorOnErrorReceived() = runTest {
+    val error = CustomThrowable("hello")
+    val channel = Turbine<Int>()
+    channel.add(1)
+    channel.close(error)
+    val actual = assertFailsWith<AssertionError> { channel.awaitUntil { it == 2 } }
+    assertSame(error, actual.cause)
+  }
+
+  @Test
+  fun awaitUntilExpectErrorOnCompletion() = runTest {
+    val channel = Turbine<Int>()
+    channel.add(1)
+    channel.close()
+    assertFailsWith<AssertionError> { channel.awaitUntil { it == 2 } }
+  }
+
+  @Test
   fun awaitItemsAreSkipped() = runTest {
     val channel = Turbine<Int>()
     listOf(1, 2, 3).forEach { channel.add(it) }
