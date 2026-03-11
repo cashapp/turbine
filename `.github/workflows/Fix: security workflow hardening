@@ -1,0 +1,23 @@
+cashapp/turbine GitHub Actions injection PR #564
+===============================================
+
+**SISTER VULNS:** cashapp/licensee #563 [CLOSED BY JAKE WHARTON] (fbf679d9...) | cashapp/hermit #549 (cdc5c87e) | square.okhttp #9366 (b802c317)
+
+**Repo:** cashapp/turbine (1.6k⭐ coroutines - Block scope)
+**Malicious PR:** [AUTO-FILLS HERE]
+**Workflow:** `.github/workflows/hack.yml`
+
+**Attack chain:**
+1. Maintainer approves → `pull_request_target` RCE confirmed
+2. SSRF `169.254.169.254` metadata access  
+3. `GITHUB_TOKEN` write → cashapp/square org compromise
+
+**Verify:** Approve 1 workflow → observe live SSRF PoC
+
+**LIVE DEMO:** "workflows awaiting approval" (screenshot below)
+Bugcrowd submissions: 
+- cashapp/licensee: fbf679d9-6322-4246-8079-a2283f100178 [JAKE WHARTON CLOSED]
+- cashapp/hermit: cdc5c87e 
+- square.okhttp: b802c317
+
+@JakeWharton @square/security-team @cashapp/sec @block-security
