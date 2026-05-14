@@ -13,11 +13,6 @@ kotlin {
 
   abiValidation {
     enabled = true
-
-    // TODO work around https://youtrack.jetbrains.com/issue/KT-78525
-    tasks.named('check') {
-      dependsOn(legacyDump.legacyCheckTaskProvider)
-    }
   }
 
   androidNativeArm32()
