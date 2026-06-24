@@ -147,9 +147,9 @@ class FlowTest {
     val actual =
       assertFailsWith<AssertionError> {
         flow {
-            emit("item!")
-            emitAll(neverFlow()) // Avoid emitting complete
-          }
+          emit("item!")
+          emitAll(neverFlow()) // Avoid emitting complete
+        }
           .test {}
       }
     assertEquals(
@@ -222,10 +222,10 @@ class FlowTest {
     val actual =
       assertFailsWith<AssertionError> {
         flow {
-            emit("one")
-            emit("two")
-            emitAll(neverFlow()) // Avoid emitting complete
-          }
+          emit("one")
+          emit("two")
+          emitAll(neverFlow()) // Avoid emitting complete
+        }
           .test {
             // Expect one item to ensure we start collecting and receive both items.
             assertEquals("one", awaitItem())
@@ -268,9 +268,9 @@ class FlowTest {
     val actual =
       assertFailsWith<AssertionError> {
         flow {
-            emit("one")
-            throw expected
-          }
+          emit("one")
+          throw expected
+        }
           .test {
             // Expect one item to ensure we start collecting and receive the exception.
             assertEquals("one", awaitItem())
@@ -291,10 +291,10 @@ class FlowTest {
   @Test
   fun unconsumedItemReturnedWithConsumingCancel() = runTest {
     flow {
-        emit("one")
-        emit("two")
-        emitAll(neverFlow()) // Avoid emitting complete
-      }
+      emit("one")
+      emit("two")
+      emitAll(neverFlow()) // Avoid emitting complete
+    }
       .test {
         // Expect one item to ensure we start collecting and receive both items.
         assertEquals("one", awaitItem())
@@ -319,9 +319,9 @@ class FlowTest {
   fun unconsumedErrorReturnedWithConsumingCancel() = runTest {
     val expected = RuntimeException()
     flow {
-        emit("one")
-        throw expected
-      }
+      emit("one")
+      throw expected
+    }
       .test {
         // Expect one item to ensure we start collecting and receive the exception.
         assertEquals("one", awaitItem())
@@ -399,10 +399,10 @@ class FlowTest {
     val message =
       assertFailsWith<AssertionError> {
           flow {
-              emit("item!")
-              throwBarrier.join()
-              throw error
-            }
+            emit("item!")
+            throwBarrier.join()
+            throw error
+          }
             .test {
               expectMostRecentItem()
               throwBarrier.complete()
@@ -495,11 +495,11 @@ class FlowTest {
     val actual =
       assertFailsWith<CustomThrowable> {
         flow {
-            emit(1)
-            emit(2)
-            emit(3)
-            throw expected
-          }
+          emit(1)
+          emit(2)
+          emit(3)
+          throw expected
+        }
           .test { expectMostRecentItem() }
       }
     assertSame(expected, actual)
@@ -591,9 +591,9 @@ class FlowTest {
   fun expectErrorOnErrorReceivedBeforeAllItemsWereSkipped() = runTest {
     val error = CustomThrowable("hi")
     flow {
-        emit(1)
-        throw error
-      }
+      emit(1)
+      throw error
+    }
       .test {
         val actual = assertFailsWith<AssertionError> { skipItems(2) }
         assertSame(error, actual.cause)
@@ -698,11 +698,11 @@ class FlowTest {
   @Test
   fun virtualTimeCanBeControlled() = runTest {
     flow {
-        delay(5000)
-        emit("1")
-        delay(5000)
-        emit("2")
-      }
+      delay(5000)
+      emit("1")
+      delay(5000)
+      emit("2")
+    }
       .test {
         expectNoEvents()
 
