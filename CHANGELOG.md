@@ -10,7 +10,7 @@
 - Nothing yet!
 
 ### Fixed
-- Nothing yet!
+- `expectNoEvents()` no longer fails when the flow's terminal event (completion or error) has already been consumed.
 
 
 ## [1.2.1] - 2025-06-11
