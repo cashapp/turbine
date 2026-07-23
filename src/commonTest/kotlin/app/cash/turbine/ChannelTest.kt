@@ -18,12 +18,17 @@ package app.cash.turbine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -31,6 +36,146 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 
 class ChannelTest {
+  @Test
+  fun receiveChannelAsReceiveTurbineDelegatesAndPreservesIdentity() = runTest {
+    val channel = channelOf(1)
+    var cancelled = false
+    val arbitraryChannel =
+      object : ReceiveChannel<Int> by channel {
+        override fun cancel(cause: CancellationException?) {
+          cancelled = true
+          channel.cancel(cause)
+        }
+      }
+    val turbine = arbitraryChannel.asReceiveTurbine()
+
+    assertSame(arbitraryChannel, turbine.asChannel())
+    assertEquals(1, turbine.awaitItem())
+    turbine.awaitComplete()
+    turbine.cancel()
+    assertTrue(cancelled)
+    turbine.ensureAllEventsConsumed()
+  }
+
+  @Test
+  fun receiveChannelAsReceiveTurbineIncludesNameInFailures() = runTest {
+    val expected = CustomThrowable("hello")
+    val turbine = channelOf<Nothing>(closeCause = expected).asReceiveTurbine(name = "error channel")
+
+    val actual = assertFailsWith<AssertionError> { turbine.awaitComplete() }
+
+    assertEquals(
+      "Expected complete for error channel but found Error(CustomThrowable)",
+      actual.message,
+    )
+    assertSame(expected, actual.cause)
+  }
+
+  @Test
+  fun receiveChannelAsReceiveTurbineRepeatsTerminalEvent() = runTest {
+    val expected = CustomThrowable("hello")
+    val turbine = channelOf<Nothing>(closeCause = expected).asReceiveTurbine()
+
+    assertSame(expected, turbine.awaitError())
+    assertSame(expected, turbine.awaitError())
+    turbine.ensureAllEventsConsumed()
+  }
+
+  @Test
+  fun receiveChannelAsReceiveTurbineReportsUnconsumedEvents() = runTest {
+    val turbine = channelOf("one", "two").asReceiveTurbine(name = "items")
+    assertEquals("one", turbine.awaitItem())
+
+    val actual = assertFailsWith<AssertionError> { turbine.ensureAllEventsConsumed() }
+
+    assertEquals(
+      """
+      |Unconsumed events found for items:
+      | - Item(two)
+      | - Complete
+      """
+        .trimMargin(),
+      actual.message,
+    )
+  }
+
+  @Test
+  fun receiveChannelAsReceiveTurbineCancelCancelsSuspendedRendezvousSender() = runTest {
+    val channel = Channel<Int>()
+    val turbine = channel.asReceiveTurbine()
+    val sender = launch(start = CoroutineStart.UNDISPATCHED) { channel.send(1) }
+    assertTrue(sender.isActive)
+
+    turbine.cancel()
+
+    sender.join()
+    assertTrue(sender.isCancelled)
+    assertFalse(channel.trySend(3).isSuccess)
+    val cancellation = turbine.awaitError()
+    assertTrue(cancellation is CancellationException)
+    assertSame(cancellation, turbine.awaitError())
+    turbine.ensureAllEventsConsumed()
+  }
+
+  @Test
+  fun receiveChannelAsReceiveTurbineConsumingCancelDoesNotChaseActiveProducer() = runTest {
+    val channel = Channel<Int>(capacity = 1)
+    val turbine = channel.asReceiveTurbine()
+    val producer =
+      launch(Dispatchers.Default, start = CoroutineStart.UNDISPATCHED) {
+        var item = 0
+        while (true) channel.send(item++)
+      }
+    assertTrue(producer.isActive)
+
+    val remaining = turbine.cancelAndConsumeRemainingEvents()
+
+    assertEquals(emptyList(), remaining)
+    producer.join()
+    assertTrue(producer.isCancelled)
+    turbine.ensureAllEventsConsumed()
+  }
+
+  @Test
+  fun receiveChannelAsReceiveTurbineRepeatedConcurrentCancelPreservesCloseCause() = runTest {
+    val expected = CustomThrowable("hello")
+    val channel = Channel<Int>(UNLIMITED)
+    channel.trySend(1).getOrThrow()
+    channel.close(expected)
+    val turbine = channel.asReceiveTurbine(name = "failed channel")
+
+    val cancellations = List(10) { launch(Dispatchers.Default) { repeat(10) { turbine.cancel() } } }
+    cancellations.forEach { it.join() }
+
+    val actual = assertFailsWith<AssertionError> { turbine.ensureAllEventsConsumed() }
+    assertEquals(
+      "Unconsumed events found for failed channel:\n - Error(CustomThrowable)",
+      actual.message,
+    )
+    assertSame(expected, actual.cause)
+  }
+
+  @Test
+  fun receiveChannelAsReceiveTurbineConsumingCancelReturnsPreexistingTerminalEvent() = runTest {
+    val expected = CancellationException("upstream cancellation")
+    val turbine = channelOf(1, 2, closeCause = expected).asReceiveTurbine()
+
+    val remaining = turbine.cancelAndConsumeRemainingEvents()
+
+    assertEquals(listOf(Event.Error(expected)), remaining)
+    assertSame(expected, (remaining.single() as? Event.Error)?.throwable)
+    turbine.ensureAllEventsConsumed()
+  }
+
+  @Test
+  fun receiveChannelAsReceiveTurbineCanIgnoreRemainingEvents() = runTest {
+    val turbine = channelOf(1, 2, closeCause = CustomThrowable("ignored")).asReceiveTurbine()
+
+    turbine.cancelAndIgnoreRemainingEvents()
+
+    turbine.ensureAllEventsConsumed()
+  }
+
   @Test
   fun exceptionsPropagateWhenExpectMostRecentItem() = runTest {
     val expected = CustomThrowable("hello")
