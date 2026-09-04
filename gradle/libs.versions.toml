@@ -8,6 +8,6 @@ ktfmt = "com.facebook:ktfmt:0.64"
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.multiplatform", version = "2.3.21" }
-spotless = { id = "com.diffplug.spotless", version = "8.10.1" }
+spotless = { id = "com.diffplug.spotless", version = "8.10.2" }
 publish = { id = "com.vanniktech.maven.publish", version = "0.36.0" }
 dokka = { id = "org.jetbrains.dokka", version = "2.2.0" }
