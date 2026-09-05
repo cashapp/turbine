@@ -153,7 +153,7 @@ The same goes for `testIn`, but at the end of the calling coroutine:
 runTest {
   turbineScope {
     val turbine = flowOf("one", "two").testIn(backgroundScope)
-    turbine.assertEquals("one", awaitItem())
+    assertEquals("one", turbine.awaitItem())
   }
 }
 ```
