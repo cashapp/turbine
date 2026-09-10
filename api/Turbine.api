@@ -79,6 +79,7 @@ public abstract interface class app/cash/turbine/ReceiveTurbine {
 public abstract interface class app/cash/turbine/Turbine : app/cash/turbine/ReceiveTurbine {
 	public abstract fun add (Ljava/lang/Object;)V
 	public abstract fun asChannel ()Lkotlinx/coroutines/channels/Channel;
+	public synthetic fun asChannel ()Lkotlinx/coroutines/channels/ReceiveChannel;
 	public abstract fun close (Ljava/lang/Throwable;)V
 	public static synthetic fun close$default (Lapp/cash/turbine/Turbine;Ljava/lang/Throwable;ILjava/lang/Object;)V
 	public abstract fun takeComplete ()V
