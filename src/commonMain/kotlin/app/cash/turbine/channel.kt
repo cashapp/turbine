@@ -36,6 +36,83 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.withTimeout
 
 /**
+ * Adapts this channel to [ReceiveTurbine]; cancellation delegates to [ReceiveChannel.cancel]. It
+ * discards queued elements; consume-and-cancel returns only a pre-existing terminal event.
+ */
+public fun <T> ReceiveChannel<T>.asReceiveTurbine(name: String? = null): ReceiveTurbine<T> =
+  ReceiveChannelTurbine(this, name)
+
+private class ReceiveChannelTurbine<T>(
+  private val underlying: ReceiveChannel<T>,
+  private val name: String?,
+) : ReceiveTurbine<T> {
+  private val cancellation = CancellationException("ReceiveTurbine was cancelled")
+  private var ignoreRemainingEvents = false
+
+  private val events =
+    object : ReceiveChannel<T> by underlying {
+      override fun tryReceive(): ChannelResult<T> =
+        underlying.tryReceive().also(::recordTerminalEvent)
+
+      override suspend fun receiveCatching(): ChannelResult<T> =
+        underlying.receiveCatching().also(::recordTerminalEvent)
+    }
+
+  private fun recordTerminalEvent(result: ChannelResult<T>) {
+    if (result.toEvent()?.isTerminal == true) ignoreRemainingEvents = true
+  }
+
+  override fun asChannel(): ReceiveChannel<T> = underlying
+
+  override suspend fun cancel() = underlying.cancel(cancellation)
+
+  override suspend fun cancelAndIgnoreRemainingEvents() {
+    ignoreRemainingEvents = true
+    underlying.cancel(cancellation)
+  }
+
+  override suspend fun cancelAndConsumeRemainingEvents(): List<Event<T>> {
+    ignoreRemainingEvents = true
+    underlying.cancel(cancellation)
+    val terminal = underlying.takeEventUnsafe()
+    return listOfNotNull(terminal.takeUnless { it is Event.Error && it.throwable === cancellation })
+  }
+
+  override fun expectNoEvents() = events.expectNoEvents(name = name)
+
+  override fun expectMostRecentItem(): T = events.expectMostRecentItem(name = name)
+
+  override suspend fun awaitEvent(): Event<T> = events.awaitEvent(name = name)
+
+  override suspend fun awaitItem(): T = events.awaitItem(name = name)
+
+  override suspend fun skipItems(count: Int) = events.skipItems(count, name = name)
+
+  override suspend fun awaitComplete() = events.awaitComplete(name = name)
+
+  override suspend fun awaitError(): Throwable = events.awaitError(name = name)
+
+  override fun ensureAllEventsConsumed() {
+    if (ignoreRemainingEvents) return
+
+    val unconsumed = mutableListOf<Event<T>>()
+    var cause: Throwable? = null
+    while (true) {
+      val event = events.takeEventUnsafe() ?: break
+      if (event is Event.Error && event.throwable is CancellationException) break
+      unconsumed += event
+      if (event is Event.Error) cause = event.throwable
+      if (event.isTerminal) break
+    }
+
+    if (unconsumed.isNotEmpty()) {
+      val report = UnconsumedEventReport(name = name, unconsumed = unconsumed, cause = cause)
+      throw TurbineAssertionError(buildString { report.describe(this) }, cause)
+    }
+  }
+}
+
+/**
  * Returns the most recent item that has already been received. If channel was closed with no item
  * being received previously, this function will throw an [AssertionError]. If channel was closed
  * with an exception, this function will throw the underlying exception.

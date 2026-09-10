@@ -4,7 +4,7 @@
 [Unreleased]: https://github.com/cashapp/turbine/compare/1.2.0...HEAD
 
 ### Added
-- Nothing yet!
+- Add `ReceiveChannel.asReceiveTurbine()` for adapting channels to the `ReceiveTurbine` API.
 
 ### Changed
 - Nothing yet!
