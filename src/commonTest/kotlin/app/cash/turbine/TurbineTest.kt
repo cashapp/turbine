@@ -125,6 +125,48 @@ class TurbineTest {
   @Test fun expectNoEvents() = runTest { Turbine<Any>().expectNoEvents() }
 
   @Test
+  fun expectNoEventsAfterConsumedComplete() = runTest {
+    val channel = Turbine<Int>()
+    channel.add(1)
+    channel.close()
+    assertEquals(1, channel.awaitItem())
+    channel.awaitComplete()
+    // The terminal event has already been consumed, so there are no unconsumed events.
+    channel.expectNoEvents()
+  }
+
+  @Test
+  fun expectNoEventsAfterConsumedError() = runTest {
+    val error = CustomThrowable("hello")
+    val channel = Turbine<Int>()
+    channel.close(error)
+    assertSame(error, channel.awaitError())
+    // The terminal event has already been consumed, so there are no unconsumed events.
+    channel.expectNoEvents()
+  }
+
+  @Test
+  fun expectNoEventsAfterTakenComplete() = withTestScope {
+    val channel = Turbine<Int>()
+    channel.add(1)
+    channel.close()
+    assertEquals(1, channel.takeItem())
+    channel.takeComplete()
+    // The terminal event has already been consumed, so there are no unconsumed events.
+    channel.expectNoEvents()
+  }
+
+  @Test
+  fun expectNoEventsAfterTakenError() = withTestScope {
+    val error = CustomThrowable("hello")
+    val channel = Turbine<Int>()
+    channel.close(error)
+    assertSame(error, channel.takeError())
+    // The terminal event has already been consumed, so there are no unconsumed events.
+    channel.expectNoEvents()
+  }
+
+  @Test
   fun awaitItemEvent() = runTest {
     val item = Any()
     val channel = Turbine<Any>()
