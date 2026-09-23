@@ -7,7 +7,7 @@
 - Nothing yet!
 
 ### Changed
-- Nothing yet!
+- Removed `macosX64`, `tvosX64`, `watchosArm32`, and `watchosX64` targets which are no longer supported by Kotlin/Native.
 
 ### Fixed
 - Nothing yet!
