@@ -1,5 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 
 plugins {
   alias(libs.plugins.kotlin)
@@ -35,32 +35,26 @@ kotlin {
   }
 
   jvm {
-    compilations.configureEach { KotlinJvmCompilation compilation ->
-      compilation.compilerOptions.options.jvmTarget = JvmTarget.JVM_1_8
-      compilation.compilerOptions.options.freeCompilerArgs.add("-Xjvm-default=all")
-    }
+    compilerOptions.jvmTarget = JvmTarget.JVM_1_8
+    compilerOptions.jvmDefault = JvmDefaultMode.NO_COMPATIBILITY
   }
 
   linuxArm64()
   linuxX64()
 
   macosArm64()
-  macosX64()
 
   mingwX64()
 
   tvosArm64()
   tvosSimulatorArm64()
-  tvosX64()
 
   wasmJs().nodejs()
   wasmWasi().nodejs()
 
-  watchosArm32()
   watchosArm64()
   watchosDeviceArm64()
   watchosSimulatorArm64()
-  watchosX64()
 
   applyDefaultHierarchyTemplate {
     it.group("common") {
