@@ -10,7 +10,7 @@
 - Removed `macosX64`, `tvosX64`, `watchosArm32`, and `watchosX64` targets which are no longer supported by Kotlin/Native.
 
 ### Fixed
-- Nothing yet!
+- `expectNoEvents()` no longer fails when the flow's terminal event (completion or error) has already been consumed.
 
 
 ## [1.2.1] - 2025-06-11
