@@ -23,7 +23,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.ChannelResult
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
@@ -33,7 +32,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Returns the most recent item that has already been received. If channel was closed with no item
@@ -80,8 +79,6 @@ public suspend fun <T> ReceiveChannel<T>.awaitEvent(name: String? = null): Event
   val timeout = contextTimeout()
   return try {
     withAppropriateTimeout(timeout) { receiveCatching().toEvent()!! }
-  } catch (e: TimeoutCancellationException) {
-    throw TurbineAssertionError("No ${"value produced".qualifiedBy(name)} in $timeout", e)
   } catch (e: TurbineTimeoutCancellationException) {
     throw TurbineAssertionError("No ${"value produced".qualifiedBy(name)} in $timeout", e)
   }
@@ -95,7 +92,18 @@ private suspend fun <T> withAppropriateTimeout(
     // withTimeout uses virtual time, which will hang.
     withWallclockTimeout(timeout, block)
   } else {
-    withTimeout(timeout, block)
+    var completed = false
+    val result =
+      withTimeoutOrNull(timeout) {
+        val value = block()
+        completed = true
+        value
+      }
+    if (!completed) {
+      throw TurbineTimeoutCancellationException("Timed out waiting for $timeout")
+    }
+    @Suppress("UNCHECKED_CAST")
+    result as T
   }
 }
 
