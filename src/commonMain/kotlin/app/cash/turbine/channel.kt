@@ -188,6 +188,43 @@ public suspend fun <T> ReceiveChannel<T>.awaitItem(name: String? = null): T =
   }
 
 /**
+ * Assert that an event was an item satisfies the [predicate] and return it.
+ * Previous items that did not satisfy the given [predicate] were ignored and skipped.
+ * This function will suspend if no events have been received.
+ *
+ * When this [ReceiveTurbine] is in a terminal state ([Event.Complete] or [Event.Error]), this
+ * method will yield the same result every time it is called.
+ *
+ * @throws AssertionError if one of the events was completion or an error.
+ */
+public suspend fun <T> ReceiveChannel<T>.awaitUntil(name: String? = null, predicate: (item: T) -> Boolean): T {
+  var event: Event<T>
+  var found: Boolean
+  do {
+    event = awaitEvent(name = name)
+    val item = (event as? Event.Item<T>)
+    found = item != null && predicate(item.value)
+  } while (!found && event !is Event.Complete && event !is Event.Error)
+  return when (event) {
+    Event.Complete,
+    is Event.Error -> {
+      val cause = (event as? Event.Error)?.throwable
+      throw TurbineAssertionError(
+        "No item satisfying the given predicate was found",
+        cause,
+      )
+    }
+    is Event.Item<T> -> {
+      if (found) {
+        event.value
+      } else {
+        unexpectedEvent(name, event, "item")
+      }
+    }
+  }
+}
+
+/**
  * Assert that [count] item events were received and ignore them. This function will suspend if no
  * events have been received.
  *

@@ -85,6 +85,18 @@ public interface ReceiveTurbine<T> {
   public suspend fun awaitItem(): T
 
   /**
+   * Assert that an event was an item that satisfies the [predicate] and return it.
+   * Previous items that did not satisfy the given [predicate] were ignored and skipped.
+   * This function will suspend if no events have been received.
+   *
+   * When this [ReceiveTurbine] is in a terminal state ([Event.Complete] or [Event.Error]), this
+   * method will yield the same result every time it is called.
+   *
+   * @throws AssertionError if one of the events was completion or an error.
+   */
+  public suspend fun awaitUntil(predicate: (item: T) -> Boolean): T
+
+  /**
    * Assert that [count] item events were received and ignore them. This function will suspend if no
    * events have been received.
    *

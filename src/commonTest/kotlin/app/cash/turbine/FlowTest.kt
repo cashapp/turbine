@@ -566,6 +566,34 @@ class FlowTest {
   }
 
   @Test
+  fun awaitUntilItemFound() = runTest {
+    flowOf(1, 2, 3).test {
+      val item = awaitUntil { it == 3 }
+      assertEquals(3, item)
+      awaitComplete()
+    }
+  }
+
+  @Test
+  fun awaitUntilMoreThanOneItemFound() = runTest {
+    flowOf(1, 2, 3, 2).test {
+      val item1 = awaitUntil { it == 2 }
+      val item2 = awaitUntil { it == 2 }
+      assertEquals(2, item1)
+      assertEquals(2, item2)
+      awaitComplete()
+    }
+  }
+
+  @Test
+  fun awaitUntilThrowsWhenNotFound() = runTest {
+    flowOf(1, 2).test {
+      val message = assertFailsWith<AssertionError> { awaitUntil { it == 3 } }.message
+      assertEquals("No item satisfying the given predicate was found", message)
+    }
+  }
+
+  @Test
   fun expectItemsAreSkipped() = runTest {
     flowOf(1, 2, 3).test {
       skipItems(2)
