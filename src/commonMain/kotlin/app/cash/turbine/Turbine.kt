@@ -211,6 +211,9 @@ internal class ChannelTurbine<T>(
   }
 
   override suspend fun awaitItem(): T = withTurbineTimeout { channel.awaitItem(name = name) }
+  override suspend fun awaitUntil(predicate: (item: T) -> Boolean): T = withTurbineTimeout {
+    channel.awaitUntil(name = name, predicate = predicate)
+  }
 
   override suspend fun skipItems(count: Int) = withTurbineTimeout { channel.skipItems(count, name) }
 
