@@ -22,6 +22,7 @@ import kotlin.test.assertSame
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.delay
@@ -29,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 
 class ChannelTest {
   @Test
@@ -218,6 +220,25 @@ class ChannelTest {
         withTurbineTimeout(10.milliseconds) { neverChannel().awaitItem() }
       }
     assertEquals("No value produced in 10ms", actual.message)
+  }
+
+  @Test
+  fun externalTimeoutPropagatesOnChannelInRunTest() = runTest {
+    assertFailsWith<TimeoutCancellationException> {
+      withTimeout(10.milliseconds) {
+        neverChannel().awaitItem()
+      }
+    }
+  }
+
+  @Test
+  fun externalTimeoutPropagatesOnTurbineInRunTest() = runTest {
+    val turbine = Turbine<String>()
+    assertFailsWith<TimeoutCancellationException> {
+      withTimeout(10.milliseconds) {
+        turbine.awaitItem()
+      }
+    }
   }
 
   @Test
