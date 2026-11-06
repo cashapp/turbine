@@ -115,7 +115,10 @@ internal class ChannelTurbine<T>(
       override fun tryReceive(): ChannelResult<T> {
         val result = channel.tryReceive()
         val event = result.toEvent()
-        if (event is Event.Error || event is Event.Complete) ignoreRemainingEvents = true
+        if (event is Event.Error || event is Event.Complete) {
+          ignoreRemainingEvents = true
+          terminalEventReceived = true
+        }
 
         return result
       }
@@ -132,6 +135,7 @@ internal class ChannelTurbine<T>(
         return channel.receiveCatching().also {
           if (it.toEvent()?.isTerminal == true) {
             ignoreRemainingEvents = true
+            terminalEventReceived = true
           }
         }
       }
@@ -181,6 +185,9 @@ internal class ChannelTurbine<T>(
   private var ignoreTerminalEvents = false
   private var ignoreRemainingEvents = false
 
+  /** True once a terminal event (complete or error) has been received off the channel. */
+  private var terminalEventReceived = false
+
   override suspend fun cancelAndIgnoreRemainingEvents() {
     cancel()
     ignoreRemainingEvents = true
@@ -201,6 +208,11 @@ internal class ChannelTurbine<T>(
   }
 
   override fun expectNoEvents() {
+    // A terminal event that has already been consumed is not an unconsumed event: the caller has
+    // already seen it. A closed channel re-surfaces its terminal event on every read, so reading it
+    // here would spuriously fail. Treat an already-consumed terminal as "no events".
+    // https://github.com/cashapp/turbine/issues/348
+    if (terminalEventReceived) return
     channel.expectNoEvents(name = name)
   }
 

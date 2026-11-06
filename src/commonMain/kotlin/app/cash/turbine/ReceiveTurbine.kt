@@ -51,6 +51,10 @@ public interface ReceiveTurbine<T> {
   /**
    * Assert that there are no unconsumed events which have already been received.
    *
+   * A terminal event (completion or error) that has already been consumed does not count as an
+   * unconsumed event, so this succeeds after the flow has terminated and its terminal event was
+   * awaited.
+   *
    * @throws AssertionError if unconsumed events are found.
    */
   public fun expectNoEvents()
