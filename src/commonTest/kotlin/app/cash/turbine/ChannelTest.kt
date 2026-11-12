@@ -75,6 +75,37 @@ class ChannelTest {
   }
 
   @Test
+  fun awaitUntilFound() = runTest {
+    val channel = channelOf(1, 2, 3)
+    val item = channel.awaitUntil { it == 2 }
+    assertEquals(2, item)
+  }
+
+  @Test
+  fun awaitUntilMoreThanOneItemFound() = runTest {
+    val channel = channelOf(1, 2, 3, 1)
+    val item1 = channel.awaitUntil { it == 1 }
+    val item2 = channel.awaitUntil { it == 1 }
+    assertEquals(1, item1)
+    assertEquals(1, item2)
+  }
+
+  @Test
+  fun awaitUntilNotFound() = runTest {
+    val channel = channelOf(1, 2, 3)
+    val message = assertFailsWith<AssertionError> { channel.awaitUntil { it == 4 } }.message
+    assertEquals("No item satisfying the given predicate was found", message)
+  }
+
+  @Test
+  fun awaitUntilExpectErrorOnErrorReceived() = runTest {
+    val error = CustomThrowable("hello")
+    val channel = channelOf(1, closeCause = error)
+    val actual = assertFailsWith<AssertionError> { channel.awaitUntil { it == 2 } }
+    assertSame(error, actual.cause)
+  }
+
+  @Test
   fun awaitItemsAreSkipped() = runTest {
     val channel = channelOf(1, 2, 3)
     channel.skipItems(2)
