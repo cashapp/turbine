@@ -18,15 +18,21 @@ package app.cash.turbine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
@@ -242,6 +248,39 @@ class ChannelTest {
   }
 
   @Test
+  fun externalTimeoutPropagatesOnChannelWithoutTestScheduler() = runTest {
+    withoutTestScheduler {
+      assertNull(currentCoroutineContext()[TestCoroutineScheduler])
+      assertFailsWith<TimeoutCancellationException> {
+        withTimeout(10.milliseconds) { neverChannel().awaitItem() }
+      }
+    }
+  }
+
+  @Test
+  fun externalTimeoutPropagatesOnTurbineWithoutTestScheduler() = runTest {
+    withoutTestScheduler {
+      assertNull(currentCoroutineContext()[TestCoroutineScheduler])
+      val turbine = Turbine<String>()
+      assertFailsWith<TimeoutCancellationException> {
+        withTimeout(10.milliseconds) { turbine.awaitItem() }
+      }
+    }
+  }
+
+  @Test
+  fun failsOnTimeoutWithoutTestScheduler() = runTest {
+    withoutTestScheduler {
+      assertNull(currentCoroutineContext()[TestCoroutineScheduler])
+      val actual =
+        assertFailsWith<AssertionError> {
+          withTurbineTimeout(10.milliseconds) { neverChannel().awaitItem() }
+        }
+      assertEquals("No value produced in 10ms", actual.message)
+    }
+  }
+
+  @Test
   fun negativeTurbineTimeoutThrows() = runTest {
     val actual =
       assertFailsWith<IllegalStateException> { withTurbineTimeout((-10).milliseconds) {} }
@@ -333,5 +372,15 @@ class ChannelTest {
     TestScope(job).block()
 
     job.cancel()
+  }
+
+  /** Used to run suspending test code outside [TestCoroutineScheduler]. */
+  private suspend fun <T> withoutTestScheduler(block: suspend CoroutineScope.() -> T): T {
+    val scope = CoroutineScope(Dispatchers.Default)
+    return try {
+      scope.async(block = block).await()
+    } finally {
+      scope.cancel()
+    }
   }
 }
