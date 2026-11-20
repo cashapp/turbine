@@ -69,6 +69,7 @@ sealed interface <#A: out kotlin/Any?> app.cash.turbine/Event { // app.cash.turb
 }
 
 final fun <#A: kotlin/Any?> (app.cash.turbine/Turbine<#A>).app.cash.turbine/plusAssign(#A) // app.cash.turbine/plusAssign|plusAssign@app.cash.turbine.Turbine<0:0>(0:0){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/asReceiveTurbine(kotlin/String? = ...): app.cash.turbine/ReceiveTurbine<#A> // app.cash.turbine/asReceiveTurbine|asReceiveTurbine@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/expectMostRecentItem(kotlin/String? = ...): #A // app.cash.turbine/expectMostRecentItem|expectMostRecentItem@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/expectNoEvents(kotlin/String? = ...) // app.cash.turbine/expectNoEvents|expectNoEvents@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlinx.coroutines.channels/ReceiveChannel<#A>).app.cash.turbine/takeComplete(kotlin/String? = ...) // app.cash.turbine/takeComplete|takeComplete@kotlinx.coroutines.channels.ReceiveChannel<0:0>(kotlin.String?){0§<kotlin.Any?>}[0]
