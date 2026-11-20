@@ -190,6 +190,27 @@ class FlowTest {
   }
 
   @Test
+  fun expectNoEventsAfterConsumedComplete() = runTest {
+    flowOf("one").test {
+      assertEquals("one", awaitItem())
+      awaitComplete()
+      // The terminal event has already been consumed, so there are no unconsumed events.
+      expectNoEvents()
+    }
+  }
+
+  @Test
+  fun expectNoEventsAfterConsumedError() = runTest {
+    val error = CustomThrowable("hi")
+    flow<Nothing> { throw error }
+      .test {
+        assertSame(error, awaitError())
+        // The terminal event has already been consumed, so there are no unconsumed events.
+        expectNoEvents()
+      }
+  }
+
+  @Test
   fun unconsumedCompleteThrows() = runTest {
     val actual = assertFailsWith<AssertionError> { emptyFlow<Nothing>().test {} }
     assertEquals(
