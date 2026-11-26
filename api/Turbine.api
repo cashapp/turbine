@@ -1,4 +1,6 @@
 public final class app/cash/turbine/ChannelKt {
+	public static final fun asReceiveTurbine (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;)Lapp/cash/turbine/ReceiveTurbine;
+	public static synthetic fun asReceiveTurbine$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/turbine/ReceiveTurbine;
 	public static final fun awaitComplete (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun awaitComplete$default (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun awaitError (Lkotlinx/coroutines/channels/ReceiveChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
